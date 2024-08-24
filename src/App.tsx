@@ -16,25 +16,21 @@ import ReportGenerator from './pages/Admin/ReportGenerator';
 import ReportView from './pages/Admin/ReportView';
 import UserList from './pages/Admin/UserList';
 import UserRoleForm from './pages/Admin/UserRoleForm';
-
-// Import the gallery components
 import GalleryList from './pages/Admin/GalleryList'; 
 import GalleryForm from './pages/Admin/GalleryForm'; 
+import HomeScreen from './pages/Home';
 
 function App() {
   const navigate = useNavigate();
 
   const handleGallerySubmit = (data: { url: string; caption: string; location: string }) => {
-    // Handle the submission logic here, e.g., saving the data to your database or state
     console.log('Gallery data submitted:', data);
-
-    // Navigate back to the gallery list after submission
     navigate('/gallery');
   };
 
   return (
     <Routes>
-      <Route path="/" element={<AdminDashboard />} />
+      <Route path="/" element={<HomeScreen />} />
       <Route path="/services" element={<ServiceList />} />
       <Route path="/services/add" element={<ServiceForm />} />
       <Route path="/services/edit/:id" element={<ServiceForm />} />
@@ -53,7 +49,7 @@ function App() {
       <Route path="/reports/:reportType" element={<ReportView />} />
       <Route path="/users" element={<UserList />} />
       <Route path="/users/:id/edit-role" element={<UserRoleForm />} />
-      
+
       {/* Gallery management routes */}
       <Route path="/gallery" element={<GalleryList />} />
       <Route path="/gallery/add" element={<GalleryForm onSubmit={handleGallerySubmit} />} />

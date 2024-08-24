@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Typography,
   IconButton,
   Table,
@@ -23,7 +22,7 @@ const facilitiesData = [
 
 const FacilityList: React.FC = () => {
   const navigate = useNavigate();
-  const [facilities, setFacilities] = useState(facilitiesData);
+  const [facilities,] = useState(facilitiesData);
 
   const handleEdit = (id: number) => {
     navigate(`/facilities/edit/${id}`);

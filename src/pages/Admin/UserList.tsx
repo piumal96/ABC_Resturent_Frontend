@@ -21,7 +21,7 @@ const usersData = [
 
 const UserList: React.FC = () => {
   const navigate = useNavigate();
-  const [users, setUsers] = useState(usersData);
+  const [users,] = useState(usersData);
 
   const handleEditRole = (id: number) => {
     navigate(`/users/${id}/edit-role`);
