@@ -9,8 +9,9 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import logo from "@/assets/images/logo.png"; 
-import authService from '@/services/AuthService'; // Import your authService
+import logo from "@/assets/images/logo.png";
+import AuthController from '@/controllers/AuthController'; // Import the AuthController
+import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -18,6 +19,7 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
@@ -25,15 +27,22 @@ const Register: React.FC = () => {
         return;
     }
     try {
-        setError(null); 
-        const role = 'Customer'; 
-        const response = await authService.register(fullName, email, password, role);
-        console.log('Registration successful:', response);
+        setError(null);
+        const role = 'Customer'; // Assuming 'Customer' is the default role
+        const user = await AuthController.register(fullName, email, password, role);
+         if (user.role === 'Customer') {
+        navigate('/'); // Admin dashboard
+      } else if (user.role === 'Staff') {
+        navigate('/staff/dashboard'); // Staff dashboard
+      } else {
+        setError('Unauthorized role. Please contact the administrator.');
+      }
     } catch (err: any) {
         console.error('Registration failed:', err);
         setError('Registration failed. Please try again.');
     }
 };
+
 
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
