@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import './App.css'
 import Register from './pages/Register';
 import HomeScreen from './pages/Home';
+import SignIn from './pages/SignIn';
 
 
 // Create a custom theme
@@ -26,7 +27,9 @@ function App() {
       {/* CssBaseline helps to provide a consistent baseline for your styles */}
       <CssBaseline />
       {/* Your Application Components */}
-      <HomeScreen />
+      {/* <HomeScreen /> */}
+      {/* <Register/> */}
+      <SignIn/>
     </ThemeProvider>
   );
 }
