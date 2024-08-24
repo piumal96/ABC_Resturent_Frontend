@@ -10,6 +10,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Reservat
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Query management icon
 import PaymentIcon from '@mui/icons-material/Payment'; // Payment management icon
 import PeopleIcon from '@mui/icons-material/People'; // User management icon
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'; // Gallery management icon
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 
@@ -82,6 +83,14 @@ const AdminDashboard: React.FC = () => {
               description="Generate and view business reports."
               icon={ReportIcon}
               onClick={() => navigate('/reports')}
+            />
+          </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Manage Gallery"
+              description="View and manage gallery images."
+              icon={PhotoLibraryIcon} // Gallery management icon
+              onClick={() => navigate('/gallery')}
             />
           </Grid>
           <Grid item>
