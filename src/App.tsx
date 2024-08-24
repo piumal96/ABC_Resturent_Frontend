@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import HomeScreen from './pages/Home'; // Assuming HomeScreen component is in pages/Home.tsx
+import HomeScreen from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
 import ServiceList from './pages/Admin/ServiceList'; 
 import ServiceForm from './pages/Admin/ServiceForm'; 
@@ -19,12 +19,20 @@ import UserList from './pages/Admin/UserList';
 import UserRoleForm from './pages/Admin/UserRoleForm';
 
 import SignIn from './pages/Auth/SignIn';
+import Register from './pages/Auth/Register';
 
 // Import the gallery components
 import GalleryList from './pages/Admin/GalleryList'; 
 import GalleryForm from './pages/Admin/GalleryForm'; 
-import Register from './pages/Auth/Register';
 
+// Import the staff dashboard and components
+import StaffDashboard from './pages/StaffDashboard';
+import StaffReservationList from './pages/staff/ReservationList';
+import StaffReservationDetail from './pages/staff/ReservationDetail';
+import StaffQueryList from './pages/staff/QueryList';
+import StaffQueryDetail from './pages/staff/QueryDetail';
+import StaffPaymentList from './pages/staff/PaymentList';
+import StaffPaymentDetail from './pages/staff/PaymentDetail';
 
 function App() {
   const navigate = useNavigate();
@@ -36,13 +44,12 @@ function App() {
 
   return (
     <Routes>
-
       <Route path="/" element={<HomeScreen />} /> 
-       {/* Set HomeScreen as the default route */}
-       <Route path="/login" element={<SignIn />} />
-       <Route path="/admin" element={<AdminDashboard />} />
-       <Route path="/register" element={<Register/>} />
+      <Route path="/login" element={<SignIn />} />
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/register" element={<Register/>} />
 
+      {/* Admin routes */}
       <Route path="/services" element={<ServiceList />} />
       <Route path="/services/add" element={<ServiceForm />} />
       <Route path="/services/edit/:id" element={<ServiceForm />} />
@@ -66,6 +73,15 @@ function App() {
       <Route path="/gallery" element={<GalleryList />} />
       <Route path="/gallery/add" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
       <Route path="/gallery/edit/:id" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
+
+      {/* Staff dashboard routes */}
+      <Route path="/staff/dashboard" element={<StaffDashboard />} />
+      <Route path="/staff/reservations" element={<StaffReservationList />} />
+      <Route path="/staff/reservations/:id" element={<StaffReservationDetail />} />
+      <Route path="/staff/queries" element={<StaffQueryList />} />
+      <Route path="/staff/queries/:id" element={<StaffQueryDetail />} />
+      <Route path="/staff/payments" element={<StaffPaymentList />} />
+      <Route path="/staff/payments/:id" element={<StaffPaymentDetail />} />
 
       {/* Other routes */}
     </Routes>

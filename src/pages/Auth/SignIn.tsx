@@ -29,10 +29,16 @@ const SignIn: React.FC = () => {
       setError('');
 
       // Call the login method from the AuthController
-      await AuthController.login(email, password);
+      const user = await AuthController.login(email, password);
 
-      // On successful login, navigate to the admin page
-      navigate('/admin');
+      // On successful login, navigate based on user role
+      if (user.role === 'Admin') {
+        navigate('/admin'); // Admin dashboard
+      } else if (user.role === 'Staff') {
+        navigate('/staff/dashboard'); // Staff dashboard
+      } else {
+        setError('Unauthorized role. Please contact the administrator.');
+      }
     } catch (err: any) {
       // If there is an error, set the error message
       setError('Invalid email or password. Please try again.');
