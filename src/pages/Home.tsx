@@ -1,9 +1,12 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Grid, Card, CardContent, Container, Box, TextField, Modal } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const HomeScreen: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState('');
+
+  const navigate = useNavigate();
 
   const handleOpen = (image: string) => {
     setSelectedImage(image);
@@ -27,8 +30,8 @@ const HomeScreen: React.FC = () => {
           <Button color="inherit" href="#gallery">Gallery</Button>
           <Button color="inherit" href="#reservations">Reservations</Button>
           <Button color="inherit" href="#contact">Contact</Button>
-          <Button color="inherit" href="#login">Login</Button>
-          <Button color="inherit" href="#register">Register</Button>
+          <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>
+          <Button color="inherit" onClick={() => navigate('/register')}>Register</Button> 
         </Toolbar>
       </AppBar>
 

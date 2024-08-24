@@ -1,4 +1,5 @@
 import { Route, Routes, useNavigate } from 'react-router-dom';
+import HomeScreen from './pages/Home'; // Assuming HomeScreen component is in pages/Home.tsx
 import AdminDashboard from './pages/AdminDashboard';
 import ServiceList from './pages/Admin/ServiceList'; 
 import ServiceForm from './pages/Admin/ServiceForm'; 
@@ -16,10 +17,12 @@ import ReportGenerator from './pages/Admin/ReportGenerator';
 import ReportView from './pages/Admin/ReportView';
 import UserList from './pages/Admin/UserList';
 import UserRoleForm from './pages/Admin/UserRoleForm';
+import SignIn from './pages/Auth/SignIn';
 
 // Import the gallery components
 import GalleryList from './pages/Admin/GalleryList'; 
 import GalleryForm from './pages/Admin/GalleryForm'; 
+import Register from './pages/Auth/Register';
 
 function App() {
   const navigate = useNavigate();
@@ -34,7 +37,12 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<AdminDashboard />} />
+      <Route path="/" element={<HomeScreen />} /> 
+       {/* Set HomeScreen as the default route */}
+       <Route path="/login" element={<SignIn />} />
+       <Route path="/admin" element={<AdminDashboard />} />
+       <Route path="/register" element={<Register/>} />
+
       <Route path="/services" element={<ServiceList />} />
       <Route path="/services/add" element={<ServiceForm />} />
       <Route path="/services/edit/:id" element={<ServiceForm />} />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   TextField,
@@ -8,10 +8,37 @@ import {
   Grid,
   Paper,
   Divider,
+  Alert,
 } from "@mui/material";
-import logo from "../assets/images/logo.png"; 
+import logo from "@/assets/images/logo.png"; 
+import { useNavigate } from 'react-router-dom';
+import authService from '@/services/authService'; // Make sure to import the auth service
 
 const SignIn: React.FC = () => {
+  const navigate = useNavigate();
+
+  // State for email, password, and error message
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  // Handle SignIn
+  const handleSignIn = async () => {
+    try {
+      // Clear any previous errors
+      setError('');
+
+      // Call the login API
+      const userData = await authService.login(email, password);
+
+      // On successful login, navigate to the admin page
+      navigate('/admin');
+    } catch (err: any) {
+      // If there is an error, set the error message
+      setError('Invalid email or password. Please try again.');
+    }
+  };
+
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
@@ -49,6 +76,8 @@ const SignIn: React.FC = () => {
             name="email"
             type="email"
             variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -64,6 +93,8 @@ const SignIn: React.FC = () => {
             name="password"
             type="password"
             variant="outlined"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -72,7 +103,13 @@ const SignIn: React.FC = () => {
             }}
             sx={{ fontSize: "0.875rem" }}
           />
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
           <Button
+            onClick={handleSignIn}
             variant="contained"
             color="primary"
             fullWidth
