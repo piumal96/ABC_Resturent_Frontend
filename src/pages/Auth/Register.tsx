@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
-import authService from '@/services/authService'; // Import your authService
+import authService from '@/services/AuthService'; // Import your authService
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState("");
