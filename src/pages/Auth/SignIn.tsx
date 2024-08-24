@@ -29,7 +29,7 @@ const SignIn: React.FC = () => {
       setError('');
 
       // Call the login API
-      const userData = await authService.login(email, password);
+      await authService.login(email, password);
 
       // On successful login, navigate to the admin page
       navigate('/admin');
