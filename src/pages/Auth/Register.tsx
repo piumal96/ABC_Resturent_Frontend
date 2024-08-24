@@ -9,8 +9,9 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import logo from "@/assets/images/logo.png"; 
-import authService from '@/services/AuthService'; // Import your authService
+import logo from "@/assets/images/logo.png";
+import AuthController from '@/controllers/AuthController'; // Import the AuthController
+import { useNavigate } from 'react-router-dom';
 
 const Register: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -18,22 +19,32 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
+      setError("Passwords do not match.");
+      return;
     }
     try {
-        setError(null); 
-        const role = 'Customer'; 
-        const response = await authService.register(fullName, email, password, role);
-        console.log('Registration successful:', response);
-    } catch (err: any) {
-        console.error('Registration failed:', err);
-        setError('Registration failed. Please try again.');
+      setError(null);
+      const role = 'Customer'; // Assuming 'Customer' is the default role
+      const user = await AuthController.register(fullName, email, password, role);
+      // Store user data in localStorage after successful registration
+      localStorage.setItem('user', JSON.stringify(user));
+      if (user.role === 'Customer') {
+        navigate('/'); // Redirect to the homepage
+      } else if (user.role === 'Staff') {
+        navigate('/staff/dashboard'); // Redirect to the staff dashboard
+      } else {
+        setError('Unauthorized role. Please contact the administrator.');
+      }
+    } catch (err) {
+      console.error('Registration failed:', err);
+      setError('Registration failed. Please try again.');
     }
-};
+  };
+  
 
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>

@@ -33,6 +33,7 @@ import StaffQueryList from './pages/staff/QueryList';
 import StaffQueryDetail from './pages/staff/QueryDetail';
 import StaffPaymentList from './pages/staff/PaymentList';
 import StaffPaymentDetail from './pages/staff/PaymentDetail';
+import ReservationForm from './pages/client/ReservationForm';
 
 function App() {
   const navigate = useNavigate();
@@ -84,6 +85,7 @@ function App() {
       <Route path="/staff/payments/:id" element={<StaffPaymentDetail />} />
 
       {/* Other routes */}
+      <Route path="/customer/reservation" element={<ReservationForm />} />
     </Routes>
   );
 }
