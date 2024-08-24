@@ -1,7 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-// https://vitejs.dev/config/
+const isProduction = process.env.NODE_ENV === 'production';
+const base = isProduction ? '/ABC_Resturent_Frontend/' : '/';
+
 export default defineConfig({
+  base,
   plugins: [react()],
-})
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});

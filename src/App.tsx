@@ -1,35 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import HomeScreen from './pages/Home'; // Assuming HomeScreen component is in pages/Home.tsx
+import AdminDashboard from './pages/AdminDashboard';
+import ServiceList from './pages/Admin/ServiceList'; 
+import ServiceForm from './pages/Admin/ServiceForm'; 
+import OfferList from './pages/Admin/OfferList';
+import OfferForm from './pages/Admin/OfferForm';
+import FacilityList from './pages/Admin/FacilityList';
+import FacilityForm from './pages/Admin/FacilityForm';
+import ReservationList from './pages/Admin/ReservationList';
+import ReservationDetail from './pages/Admin/ReservationDetail';
+import QueryList from './pages/Admin/QueryList';
+import QueryDetail from './pages/Admin/QueryDetail';
+import PaymentList from './pages/Admin/PaymentList';
+import PaymentDetail from './pages/Admin/PaymentDetail';
+import ReportGenerator from './pages/Admin/ReportGenerator';
+import ReportView from './pages/Admin/ReportView';
+import UserList from './pages/Admin/UserList';
+import UserRoleForm from './pages/Admin/UserRoleForm';
+
+import SignIn from './pages/Auth/SignIn';
+
+// Import the gallery components
+import GalleryList from './pages/Admin/GalleryList'; 
+import GalleryForm from './pages/Admin/GalleryForm'; 
+import Register from './pages/Auth/Register';
+
 
 function App() {
-  const [count, setCount] = useState(0)
+  const navigate = useNavigate();
+
+  const handleGallerySubmit = (data: { url: string; caption: string; location: string }) => {
+    console.log('Gallery data submitted:', data);
+    navigate('/gallery');
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Routes>
+
+      <Route path="/" element={<HomeScreen />} /> 
+       {/* Set HomeScreen as the default route */}
+       <Route path="/login" element={<SignIn />} />
+       <Route path="/admin" element={<AdminDashboard />} />
+       <Route path="/register" element={<Register/>} />
+
+      <Route path="/services" element={<ServiceList />} />
+      <Route path="/services/add" element={<ServiceForm />} />
+      <Route path="/services/edit/:id" element={<ServiceForm />} />
+      <Route path="/offers" element={<OfferList />} />
+      <Route path="/offers/add" element={<OfferForm />} />
+      <Route path="/offers/edit/:id" element={<OfferForm />} />
+      <Route path="/facilities" element={<FacilityList />} />
+      <Route path="/facilities/edit/:id" element={<FacilityForm />} />
+      <Route path="/reservations" element={<ReservationList />} />
+      <Route path="/reservations/:id" element={<ReservationDetail />} />
+      <Route path="/queries" element={<QueryList />} />
+      <Route path="/queries/:id" element={<QueryDetail />} />
+      <Route path="/payments" element={<PaymentList />} />
+      <Route path="/payments/:id" element={<PaymentDetail />} />
+      <Route path="/reports" element={<ReportGenerator />} />
+      <Route path="/reports/:reportType" element={<ReportView />} />
+      <Route path="/users" element={<UserList />} />
+      <Route path="/users/:id/edit-role" element={<UserRoleForm />} />
+
+      {/* Gallery management routes */}
+      <Route path="/gallery" element={<GalleryList />} />
+      <Route path="/gallery/add" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
+      <Route path="/gallery/edit/:id" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
+
+      {/* Other routes */}
+    </Routes>
+  );
 }
 
-export default App
+export default App;
