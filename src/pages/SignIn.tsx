@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import logo from "../assets/images/logo.png"; 
 
-const Register: React.FC = () => {
+const SignIn: React.FC = () => {
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
@@ -28,7 +28,7 @@ const Register: React.FC = () => {
             color: "#1976d2",
           }}
         >
-          Create an Account
+          Sign In
         </Typography>
         <Divider sx={{ my: 2 }} />
         <Box
@@ -42,20 +42,6 @@ const Register: React.FC = () => {
           noValidate
           autoComplete="off"
         >
-          <TextField
-            required
-            fullWidth
-            label="Full Name"
-            name="fullName"
-            variant="outlined"
-            InputProps={{
-              style: {
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-              },
-            }}
-            sx={{ fontSize: "0.875rem" }}
-          />
           <TextField
             required
             fullWidth
@@ -86,21 +72,6 @@ const Register: React.FC = () => {
             }}
             sx={{ fontSize: "0.875rem" }}
           />
-          <TextField
-            required
-            fullWidth
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            variant="outlined"
-            InputProps={{
-              style: {
-                borderRadius: "8px",
-                fontSize: "0.875rem",
-              },
-            }}
-            sx={{ fontSize: "0.875rem" }}
-          />
           <Button
             variant="contained"
             color="primary"
@@ -118,22 +89,22 @@ const Register: React.FC = () => {
               transition: "background-color 0.3s ease",
             }}
           >
-            Register
+            Sign In
           </Button>
         </Box>
         <Grid container justifyContent="flex-end" sx={{ mt: 1.5 }}>
           <Grid item>
             <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-              Already have an account?{" "}
+              Don't have an account?{" "}
               <a
-                href="/login"
+                href="/register"
                 style={{
                   textDecoration: "none",
                   color: "#1976d2",
                   fontWeight: "bold",
                 }}
               >
-                Sign in
+                Register
               </a>
             </Typography>
           </Grid>
@@ -143,4 +114,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default SignIn;
