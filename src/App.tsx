@@ -5,6 +5,7 @@ import './App.css'
 import Register from './pages/Register';
 import HomeScreen from './pages/Home';
 import SignIn from './pages/SignIn';
+import AdminDashboard from './pages/AdminDashboard';
 
 
 // Create a custom theme
@@ -29,7 +30,8 @@ function App() {
       {/* Your Application Components */}
       {/* <HomeScreen /> */}
       {/* <Register/> */}
-      <SignIn/>
+      {/* <SignIn/> */}
+      <AdminDashboard/>
     </ThemeProvider>
   );
 }
