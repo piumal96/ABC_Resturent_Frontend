@@ -9,9 +9,13 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import logo from "../assets/images/logo.png"; 
+import logo from "@/assets/images/logo.png"; 
+import { useNavigate } from 'react-router-dom';
 
 const SignIn: React.FC = () => {
+  // Move the useNavigate hook inside the component
+  const navigate = useNavigate();
+
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
@@ -73,6 +77,7 @@ const SignIn: React.FC = () => {
             sx={{ fontSize: "0.875rem" }}
           />
           <Button
+            onClick={() => navigate('/admin')}
             variant="contained"
             color="primary"
             fullWidth

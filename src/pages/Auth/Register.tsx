@@ -9,7 +9,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import logo from "../assets/images/logo.png"; 
+import logo from "@/assets/images/logo.png"; 
 
 const Register: React.FC = () => {
   return (
