@@ -31,7 +31,7 @@ const HomeScreen: React.FC = () => {
           <Button color="inherit" href="#reservations">Reservations</Button>
           <Button color="inherit" href="#contact">Contact</Button>
           <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>
-          <Button color="inherit" onClick={() => navigate('/register')}>Register</Button> 
+          <Button color="inherit" onClick={() => navigate('/staff/dashboard')}>Register</Button> 
         </Toolbar>
       </AppBar>
 
