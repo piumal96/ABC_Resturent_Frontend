@@ -51,7 +51,8 @@ import PaymentList from './pages/Admin/PaymentList';
 import PaymentDetail from './pages/Admin/PaymentDetail';
 import ReportGenerator from './pages/Admin/ReportGenerator';
 import ReportView from './pages/Admin/ReportView';
-
+import UserList from './pages/Admin/UserList';
+import UserRoleForm from './pages/Admin/UserRoleForm';
 
 function App() {
   return (
@@ -73,6 +74,8 @@ function App() {
         <Route path="/payments/:id" element={<PaymentDetail />} />
         <Route path="/reports" element={<ReportGenerator />} />
         <Route path="/reports/:reportType" element={<ReportView />} />
+        <Route path="/users" element={<UserList />} />
+        <Route path="/users/:id/edit-role" element={<UserRoleForm />} />
       {/* Other routes */}
     </Routes>
   );

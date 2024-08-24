@@ -9,6 +9,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork'; // Facility icon
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Reservation icon
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Query management icon
 import PaymentIcon from '@mui/icons-material/Payment'; // Payment management icon
+import PeopleIcon from '@mui/icons-material/People'; // User management icon
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 
@@ -65,6 +66,14 @@ const AdminDashboard: React.FC = () => {
               description="View and process customer payments."
               icon={PaymentIcon} // Payment management icon
               onClick={() => navigate('/payments')}
+            />
+          </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Manage Users"
+              description="View and manage user roles and access levels."
+              icon={PeopleIcon} // User management icon
+              onClick={() => navigate('/users')}
             />
           </Grid>
           <Grid item>
