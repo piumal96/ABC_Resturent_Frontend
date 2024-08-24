@@ -6,6 +6,8 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ReportIcon from '@mui/icons-material/Report';
 import BuildIcon from '@mui/icons-material/Build';
 import HomeWorkIcon from '@mui/icons-material/HomeWork'; // Facility icon
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Reservation icon
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Query management icon
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 
@@ -38,6 +40,22 @@ const AdminDashboard: React.FC = () => {
               description="Manage facilities at different locations."
               icon={HomeWorkIcon} // Facility management icon
               onClick={() => navigate('/facilities')}
+            />
+          </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Manage Reservations"
+              description="View and manage customer reservations."
+              icon={EventAvailableIcon} // Reservation management icon
+              onClick={() => navigate('/reservations')}
+            />
+          </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Manage Queries"
+              description="View and manage customer queries."
+              icon={QuestionAnswerIcon} // Query management icon
+              onClick={() => navigate('/queries')}
             />
           </Grid>
           <Grid item>

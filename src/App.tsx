@@ -43,6 +43,10 @@ import OfferList from './pages/Admin/OfferList';
 import OfferForm from './pages/Admin/OfferForm';
 import FacilityList from './pages/Admin/FacilityList';
 import FacilityForm from './pages/Admin/FacilityForm';
+import ReservationList from './pages/Admin/ReservationList';
+import ReservationDetail from './pages/Admin/ReservationDetail';
+import QueryList from './pages/Admin/QueryList';
+import QueryDetail from './pages/Admin/QueryDetail';
 
 function App() {
   return (
@@ -56,6 +60,10 @@ function App() {
         <Route path="/offers/edit/:id" element={<OfferForm />} />
         <Route path="/facilities" element={<FacilityList />} />
         <Route path="/facilities/edit/:id" element={<FacilityForm />} />
+        <Route path="/reservations" element={<ReservationList />} />
+        <Route path="/reservations/:id" element={<ReservationDetail />} />
+        <Route path="/queries" element={<QueryList />} />
+        <Route path="/queries/:id" element={<QueryDetail />} />
       {/* Other routes */}
     </Routes>
   );
