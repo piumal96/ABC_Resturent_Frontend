@@ -23,7 +23,7 @@ const AdminDashboard: React.FC = () => {
         <Grid container spacing={3} justifyContent="center">
           <Grid item>
             <DashboardCard
-              title="Manage Services"
+              title="Manage Services."
               description="Add, edit, and remove restaurant services."
               icon={RestaurantMenuIcon}
               onClick={() => navigate('/services')}
