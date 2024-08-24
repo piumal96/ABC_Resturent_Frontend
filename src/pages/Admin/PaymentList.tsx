@@ -21,7 +21,7 @@ const paymentsData = [
 
 const PaymentList: React.FC = () => {
   const navigate = useNavigate();
-  const [payments, setPayments] = useState(paymentsData);
+  const [payments, ] = useState(paymentsData);
 
   const handleDetail = (id: number) => {
     navigate(`/payments/${id}`);
