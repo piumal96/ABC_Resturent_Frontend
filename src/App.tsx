@@ -47,6 +47,8 @@ import ReservationList from './pages/Admin/ReservationList';
 import ReservationDetail from './pages/Admin/ReservationDetail';
 import QueryList from './pages/Admin/QueryList';
 import QueryDetail from './pages/Admin/QueryDetail';
+import PaymentList from './pages/Admin/PaymentList';
+import PaymentDetail from './pages/Admin/PaymentDetail';
 
 function App() {
   return (
@@ -64,6 +66,8 @@ function App() {
         <Route path="/reservations/:id" element={<ReservationDetail />} />
         <Route path="/queries" element={<QueryList />} />
         <Route path="/queries/:id" element={<QueryDetail />} />
+        <Route path="/payments" element={<PaymentList />} />
+        <Route path="/payments/:id" element={<PaymentDetail />} />
       {/* Other routes */}
     </Routes>
   );

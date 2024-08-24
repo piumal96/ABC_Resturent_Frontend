@@ -8,6 +8,7 @@ import BuildIcon from '@mui/icons-material/Build';
 import HomeWorkIcon from '@mui/icons-material/HomeWork'; // Facility icon
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Reservation icon
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Query management icon
+import PaymentIcon from '@mui/icons-material/Payment'; // Payment management icon
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
 
@@ -56,6 +57,14 @@ const AdminDashboard: React.FC = () => {
               description="View and manage customer queries."
               icon={QuestionAnswerIcon} // Query management icon
               onClick={() => navigate('/queries')}
+            />
+          </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Manage Payments"
+              description="View and process customer payments."
+              icon={PaymentIcon} // Payment management icon
+              onClick={() => navigate('/payments')}
             />
           </Grid>
           <Grid item>
