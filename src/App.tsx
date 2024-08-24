@@ -37,8 +37,12 @@
 // }
 import { Route, Routes } from 'react-router-dom';
 import AdminDashboard from './pages/AdminDashboard';
-import ServiceList from './pages/ServiceList'; // The list view of services
-import ServiceForm from './pages/ServiceForm'; // The form to add/edit a service
+import ServiceList from './pages/Admin/ServiceList'; // The list view of services
+import ServiceForm from './pages/Admin/ServiceForm'; // The form to add/edit a service
+import OfferList from './pages/Admin/OfferList';
+import OfferForm from './pages/Admin/OfferForm';
+import FacilityList from './pages/Admin/FacilityList';
+import FacilityForm from './pages/Admin/FacilityForm';
 
 function App() {
   return (
@@ -47,6 +51,11 @@ function App() {
       <Route path="/services" element={<ServiceList />} />
       <Route path="/services/add" element={<ServiceForm />} />
       <Route path="/services/edit/:id" element={<ServiceForm />} />
+      <Route path="/offers" element={<OfferList />} />
+        <Route path="/offers/add" element={<OfferForm />} />
+        <Route path="/offers/edit/:id" element={<OfferForm />} />
+        <Route path="/facilities" element={<FacilityList />} />
+        <Route path="/facilities/edit/:id" element={<FacilityForm />} />
       {/* Other routes */}
     </Routes>
   );
