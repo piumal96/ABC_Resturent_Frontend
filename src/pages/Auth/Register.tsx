@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   TextField,
@@ -10,8 +10,31 @@ import {
   Divider,
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
+import authService from '@/services/authService'; // Import your authService
 
 const Register: React.FC = () => {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+    }
+    try {
+        setError(null); 
+        const role = 'Customer'; 
+        const response = await authService.register(fullName, email, password, role);
+        console.log('Registration successful:', response);
+    } catch (err: any) {
+        console.error('Registration failed:', err);
+        setError('Registration failed. Please try again.');
+    }
+};
+
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
@@ -48,6 +71,8 @@ const Register: React.FC = () => {
             label="Full Name"
             name="fullName"
             variant="outlined"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -63,6 +88,8 @@ const Register: React.FC = () => {
             name="email"
             type="email"
             variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -78,6 +105,8 @@ const Register: React.FC = () => {
             name="password"
             type="password"
             variant="outlined"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -93,6 +122,8 @@ const Register: React.FC = () => {
             name="confirmPassword"
             type="password"
             variant="outlined"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -101,7 +132,13 @@ const Register: React.FC = () => {
             }}
             sx={{ fontSize: "0.875rem" }}
           />
+          {error && (
+            <Typography color="error" variant="body2">
+              {error}
+            </Typography>
+          )}
           <Button
+            onClick={handleRegister}
             variant="contained"
             color="primary"
             fullWidth
