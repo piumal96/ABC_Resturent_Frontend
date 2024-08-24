@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
 import { useNavigate } from 'react-router-dom';
-import authService from '@/services/authService'; // Make sure to import the auth service
+import AuthController from '@/controllers/AuthController'; // Import the AuthController
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
@@ -28,8 +28,8 @@ const SignIn: React.FC = () => {
       // Clear any previous errors
       setError('');
 
-      // Call the login API
-      await authService.login(email, password);
+      // Call the login method from the AuthController
+      await AuthController.login(email, password);
 
       // On successful login, navigate to the admin page
       navigate('/admin');
