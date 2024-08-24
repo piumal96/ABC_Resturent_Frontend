@@ -49,6 +49,9 @@ import QueryList from './pages/Admin/QueryList';
 import QueryDetail from './pages/Admin/QueryDetail';
 import PaymentList from './pages/Admin/PaymentList';
 import PaymentDetail from './pages/Admin/PaymentDetail';
+import ReportGenerator from './pages/Admin/ReportGenerator';
+import ReportView from './pages/Admin/ReportView';
+
 
 function App() {
   return (
@@ -68,6 +71,8 @@ function App() {
         <Route path="/queries/:id" element={<QueryDetail />} />
         <Route path="/payments" element={<PaymentList />} />
         <Route path="/payments/:id" element={<PaymentDetail />} />
+        <Route path="/reports" element={<ReportGenerator />} />
+        <Route path="/reports/:reportType" element={<ReportView />} />
       {/* Other routes */}
     </Routes>
   );
