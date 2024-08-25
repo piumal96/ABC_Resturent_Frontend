@@ -7,7 +7,7 @@ const login = async (email: string, password: string) => {
         const response = await axios.post(`${API_URL}auth/login`, { email, password });
         return response.data;
     } catch (error) {
-        throw new Error('Login failed. Please check your credentials and try again.');
+        throw new Error('Login fadiled. Please check your credentials and try again.');
     }
 };
 
