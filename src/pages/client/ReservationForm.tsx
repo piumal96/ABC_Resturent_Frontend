@@ -1,141 +1,119 @@
-import React, { useState } from 'react';
-import {
-  TextField,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-  Box,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook from AuthContext
+import { useReservation } from '@/context/ReservationContext'; // Assuming you have a ReservationContext
+import { Container, TextField, Button, Typography } from '@mui/material';
 
 const ReservationForm: React.FC = () => {
-  const [reservationType, setReservationType] = useState<string>('');
-  const [date, setDate] = useState<string>('');
-  const [time, setTime] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
-  const [numberOfGuests, setNumberOfGuests] = useState<number>(1);
-  const [customerName, setCustomerName] = useState<string>('');
-  const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [specialRequests, setSpecialRequests] = useState<string>('');
+  const [restaurant, setRestaurant] = useState('');
+  const [service, setService] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [type, setType] = useState('Dine-in');
+  const [specialRequests, setSpecialRequests] = useState('');
+  const [feedback, setFeedback] = useState('');
 
-  const handleSubmit = () => {
-    // Here, you would typically send the reservation data to your backend.
-    const reservationData = {
-      reservationType,
-      date,
-      time,
-      location,
-      numberOfGuests,
-      customerName,
-      phoneNumber,
-      email,
-      specialRequests,
-    };
-    console.log(reservationData);
+  const { user, isAuthenticated } = useAuth(); // Get authentication status and user info
+  const { createReservation } = useReservation(); // Access createReservation from ReservationContext
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is not authenticated, redirect to login page
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      if (!user) {
+        throw new Error('You must be logged in to make a reservation.');
+      }
+
+      const reservationData = {
+        restaurant,
+        service,
+        date,
+        time,
+        type,
+        specialRequests,
+      };
+
+      await createReservation(reservationData);
+      setFeedback('Reservation created successfully!');
+    } catch (error) {
+      setFeedback('Failed to create reservation. Please try again.');
+      console.error('Error creating reservation:', error);
+    }
   };
 
   return (
-    <Box sx={{ maxWidth: 500, margin: 'auto', mt: 5 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Container maxWidth="sm" sx={{ padding: '40px 0' }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>
         Make a Reservation
       </Typography>
-
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel id="reservation-type-label">Reservation Type</InputLabel>
-        <Select
-          labelId="reservation-type-label"
-          value={reservationType}
-          label="Reservation Type"
-          onChange={(e) => setReservationType(e.target.value)}
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Restaurant ID"
+          value={restaurant}
+          onChange={(e) => setRestaurant(e.target.value)}
+          fullWidth
+          required
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          label="Service ID"
+          value={service}
+          onChange={(e) => setService(e.target.value)}
+          fullWidth
+          required
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          label="Date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          fullWidth
+          required
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          label="Time"
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          fullWidth
+          required
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          label="Special Requests"
+          value={specialRequests}
+          onChange={(e) => setSpecialRequests(e.target.value)}
+          fullWidth
+          multiline
+          rows={4}
+          sx={{ marginBottom: '20px' }}
+        />
+        <Button
+          variant="contained"
+          type="submit"
+          color="primary"
+          fullWidth
+          sx={{ padding: '10px', fontSize: '16px' }}
         >
-          <MenuItem value="Dine-In">Dine-In</MenuItem>
-          <MenuItem value="Delivery">Delivery</MenuItem>
-        </Select>
-      </FormControl>
-
-      <TextField
-        label="Date"
-        type="date"
-        fullWidth
-        sx={{ mb: 2 }}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
-
-      <TextField
-        label="Time"
-        type="time"
-        fullWidth
-        sx={{ mb: 2 }}
-        InputLabelProps={{
-          shrink: true,
-        }}
-        value={time}
-        onChange={(e) => setTime(e.target.value)}
-      />
-
-      <TextField
-        label="Location"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-      />
-
-      <TextField
-        label="Number of Guests"
-        type="number"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={numberOfGuests}
-        onChange={(e) => setNumberOfGuests(parseInt(e.target.value, 10))}
-      />
-
-      <TextField
-        label="Name"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={customerName}
-        onChange={(e) => setCustomerName(e.target.value)}
-      />
-
-      <TextField
-        label="Phone Number"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-      />
-
-      <TextField
-        label="Email"
-        type="email"
-        fullWidth
-        sx={{ mb: 2 }}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <TextField
-        label="Special Requests"
-        fullWidth
-        multiline
-        rows={4}
-        sx={{ mb: 2 }}
-        value={specialRequests}
-        onChange={(e) => setSpecialRequests(e.target.value)}
-      />
-
-      <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
-        Submit Reservation
-      </Button>
-    </Box>
+          Submit Reservation
+        </Button>
+      </form>
+      {feedback && (
+        <Typography variant="body1" color="error" sx={{ marginTop: '20px', textAlign: 'center' }}>
+          {feedback}
+        </Typography>
+      )}
+    </Container>
   );
 };
 

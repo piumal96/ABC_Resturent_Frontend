@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import UserModel from '../models/UserModel';
+import ReservationModel from '@/models/ReservationModel';
 
 const API_URL = 'http://localhost:5001/api/';
 
@@ -16,6 +17,25 @@ interface LoginResponse {
     sessionId: string;
 }
 
+// Reservation API Calls
+interface ReservationResponse {
+    success: boolean;
+    message: string;
+    reservation: {
+        id: string;
+        customer: string;
+        restaurant: string;
+        service: string;
+        date: string;
+        time: string;
+        type: string;
+        deliveryAddress?: string;
+        specialRequests: string;
+        status: string;
+        createdAt: string;
+    };
+}
+
 // Login function
 export const login = async (email: string, password: string): Promise<UserModel> => {
     try {
@@ -27,7 +47,6 @@ export const login = async (email: string, password: string): Promise<UserModel>
         throw new Error('Login failed. Please check your credentials and try again.');
     }
 };
-
 
 // Get current user from localStorage
 export const getCurrentUser = (): UserModel | null => {
@@ -54,8 +73,42 @@ export const logout = (): void => {
     localStorage.removeItem('user');
 };
 
+
+// Create a reservation
+export const createReservation = async (reservationData: {
+    restaurant: string;
+    service: string;
+    date: string;
+    time: string;
+    type: string;
+    specialRequests: string;
+}): Promise<ReservationModel> => {
+    try {
+        const response: AxiosResponse<ReservationResponse> = await axios.post(`${API_URL}reservations`, reservationData);
+        return ReservationModel.fromApiResponse(response.data.reservation);
+    } catch (error) {
+        console.error('Failed to create reservation:', error);
+        throw error;
+    }
+};
+
+// Fetch reservations (if needed)
+export const fetchReservations = async (): Promise<ReservationModel[]> => {
+    try {
+        const response: AxiosResponse<{ reservations: ReservationModel[] }> = await axios.get(`${API_URL}reservations`);
+        return response.data.reservations.map((reservation: any) => ReservationModel.fromApiResponse(reservation));
+    } catch (error) {
+        console.error('Failed to fetch reservations:', error);
+        throw error;
+    }
+};
+
+
+
 export default {
     login,
     getCurrentUser,
     logout,
+    createReservation,
+    fetchReservations, // Add this if you plan to fetch reservations
 };
