@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Button, Grid, Card, CardContent, Container, Box, TextField, Modal } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
 
 const HomeScreen: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);  // Track login status
-  const [userName, setUserName] = useState('');  // Store the user's name
+  const { isAuthenticated, user, logout } = useAuth(); // Use AuthContext to get authentication status and user info
   const [isOpen, setIsOpen] = useState(false);  // Modal state
   const [selectedImage, setSelectedImage] = useState('');  // Selected image for the modal
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Check if the user is logged in by looking for user data in localStorage
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    if (user && user.name) {
-      setIsLoggedIn(true);
-      setUserName(user.name);
-    }
-  }, []);
-
   const handleLogout = () => {
-    // Clear user data from localStorage and reset login state
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setUserName("");
+    logout(); // Logout using AuthContext
     navigate("/login");
   };
 
@@ -40,32 +28,32 @@ const HomeScreen: React.FC = () => {
     <div>
       {/* Header Section */}
       <AppBar position="static" sx={{ backgroundColor: '#4caf50' }}>
-  <Toolbar>
-    <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-      ABC Restaurant
-    </Typography>
-    <Button color="inherit" href="#services">Services</Button>
-    <Button color="inherit" href="#offers">Offers</Button>
-    <Button color="inherit" href="#gallery">Gallery</Button>
-    <Button color="inherit" onClick={() => navigate('/customer/reservation')}>Reservations</Button> {/* Updated Reservations button */}
-    <Button color="inherit" href="#contact">Contact</Button>
-    {isLoggedIn ? (
-      <>
-        <Typography variant="h6" sx={{ marginRight: '20px' }}>
-          Welcome, {userName}  {/* Display the user's name */}
-        </Typography>
-        <Button color="inherit" onClick={handleLogout}>Logout</Button>  {/* Logout button */}
-      </>
-    ) : (
-      <>
-        <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>  {/* Login button */}
-        <Button color="inherit" onClick={() => navigate('/register')}>Register</Button>  {/* Register button */}
-      </>
-    )}
-  </Toolbar>
-</AppBar>
+        <Toolbar>
+          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            ABC Restaurant
+          </Typography>
+          <Button color="inherit" href="#services">Services</Button>
+          <Button color="inherit" href="#offers">Offers</Button>
+          <Button color="inherit" href="#gallery">Gallery</Button>
+          <Button color="inherit" onClick={() => navigate('/customer/reservation')}>Reservations</Button> {/* Updated Reservations button */}
+          <Button color="inherit" href="#contact">Contact</Button>
+          {isAuthenticated ? (
+            <>
+              <Typography variant="h6" sx={{ marginRight: '20px' }}>
+                Welcome, {user?.username}  {/* Display the user's name */}
+              </Typography>
+              <Button color="inherit" onClick={handleLogout}>Logout</Button>  {/* Logout button */}
+            </>
+          ) : (
+            <>
+              <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>  {/* Login button */}
+              <Button color="inherit" onClick={() => navigate('/register')}>Register</Button>  {/* Register button */}
+            </>
+          )}
+        </Toolbar>
+      </AppBar>
 
-
+      {/* The rest of the HomeScreen component remains unchanged */}
       {/* Hero Section */}
       <Box
         sx={{
@@ -91,14 +79,13 @@ const HomeScreen: React.FC = () => {
             sx={{ marginBottom: '20px', backgroundColor: '#fff', borderRadius: '5px' }}
           />
           <Button
-  variant="contained"
-  size="large"
-  sx={{ backgroundColor: '#ff5722' }}
-  onClick={() => navigate('/customer/reservation')}  // Updated to navigate to the reservation page
->
-  Make a Reservation
-</Button>
-
+            variant="contained"
+            size="large"
+            sx={{ backgroundColor: '#ff5722' }}
+            onClick={() => navigate('/customer/reservation')}  // Updated to navigate to the reservation page
+          >
+            Make a Reservation
+          </Button>
         </Container>
       </Box>
 
