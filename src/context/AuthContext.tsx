@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setSessionId(null);
         localStorage.removeItem('user'); // Clear user from localStorage
-        navigate('/login');
+        navigate('/home');
     };
 
     return (
