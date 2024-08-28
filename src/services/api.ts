@@ -1,6 +1,8 @@
 import axios, { AxiosResponse } from 'axios';
 import UserModel from '../models/UserModel';
 import ReservationModel from '@/models/ReservationModel';
+import RestaurantModel from '@/models/RestaurantModel';
+import ServiceModel from '@/models/ServiceModel';
 
 const API_URL = 'http://localhost:5001/api/';
 
@@ -36,6 +38,18 @@ interface ReservationResponse {
     };
 }
 
+interface FetchRestaurantsResponse {
+    success: boolean;
+    message: string;
+    restaurants: RestaurantModel[];
+    
+}
+
+interface FetchServicesResponse {
+    success: boolean;
+    message: string;
+    services: ServiceModel[];
+}
 // Login function
 export const login = async (email: string, password: string): Promise<UserModel> => {
     try {
@@ -102,10 +116,33 @@ export const fetchReservations = async (): Promise<ReservationModel[]> => {
         throw error;
     }
 };
+// Fetch Restaurant (if needed)
+export const fetchRestaurants = async (): Promise<RestaurantModel[]> => {
+    try {
+        const response: AxiosResponse<FetchRestaurantsResponse> = await axios.get(`${API_URL}restaurants`);
+        return response.data.restaurants.map(restaurant => RestaurantModel.fromApiResponse(restaurant));
+    } catch (error) {
+        console.error('Error fetching restaurants:', error);
+        throw error;
+    }
+};
+
+// Fetch Services (if needed)
+export const fetchServices = async (): Promise<ServiceModel[]> => {
+    try {
+        const response: AxiosResponse<FetchServicesResponse> = await axios.get(`${API_URL}services`);
+        return response.data.services.map(service => ServiceModel.fromApiResponse(service));
+    } catch (error) {
+        console.error('Error fetching services:', error);
+        throw error;
+    }
+};
 
 
 
 export default {
+    fetchServices,
+    fetchRestaurants,
     login,
     getCurrentUser,
     logout,

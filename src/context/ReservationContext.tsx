@@ -1,17 +1,10 @@
-import React, { createContext, useState, ReactNode, useContext } from 'react';
-import api from '@/services/api';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import api from '../services/api';
 import ReservationModel from '../models/ReservationModel';
 
 interface ReservationContextProps {
+    createReservation: (data: ReservationModel) => Promise<void>;
     reservations: ReservationModel[];
-    createReservation: (data: {
-        restaurant: string;
-        service: string;
-        date: string;
-        time: string;
-        type: string;
-        specialRequests: string;
-    }) => Promise<ReservationModel>;
     fetchReservations: () => Promise<void>;
 }
 
@@ -20,36 +13,26 @@ const ReservationContext = createContext<ReservationContextProps | undefined>(un
 export const ReservationProvider = ({ children }: { children: ReactNode }) => {
     const [reservations, setReservations] = useState<ReservationModel[]>([]);
 
-    const fetchReservations = async () => {
+    const createReservation = async (data: ReservationModel) => {
         try {
-            const response = await api.fetchReservations();
-            setReservations(response.map((res: any) => ReservationModel.fromApiResponse(res)));
+            const newReservation = await api.createReservation(data);
+            setReservations([...reservations, newReservation]);
         } catch (error) {
-            console.error('Failed to fetch reservations:', error);
+            console.error("Failed to create reservation", error);
         }
     };
 
-    const createReservation = async (data: {
-        restaurant: string;
-        service: string;
-        date: string;
-        time: string;
-        type: string;
-        specialRequests: string;
-    }): Promise<ReservationModel> => {
+    const fetchReservations = async () => {
         try {
-            const response = await api.createReservation(data);
-            const newReservation = ReservationModel.fromApiResponse(response);
-            setReservations((prev) => [...prev, newReservation]);
-            return newReservation;
+            const fetchedReservations = await api.fetchReservations();
+            setReservations(fetchedReservations);
         } catch (error) {
-            console.error('Failed to create reservation:', error);
-            throw error;
+            console.error("Failed to fetch reservations", error);
         }
     };
 
     return (
-        <ReservationContext.Provider value={{ reservations, createReservation, fetchReservations }}>
+        <ReservationContext.Provider value={{ createReservation, reservations, fetchReservations }}>
             {children}
         </ReservationContext.Provider>
     );

@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook from AuthContext
-import { useReservation } from '@/context/ReservationContext'; // Assuming you have a ReservationContext
-import { Container, TextField, Button, Typography } from '@mui/material';
+import { useAuth } from '@/context/AuthContext';
+import { useReservation } from '@/context/ReservationContext';
+import { fetchRestaurants, fetchServices } from '@/services/api'; // Import the fetchServices function
+import RestaurantModel from '@/models/RestaurantModel';
+import ServiceModel from '@/models/ServiceModel'; // Import the ServiceModel
+import { Container, TextField, Button, Typography, MenuItem } from '@mui/material';
 
 const ReservationForm: React.FC = () => {
-  const [restaurant, setRestaurant] = useState('');
-  const [service, setService] = useState('');
+  const [restaurant, setRestaurant] = useState<string>('');
+  const [restaurants, setRestaurants] = useState<RestaurantModel[]>([]);
+  const [service, setService] = useState<string>('');
+  const [services, setServices] = useState<ServiceModel[]>([]); // State for storing fetched services
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [type, setType] = useState('Dine-in');
   const [specialRequests, setSpecialRequests] = useState('');
   const [feedback, setFeedback] = useState('');
 
-  const { user, isAuthenticated } = useAuth(); // Get authentication status and user info
-  const { createReservation } = useReservation(); // Access createReservation from ReservationContext
+  const { user, isAuthenticated } = useAuth();
+  const { createReservation } = useReservation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is not authenticated, redirect to login page
     if (!isAuthenticated) {
       navigate('/login');
     }
+
+    const loadRestaurantsAndServices = async () => {
+      try {
+        const fetchedRestaurants = await fetchRestaurants();
+        setRestaurants(fetchedRestaurants);
+
+        const fetchedServices = await fetchServices();
+        setServices(fetchedServices);
+      } catch (error) {
+        console.error('Failed to fetch data', error);
+      }
+    };
+
+    loadRestaurantsAndServices();
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -56,21 +74,37 @@ const ReservationForm: React.FC = () => {
       </Typography>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Restaurant ID"
+          label="Select Restaurant"
           value={restaurant}
           onChange={(e) => setRestaurant(e.target.value)}
+          select
           fullWidth
           required
           sx={{ marginBottom: '20px' }}
-        />
+        >
+          {restaurants.map((restaurant) => (
+            <MenuItem key={restaurant._id} value={restaurant._id}>
+              {restaurant.name} - {restaurant.location}
+            </MenuItem>
+          ))}
+        </TextField>
+
         <TextField
-          label="Service ID"
+          label="Select Service"
           value={service}
           onChange={(e) => setService(e.target.value)}
+          select
           fullWidth
           required
           sx={{ marginBottom: '20px' }}
-        />
+        >
+          {services.map((service) => (
+            <MenuItem key={service._id} value={service._id}>
+              {service.name} - ${service.price.toFixed(2)}
+            </MenuItem>
+          ))}
+        </TextField>
+
         <TextField
           label="Date"
           type="date"
