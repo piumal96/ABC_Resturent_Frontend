@@ -12,10 +12,12 @@ import {
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
 import { useNavigate } from 'react-router-dom';
-import AuthController from '@/controllers/AuthController'; // Import the AuthController
+import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
+import UserModel from '@/models/UserModel'; // Import UserModel for typing
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get the login function from AuthContext
 
   // State for email, password, and error message
   const [email, setEmail] = useState('');
@@ -28,8 +30,8 @@ const SignIn: React.FC = () => {
       // Clear any previous errors
       setError('');
 
-      // Call the login method from the AuthController
-      const user = await AuthController.login(email, password);
+      // Call the login method from the AuthContext
+      const user: UserModel = await login(email, password);
 
       // On successful login, navigate based on user role
       if (user.role === 'Admin') {
