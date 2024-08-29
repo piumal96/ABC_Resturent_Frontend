@@ -1,0 +1,63 @@
+// src/models/ReservationDetailModel.ts
+
+export default class ReservationDetailModel {
+    _id: string;
+    customer: {
+        _id: string;
+        username: string;
+        email: string;
+    };
+    restaurant: {
+        _id: string;
+        name: string;
+        location: string;
+    } | null;
+    service: {
+        _id: string;
+        name: string;
+        price: number;
+    } | null;
+    date: string;
+    time: string;
+    type: string;
+    deliveryAddress?: string | null;
+    specialRequests: string;
+    status: string;
+    paymentStatus: string;
+    createdAt: string;
+
+    constructor(data: any) {
+        this._id = data._id;
+        this.customer = {
+            _id: data.customer._id,
+            username: data.customer.username,
+            email: data.customer.email,
+        };
+        this.restaurant = data.restaurant
+            ? {
+                  _id: data.restaurant._id,
+                  name: data.restaurant.name,
+                  location: data.restaurant.location,
+              }
+            : null;
+        this.service = data.service
+            ? {
+                  _id: data.service._id,
+                  name: data.service.name,
+                  price: data.service.price,
+              }
+            : null;
+        this.date = data.date;
+        this.time = data.time;
+        this.type = data.type;
+        this.deliveryAddress = data.deliveryAddress || null;
+        this.specialRequests = data.specialRequests;
+        this.status = data.status;
+        this.paymentStatus = data.paymentStatus;
+        this.createdAt = data.createdAt;
+    }
+
+    static fromApiResponse(response: any): ReservationDetailModel[] {
+        return response.reservations.map((reservation: any) => new ReservationDetailModel(reservation));
+    }
+}
