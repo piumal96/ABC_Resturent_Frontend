@@ -72,12 +72,23 @@ export const createReservation = async (reservationData: ReservationModel): Prom
     return response.data.reservation;
 };
 
+// Correctly define the getReservationById function to fetch multiple reservations by user ID
+export const getReservationsByUserId = async (
+    userId: string
+): Promise<ReservationDetailModel[]> => {
+    const response: AxiosResponse<{ reservations: ReservationDetailModel[] }> = await axios.get(
+        `${API_URL}reservations/user/${userId}`
+    );
+    return response.data.reservations;
+};
+
 export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
     return response.data.reservation;
 };
+
 export const deleteReservation = async (id: string): Promise<ReservationModel> => {
-    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`, );
+    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`);
     return response.data.reservation;
 };
 
@@ -105,6 +116,8 @@ export default {
     getCurrentUser,
     logout,
     createReservation,
-    updateReservation,  // Added the updateReservation method
-    fetchReservations
+    updateReservation,
+    deleteReservation,
+    fetchReservations,
+    getReservationsByUserId, // Ensure this function is exported
 };
