@@ -50,12 +50,12 @@ interface FetchServicesResponse {
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
-    const { user, sessionId } = response.data;
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('sessionId', sessionId); 
-    console.log("Session ID:", sessionId);
+    const { sessionId, user } = response.data;
+    localStorage.setItem('sessionId', sessionId);  // Store the session ID
+    localStorage.setItem('user', JSON.stringify(user));  // Store user data
     return user;
 };
+
 
 export const getCurrentUser = (): UserModel | null => {
     const userData = localStorage.getItem('user');
