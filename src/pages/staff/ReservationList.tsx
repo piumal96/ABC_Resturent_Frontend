@@ -25,10 +25,11 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Grid,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
-import { fetchReservations } from '@/services/api';
+import { fetchReservations, updateReservation } from '@/services/api';
 import StaffLayout from '@/components/Layout/StaffLayout';
 
 const ReservationList: React.FC = () => {
@@ -42,6 +43,7 @@ const ReservationList: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<ReservationDetailModel | null>(null);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const loadReservations = async () => {
@@ -76,23 +78,33 @@ const ReservationList: React.FC = () => {
     setSelectedReservation(null);
   };
 
-  const handleConfirmReservation = () => {
-    // Implement the logic to confirm the reservation here
-    console.log(`Confirming reservation with ID: ${selectedReservation?._id}`);
-    handleCloseConfirmDialog();
-  };
+  const handleUpdateReservation = async () => {
+    if (!selectedReservation) return;
 
-  const handleCancelReservation = () => {
-    // Implement the logic to cancel the reservation here
-    console.log(`Cancelling reservation with ID: ${selectedReservation?._id}`);
-    handleCloseConfirmDialog();
-  };
+    setUpdating(true);
+    try {
+        const updatedReservation = await updateReservation(selectedReservation._id, {
+            status: selectedReservation.status,
+           // paymentStatus: selectedReservation.paymentStatus,
+        });
 
-  const handleConfirmPayment = () => {
-    // Implement the logic to confirm the payment here
-    console.log(`Confirming payment for reservation with ID: ${selectedReservation?._id}`);
-    handleCloseConfirmDialog();
-  };
+        // Convert the updatedReservation (which might be of type ReservationModel) to ReservationDetailModel
+        const updatedDetailReservation = new ReservationDetailModel(updatedReservation);
+
+        setReservations(prevReservations =>
+            prevReservations.map(res =>
+                res._id === updatedDetailReservation._id ? updatedDetailReservation : res
+            )
+        );
+
+        setUpdating(false);
+        handleCloseConfirmDialog();
+    } catch (err) {
+        console.error('Failed to update reservation:', err);
+        setUpdating(false);
+    }
+};
+
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -143,13 +155,13 @@ const ReservationList: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             sx={{ mr: 2 }}
           />
-          {/* <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
             <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
               labelId="status-filter-label"
               id="status-filter"
               value={statusFilter}
-              onChange={handleStatusFilterChange}
+              // onChange={handleStatusFilterChange}
               label="Status"
             >
               <MenuItem value="">All</MenuItem>
@@ -158,7 +170,7 @@ const ReservationList: React.FC = () => {
               <MenuItem value="Completed">Completed</MenuItem>
               <MenuItem value="Cancelled">Cancelled</MenuItem>
             </Select>
-          </FormControl> */}
+          </FormControl>
           <Button variant="contained" color="primary" startIcon={<SearchIcon />} onClick={handleSearch}>
             Search
           </Button>
@@ -214,42 +226,70 @@ const ReservationList: React.FC = () => {
           </>
         )}
 
-        {/* Confirm Navigation Dialog */}
+        {/* Confirm Update Dialog */}
         {selectedReservation && (
           <Dialog
             open={confirmDialogOpen}
             onClose={handleCloseConfirmDialog}
           >
-            <DialogTitle>Reservation Details</DialogTitle>
+            <DialogTitle>Update Reservation Details</DialogTitle>
             <DialogContent>
               <DialogContentText>
                 <strong>Customer:</strong> {selectedReservation.customer.username}<br />
                 <strong>Date:</strong> {new Date(selectedReservation.date).toLocaleDateString()}<br />
                 <strong>Time:</strong> {selectedReservation.time}<br />
                 <strong>Type:</strong> {selectedReservation.type}<br />
-                <strong>Status:</strong> {selectedReservation.status}<br />
-                <strong>Payment Status:</strong> {selectedReservation.paymentStatus}<br />
-                <strong>Special Requests:</strong> {selectedReservation.specialRequests}<br />
-                {/* Add other fields as necessary */}
+                <Grid container spacing={2} sx={{ mt: 2 }}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth variant="outlined" size="small">
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={selectedReservation.status}
+                        onChange={(e) => setSelectedReservation({
+                          ...selectedReservation,
+                          status: e.target.value as string
+                        })}
+                        label="Status"
+                      >
+                        <MenuItem value="Pending">Pending</MenuItem>
+                        <MenuItem value="Confirmed">Confirmed</MenuItem>
+                        <MenuItem value="Completed">Completed</MenuItem>
+                        <MenuItem value="Cancelled">Cancelled</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth variant="outlined" size="small">
+                      <InputLabel>Payment Status</InputLabel>
+                      <Select
+                        value={selectedReservation.paymentStatus}
+                        onChange={(e) => setSelectedReservation({
+                          ...selectedReservation,
+                          paymentStatus: e.target.value as string
+                        })}
+                        label="Payment Status"
+                      >
+                        <MenuItem value="Pending">Pending</MenuItem>
+                        <MenuItem value="Paid">Paid</MenuItem>
+                        <MenuItem value="Failed">Failed</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+                <strong>Special Requests:</strong> {selectedReservation.specialRequests}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              {selectedReservation.status === 'Pending' && (
-                <>
-                  <Button onClick={handleCancelReservation} color="secondary">
-                    Cancel Reservation
-                  </Button>
-                  <Button onClick={handleConfirmReservation} color="primary">
-                    Confirm Reservation
-                  </Button>
-                </>
-              )}
-              {selectedReservation.paymentStatus === 'Pending' && (
-                <Button onClick={handleConfirmPayment} color="primary">
-                  Confirm Payment
-                </Button>
-              )}
-              <Button onClick={handleCloseConfirmDialog}>Close</Button>
+              <Button onClick={handleCloseConfirmDialog} disabled={updating}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateReservation}
+                color="primary"
+                disabled={updating}
+              >
+                {updating ? 'Updating...' : 'Update Reservation'}
+              </Button>
             </DialogActions>
           </Dialog>
         )}

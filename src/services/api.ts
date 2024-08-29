@@ -4,6 +4,7 @@ import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
 import ServiceModel from '@/models/ServiceModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
+
 // Constants
 const API_URL = 'http://localhost:5001/api/';
 
@@ -56,7 +57,6 @@ export const login = async (email: string, password: string): Promise<UserModel>
     return user;
 };
 
-
 export const getCurrentUser = (): UserModel | null => {
     const userData = localStorage.getItem('user');
     return userData ? JSON.parse(userData) : null;
@@ -69,6 +69,11 @@ export const logout = (): void => {
 
 export const createReservation = async (reservationData: ReservationModel): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.post(`${API_URL}reservations`, reservationData);
+    return response.data.reservation;
+};
+
+export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationModel> => {
+    const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
     return response.data.reservation;
 };
 
@@ -97,5 +102,6 @@ export default {
     getCurrentUser,
     logout,
     createReservation,
+    updateReservation,  // Added the updateReservation method
     fetchReservations
 };
