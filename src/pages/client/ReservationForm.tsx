@@ -2,21 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useReservation } from '@/context/ReservationContext';
-import { fetchRestaurants, fetchServices } from '@/services/api'; // Import the fetchServices function
+import { fetchRestaurants, fetchServices } from '@/services/api';
 import RestaurantModel from '@/models/RestaurantModel';
-import ServiceModel from '@/models/ServiceModel'; // Import the ServiceModel
-import { Container, TextField, Button, Typography, MenuItem } from '@mui/material';
+import ServiceModel from '@/models/ServiceModel';
+import ReservationModel from '@/models/ReservationModel';  // Import ReservationModel
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  MenuItem,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
 
 const ReservationForm: React.FC = () => {
   const [restaurant, setRestaurant] = useState<string>('');
   const [restaurants, setRestaurants] = useState<RestaurantModel[]>([]);
   const [service, setService] = useState<string>('');
-  const [services, setServices] = useState<ServiceModel[]>([]); // State for storing fetched services
+  const [services, setServices] = useState<ServiceModel[]>([]);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [type, setType] = useState('Dine-in');
   const [specialRequests, setSpecialRequests] = useState('');
   const [feedback, setFeedback] = useState('');
+
+  const [dialogOpen, setDialogOpen] = useState(false); // State for managing the dialog
 
   const { user, isAuthenticated } = useAuth();
   const { createReservation } = useReservation();
@@ -50,21 +64,31 @@ const ReservationForm: React.FC = () => {
         throw new Error('You must be logged in to make a reservation.');
       }
 
-      const reservationData = {
+      const reservationData: ReservationModel = {
+        id: '',  // Default value; backend might generate this
+        customer: user.id,  // Assuming customer is the logged-in user
         restaurant,
         service,
         date,
         time,
         type,
         specialRequests,
+        status: 'Pending',  // Default status; backend might override this
+        createdAt: '',  // Default value; backend might generate this
       };
 
       await createReservation(reservationData);
       setFeedback('Reservation created successfully!');
+      setDialogOpen(true); // Open the dialog after successful reservation
     } catch (error) {
       setFeedback('Failed to create reservation. Please try again.');
       console.error('Error creating reservation:', error);
     }
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    navigate('/'); // Navigate to home after dialog closes
   };
 
   return (
@@ -142,11 +166,27 @@ const ReservationForm: React.FC = () => {
           Submit Reservation
         </Button>
       </form>
-      {feedback && (
+
+      {/* Success Dialog */}
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Reservation Successful</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your reservation has been successfully created.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* {feedback && (
         <Typography variant="body1" color="error" sx={{ marginTop: '20px', textAlign: 'center' }}>
           {feedback}
         </Typography>
-      )}
+      )} */}
     </Container>
   );
 };

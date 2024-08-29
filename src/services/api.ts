@@ -3,7 +3,7 @@ import UserModel from '../models/UserModel';
 import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
 import ServiceModel from '@/models/ServiceModel';
-
+import ReservationDetailModel from '@/models/ReservationDetailModel';
 // Constants
 const API_URL = 'http://localhost:5001/api/';
 
@@ -72,9 +72,11 @@ export const createReservation = async (reservationData: ReservationModel): Prom
     return response.data.reservation;
 };
 
-export const fetchReservations = async (): Promise<ReservationModel[]> => {
-    const response: AxiosResponse<{ reservations: ReservationModel[] }> = await axios.get(`${API_URL}reservations`);
-    return response.data.reservations.map(reservation => reservation);
+export const fetchReservations = async (): Promise<ReservationDetailModel[]> => {
+    const response: AxiosResponse<{ reservations: any[] }> = await axios.get(`${API_URL}reservations`);
+    
+    // Map the raw API response data to ReservationDetailModel instances
+    return response.data.reservations.map(reservation => new ReservationDetailModel(reservation));
 };
 
 export const fetchRestaurants = async (): Promise<RestaurantModel[]> => {
