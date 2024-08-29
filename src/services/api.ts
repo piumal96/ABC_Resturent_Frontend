@@ -76,10 +76,13 @@ export const updateReservation = async (id: string, reservationData: Partial<Res
     const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
     return response.data.reservation;
 };
+export const deleteReservation = async (id: string): Promise<ReservationModel> => {
+    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`, );
+    return response.data.reservation;
+};
 
 export const fetchReservations = async (): Promise<ReservationDetailModel[]> => {
     const response: AxiosResponse<{ reservations: any[] }> = await axios.get(`${API_URL}reservations`);
-    
     // Map the raw API response data to ReservationDetailModel instances
     return response.data.reservations.map(reservation => new ReservationDetailModel(reservation));
 };

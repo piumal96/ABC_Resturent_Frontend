@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
-import Layout from '@/components/Layout/Layout';
 import {
   Box,
   Button,
@@ -26,15 +25,20 @@ import {
   FormControl,
   InputLabel,
   Grid,
+  IconButton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
-import { fetchReservations, updateReservation } from '@/services/api';
+import { fetchReservations, updateReservation, deleteReservation } from '@/services/api';
 import StaffLayout from '@/components/Layout/StaffLayout';
 
 const ReservationList: React.FC = () => {
   const navigate = useNavigate();
   const [reservations, setReservations] = useState<ReservationDetailModel[]>([]);
+  const [displayedReservations, setDisplayedReservations] = useState<ReservationDetailModel[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(''); // State for status filter
   const [loading, setLoading] = useState(true);
@@ -42,6 +46,7 @@ const ReservationList: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<ReservationDetailModel | null>(null);
   const [updating, setUpdating] = useState(false);
 
@@ -50,6 +55,7 @@ const ReservationList: React.FC = () => {
       try {
         const fetchedReservations: ReservationDetailModel[] = await fetchReservations();
         setReservations(fetchedReservations);
+        setDisplayedReservations(fetchedReservations);
         setLoading(false);
       } catch (err) {
         setError('Failed to load reservations. Please try again later.');
@@ -60,13 +66,13 @@ const ReservationList: React.FC = () => {
     loadReservations();
   }, []);
 
-  const handleSearch = () => {
+  useEffect(() => {
     const filteredReservations = reservations.filter((reservation) =>
       reservation.customer.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (statusFilter === '' || reservation.status === statusFilter)
     );
-    setReservations(filteredReservations);
-  };
+    setDisplayedReservations(filteredReservations);
+  }, [searchTerm, statusFilter, reservations]);
 
   const handleDetail = (reservation: ReservationDetailModel) => {
     setSelectedReservation(reservation);
@@ -78,33 +84,58 @@ const ReservationList: React.FC = () => {
     setSelectedReservation(null);
   };
 
+  const handleOpenDeleteDialog = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+  };
+
   const handleUpdateReservation = async () => {
     if (!selectedReservation) return;
 
     setUpdating(true);
     try {
-        const updatedReservation = await updateReservation(selectedReservation._id, {
-            status: selectedReservation.status,
-           // paymentStatus: selectedReservation.paymentStatus,
-        });
+      const updatedReservation = await updateReservation(selectedReservation._id, {
+        status: selectedReservation.status,
+      });
 
-        // Convert the updatedReservation (which might be of type ReservationModel) to ReservationDetailModel
-        const updatedDetailReservation = new ReservationDetailModel(updatedReservation);
+      const updatedDetailReservation = new ReservationDetailModel(updatedReservation);
 
-        setReservations(prevReservations =>
-            prevReservations.map(res =>
-                res._id === updatedDetailReservation._id ? updatedDetailReservation : res
-            )
-        );
+      setReservations(prevReservations =>
+        prevReservations.map(res =>
+          res._id === updatedDetailReservation._id ? updatedDetailReservation : res
+        )
+      );
 
-        setUpdating(false);
-        handleCloseConfirmDialog();
+      setUpdating(false);
+      handleCloseConfirmDialog();
     } catch (err) {
-        console.error('Failed to update reservation:', err);
-        setUpdating(false);
+      console.error('Failed to update reservation:', err);
+      setUpdating(false);
     }
-};
+  };
 
+  const handleDeleteReservation = async () => {
+    if (!selectedReservation) return;
+
+    setUpdating(true);
+    try {
+      await deleteReservation(selectedReservation._id);
+
+      setReservations(prevReservations =>
+        prevReservations.filter(res => res._id !== selectedReservation._id)
+      );
+
+      setUpdating(false);
+      handleCloseDeleteDialog();
+      handleCloseConfirmDialog();
+    } catch (err) {
+      console.error('Failed to delete reservation:', err);
+      setUpdating(false);
+    }
+  };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -114,15 +145,6 @@ const ReservationList: React.FC = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-
-  const handleStatusFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setStatusFilter(event.target.value as string);
-  };
-
-  const displayedReservations = useMemo(() => {
-    const startIndex = page * rowsPerPage;
-    return reservations.slice(startIndex, startIndex + rowsPerPage);
-  }, [reservations, page, rowsPerPage]);
 
   if (loading) {
     return (
@@ -153,6 +175,13 @@ const ReservationList: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              endAdornment: searchTerm && (
+                <IconButton size="small" onClick={() => setSearchTerm('')}>
+                  <ClearIcon />
+                </IconButton>
+              ),
+            }}
             sx={{ mr: 2 }}
           />
           <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
@@ -161,7 +190,7 @@ const ReservationList: React.FC = () => {
               labelId="status-filter-label"
               id="status-filter"
               value={statusFilter}
-              // onChange={handleStatusFilterChange}
+              onChange={(e) => setStatusFilter(e.target.value as string)}
               label="Status"
             >
               <MenuItem value="">All</MenuItem>
@@ -171,18 +200,18 @@ const ReservationList: React.FC = () => {
               <MenuItem value="Cancelled">Cancelled</MenuItem>
             </Select>
           </FormControl>
-          <Button variant="contained" color="primary" startIcon={<SearchIcon />} onClick={handleSearch}>
+          <Button variant="contained" color="primary" startIcon={<SearchIcon />}>
             Search
           </Button>
         </Box>
-        {reservations.length === 0 ? (
+        {displayedReservations.length === 0 ? (
           <Typography variant="body1" align="center" color="textSecondary">
             No reservations found.
           </Typography>
         ) : (
           <>
             <TableContainer component={Paper}>
-              <Table>
+              <Table stickyHeader>
                 <TableHead>
                   <TableRow>
                     <TableCell>Customer Name</TableCell>
@@ -194,8 +223,11 @@ const ReservationList: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {displayedReservations.map((reservation) => (
-                    <TableRow key={reservation._id}>
+                  {displayedReservations.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((reservation) => (
+                    <TableRow 
+                      key={reservation._id} 
+                      sx={{ '&:hover': { backgroundColor: '#f5f5f5', cursor: 'pointer' } }}
+                    >
                       <TableCell>{reservation.customer.username}</TableCell>
                       <TableCell>{new Date(reservation.date).toLocaleDateString()}</TableCell>
                       <TableCell>{reservation.time}</TableCell>
@@ -205,8 +237,21 @@ const ReservationList: React.FC = () => {
                         <Button
                           variant="outlined"
                           onClick={() => handleDetail(reservation)}
+                          startIcon={<VisibilityIcon />}
+                          sx={{ mr: 1 }}
                         >
                           View Details
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          onClick={() => {
+                            setSelectedReservation(reservation);
+                            handleOpenDeleteDialog();
+                          }}
+                          startIcon={<DeleteIcon />}
+                        >
+                          Delete
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -217,7 +262,7 @@ const ReservationList: React.FC = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={reservations.length}
+              count={displayedReservations.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
@@ -289,6 +334,33 @@ const ReservationList: React.FC = () => {
                 disabled={updating}
               >
                 {updating ? 'Updating...' : 'Update Reservation'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+
+        {/* Confirm Delete Dialog */}
+        {selectedReservation && (
+          <Dialog
+            open={deleteDialogOpen}
+            onClose={handleCloseDeleteDialog}
+          >
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this reservation for <strong>{selectedReservation.customer.username}</strong> on <strong>{new Date(selectedReservation.date).toLocaleDateString()}</strong> at <strong>{selectedReservation.time}</strong>?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDeleteDialog} disabled={updating}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteReservation}
+                color="error"
+                disabled={updating}
+              >
+                {updating ? 'Deleting...' : 'Delete'}
               </Button>
             </DialogActions>
           </Dialog>
