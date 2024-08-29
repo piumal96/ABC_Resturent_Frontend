@@ -4,6 +4,7 @@ import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
 import ServiceModel from '@/models/ServiceModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
+
 // Constants
 const API_URL = 'http://localhost:5001/api/';
 
@@ -50,10 +51,9 @@ interface FetchServicesResponse {
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
-    const { user, sessionId } = response.data;
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('sessionId', sessionId); 
-    console.log("Session ID:", sessionId);
+    const { sessionId, user } = response.data;
+    localStorage.setItem('sessionId', sessionId);  // Store the session ID
+    localStorage.setItem('user', JSON.stringify(user));  // Store user data
     return user;
 };
 
@@ -72,9 +72,17 @@ export const createReservation = async (reservationData: ReservationModel): Prom
     return response.data.reservation;
 };
 
+export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationModel> => {
+    const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
+    return response.data.reservation;
+};
+export const deleteReservation = async (id: string): Promise<ReservationModel> => {
+    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`, );
+    return response.data.reservation;
+};
+
 export const fetchReservations = async (): Promise<ReservationDetailModel[]> => {
     const response: AxiosResponse<{ reservations: any[] }> = await axios.get(`${API_URL}reservations`);
-    
     // Map the raw API response data to ReservationDetailModel instances
     return response.data.reservations.map(reservation => new ReservationDetailModel(reservation));
 };
@@ -97,5 +105,6 @@ export default {
     getCurrentUser,
     logout,
     createReservation,
+    updateReservation,  // Added the updateReservation method
     fetchReservations
 };

@@ -5,7 +5,6 @@ import UserModel from '../models/UserModel';
 
 interface AuthContextProps {
     user: UserModel | null;
-    sessionId: string | null;
     isAuthenticated: boolean;
     loading: boolean;
     login: (email: string, password: string) => Promise<UserModel>;
@@ -16,42 +15,24 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserModel | null>(null);
-    const [sessionId, setSessionId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if user and session data are available in localStorage on app load
         const storedUser = localStorage.getItem('user');
-        const storedSessionId = localStorage.getItem('sessionId');
-
-        if (storedUser && storedSessionId) {
-            const parsedUser = JSON.parse(storedUser);
-            setUser(parsedUser);
-            setSessionId(storedSessionId);
-            console.log('User and session restored from localStorage');
-        } else {
-            setUser(null);
-            setSessionId(null);
-            console.log('No valid session found in localStorage');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
-
-        setLoading(false); // Mark loading as complete
+        setLoading(false);
     }, []);
 
-    const isAuthenticated = !!user && !!sessionId;
-
-    useEffect(() => {
-        console.log("isAuthenticated:", isAuthenticated);
-    }, [isAuthenticated]);
+    const isAuthenticated = !!user;
 
     const login = async (email: string, password: string): Promise<UserModel> => {
         try {
             const loggedInUser = await api.login(email, password);
             setUser(loggedInUser);
-            setSessionId(loggedInUser.sessionId || null);
-            localStorage.setItem('user', JSON.stringify(loggedInUser)); // Store user in localStorage
-            localStorage.setItem('sessionId', loggedInUser.sessionId || ''); // Store sessionId in localStorage
+            localStorage.setItem('user', JSON.stringify(loggedInUser));
             console.log('User logged in and session stored');
             navigate('/dashboard');
             return loggedInUser;
@@ -64,15 +45,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         api.logout();
         setUser(null);
-        setSessionId(null);
-        localStorage.removeItem('user'); // Clear user from localStorage
-        localStorage.removeItem('sessionId'); // Clear sessionId from localStorage
+        localStorage.removeItem('user');
         console.log('User logged out and session cleared');
-        navigate('/home');
+        navigate('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ user, sessionId, isAuthenticated, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
