@@ -38,7 +38,11 @@ const SignIn: React.FC = () => {
         navigate('/admin'); // Admin dashboard
       } else if (user.role === 'Staff') {
         navigate('/staff/dashboard'); // Staff dashboard
-      } else {
+      } else if (user.role === 'Customer') {
+        navigate('/');
+      }
+      
+      else {
         setError('Unauthorized role. Please contact the administrator.');
       }
     } catch (err: any) {
