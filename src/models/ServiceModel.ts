@@ -1,32 +1,24 @@
 // src/models/ServiceModel.ts
+
 export default class ServiceModel {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    createdAt: string;
-
-    constructor(
-        _id: string,
-        name: string,
-        description: string,
-        price: number,
-        createdAt: string
-    ) {
-        this._id = _id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.createdAt = createdAt;
+    _id: string;             // MongoDB ObjectId as a string
+    name: string;            // Name of the service
+    description: string;     // Description of the service
+    price: number;           // Price of the service
+    createdAt: Date;         // Date the service was created
+  
+    constructor(serviceData: {
+      _id: string;
+      name: string;
+      description: string;
+      price: number;
+      createdAt: Date;
+    }) {
+      this._id = serviceData._id;
+      this.name = serviceData.name;
+      this.description = serviceData.description;
+      this.price = serviceData.price;
+      this.createdAt = serviceData.createdAt;
     }
-
-    static fromApiResponse(apiResponse: any): ServiceModel {
-        return new ServiceModel(
-            apiResponse._id,
-            apiResponse.name,
-            apiResponse.description,
-            apiResponse.price,
-            apiResponse.createdAt
-        );
-    }
-}
+  }
+  
