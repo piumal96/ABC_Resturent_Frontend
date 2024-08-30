@@ -63,6 +63,10 @@ const AppHeader: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <>
       <AppBar position="static" sx={{ backgroundColor: '#4caf50', padding: '0 20px' }}>
@@ -71,16 +75,41 @@ const AppHeader: React.FC = () => {
             ABC Restaurant
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {['Services', 'Offers', 'Gallery', 'Reservations', 'Contact'].map((item, index) => (
-              <Button
-                key={index}
-                color="inherit"
-                onClick={() => navigate(`/${item.toLowerCase()}`)}
-                sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
-              >
-                {item}
-              </Button>
-            ))}
+            <Button
+              color="inherit"
+              onClick={() => scrollToSection('services')}
+              sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
+            >
+              Services
+            </Button>
+            <Button
+              color="inherit"
+              onClick={() => scrollToSection('offers')}
+              sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
+            >
+              Offers
+            </Button>
+            <Button
+              color="inherit"
+              onClick={() => scrollToSection('gallery')}
+              sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
+            >
+              Gallery
+            </Button>
+            {/* <Button
+              color="inherit"
+              onClick={() => scrollToSection('reservations')}
+              sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
+            >
+              Reservations
+            </Button> */}
+            <Button
+              color="inherit"
+              onClick={() => scrollToSection('contact')}
+              sx={{ '&:hover': { backgroundColor: '#388e3c' } }}
+            >
+              Contact
+            </Button>
             {!isAuthenticated ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>
