@@ -62,8 +62,34 @@ interface FetchQueriesResponse {
     message: string;
     queries: QueryModel[];
   }
-  
 
+  interface UploadImageResponse {
+    success: boolean;
+    message: string;
+    image: {
+        id: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        uploadedAt: string;
+    };
+}
+interface FetchGalleryImagesResponse {
+    success: boolean;
+    message: string;
+    images: {
+        _id: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        uploadedAt: string;
+    }[];
+}
+
+interface DeleteImageResponse {
+    success: boolean;
+    message: string;
+}
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -150,8 +176,54 @@ export const fetchQueries = async (): Promise<QueryModel[]> => {
     const response: AxiosResponse<{ success: boolean; message: string; query: QueryModel }> = await axios.delete(`${API_URL}queries/${id}`);
     return response.data.query;
 };
+
+export const uploadImage = async (imageFile: File, title: string, description: string): Promise<UploadImageResponse> => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('title', title);
+    formData.append('description', description);
+
+    try {
+        console.log('Uploading image with title:', title);
+        const response: AxiosResponse<UploadImageResponse> = await axios.post(`${API_URL}gallery`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        console.log('Image uploaded successfully:', response.data);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error response:', error.response);
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        throw error;
+    }
+};
+
+// Get all images from the gallery
+export const getGalleryImages = async (): Promise<FetchGalleryImagesResponse['images']> => {
+    const response: AxiosResponse<FetchGalleryImagesResponse> = await axios.get(`${API_URL}gallery`);
+    return response.data.images.map(image => ({
+        ...image,
+        imageUrl: `${API_URL}${image.imageUrl}`  // Ensure the full URL is used for images
+    }));
+};
+
+export const deleteImage = async (id: string): Promise<DeleteImageResponse> => {
+    try {
+        const response: AxiosResponse<DeleteImageResponse> = await axios.delete(`${API_URL}gallery/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        throw error;
+    }
+};
 // Export all functions as a single default object
 export default {
+    getGalleryImages,
     deleteQuery,
     fetchQueries,
     createQuery,
@@ -164,5 +236,6 @@ export default {
     updateReservation,
     deleteReservation,
     fetchReservations,
-    getReservationsByUserId, // Ensure this function is exported
+    getReservationsByUserId, 
+    uploadImage,
 };
