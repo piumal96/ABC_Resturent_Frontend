@@ -16,7 +16,7 @@ import {
   Container
 } from '@mui/material';
 import Layout from '@/components/Layout/Layout';
-import { getGalleryImages, uploadImage, deleteImage } from '@/services/api'; // Import the necessary functions
+import { getGalleryImages, uploadImage, deleteImage } from '@/services/api';
 
 interface GalleryImage {
   id: string;
@@ -35,7 +35,6 @@ const GalleryList: React.FC = () => {
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch images from the API on component mount
     const fetchImages = async () => {
       try {
         const galleryImages = await getGalleryImages();
@@ -54,14 +53,13 @@ const GalleryList: React.FC = () => {
   }, []);
 
   const handleEdit = (id: string) => {
-    // Handle edit image action
     console.log(`Edit image with id: ${id}`);
   };
 
   const handleDelete = async () => {
     if (imageToDelete) {
       try {
-        const response = await deleteImage(imageToDelete); // Call API to delete image
+        const response = await deleteImage(imageToDelete);
         if (response.success) {
           setImages(images.filter((image) => image.id !== imageToDelete));
           console.log(`Deleted image with id: ${imageToDelete}`);
@@ -80,17 +78,16 @@ const GalleryList: React.FC = () => {
   const handleImageUpload = async () => {
     if (newImage && newCaption && newLocation) {
       try {
-        const response = await uploadImage(newImage, newCaption, newLocation); // Call API to upload image
+        const response = await uploadImage(newImage, newCaption, newLocation);
         const newGalleryImage: GalleryImage = {
-          id: response.image.id, // Assuming the API returns an image object with id
-          url: response.image.imageUrl, // Use imageUrl from the response
+          id: response.image.id,
+          url: response.image.imageUrl,
           caption: newCaption,
           location: newLocation,
         };
 
         setImages([...images, newGalleryImage]);
 
-        // Reset form
         setNewImage(null);
         setSelectedImagePreview(null);
         setNewCaption('');
@@ -198,15 +195,15 @@ const GalleryList: React.FC = () => {
           <Grid container spacing={4} sx={{ mt: 4 }}>
             {images.map((image) => (
               <Grid item xs={12} sm={6} md={4} key={image.id}>
-                <Card sx={{ boxShadow: 3 }}>
+                <Card sx={{ width: '100%', maxWidth: '300px', height: '100%', boxShadow: 3 }}>
                   <CardMedia
                     component="img"
                     height="200"
                     image={image.url}
                     alt={image.caption}
-                    sx={{ borderRadius: '8px 8px 0 0' }}
+                    sx={{ objectFit: 'cover', height: '200px', borderRadius: '8px 8px 0 0' }}
                   />
-                  <CardContent>
+                  <CardContent sx={{ padding: '16px' }}>
                     <Typography variant="h6">{image.caption}</Typography>
                     <Typography variant="body2" color="textSecondary">
                       {image.location}
@@ -231,7 +228,6 @@ const GalleryList: React.FC = () => {
           </Grid>
         )}
 
-        {/* Delete Confirmation Dialog */}
         <Dialog
           open={deleteDialogOpen}
           onClose={() => setDeleteDialogOpen(false)}
@@ -256,4 +252,4 @@ const GalleryList: React.FC = () => {
   );
 };
 
-export default GalleryList
+export default GalleryList;
