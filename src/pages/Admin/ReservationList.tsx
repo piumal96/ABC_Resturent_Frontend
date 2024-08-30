@@ -142,13 +142,13 @@ const ReservationList: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             sx={{ mr: 2 }}
           />
-          {/* <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
+          <FormControl variant="outlined" size="small" sx={{ minWidth: 120 }}>
             <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
               labelId="status-filter-label"
               id="status-filter"
               value={statusFilter}
-              onChange={handleStatusFilterChange}
+              // onChange={handleStatusFilterChange}
               label="Status"
             >
               <MenuItem value="">All</MenuItem>
@@ -157,7 +157,7 @@ const ReservationList: React.FC = () => {
               <MenuItem value="Completed">Completed</MenuItem>
               <MenuItem value="Cancelled">Cancelled</MenuItem>
             </Select>
-          </FormControl> */}
+          </FormControl>
           <Button variant="contained" color="primary" startIcon={<SearchIcon />} onClick={handleSearch}>
             Search
           </Button>

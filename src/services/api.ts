@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from 'axios';
 import UserModel from '../models/UserModel';
 import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
-import ServiceModel from '@/models/ServiceModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
 
 // Constants
@@ -48,6 +47,15 @@ interface FetchServicesResponse {
     services: ServiceModel[];
 }
 
+// Define the ServiceModel interface
+export interface ServiceModel {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    createdAt: Date;
+}
+
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -72,12 +80,23 @@ export const createReservation = async (reservationData: ReservationModel): Prom
     return response.data.reservation;
 };
 
+// Correctly define the getReservationsByUserId function to fetch multiple reservations by user ID
+export const getReservationsByUserId = async (
+    userId: string
+): Promise<ReservationDetailModel[]> => {
+    const response: AxiosResponse<{ reservations: ReservationDetailModel[] }> = await axios.get(
+        `${API_URL}reservations/user/${userId}`
+    );
+    return response.data.reservations;
+};
+
 export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
     return response.data.reservation;
 };
+
 export const deleteReservation = async (id: string): Promise<ReservationModel> => {
-    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`, );
+    const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`);
     return response.data.reservation;
 };
 
@@ -89,12 +108,19 @@ export const fetchReservations = async (): Promise<ReservationDetailModel[]> => 
 
 export const fetchRestaurants = async (): Promise<RestaurantModel[]> => {
     const response: AxiosResponse<FetchRestaurantsResponse> = await axios.get(`${API_URL}restaurants`);
-    return response.data.restaurants.map(restaurant => restaurant);
+    return response.data.restaurants;
 };
 
-export const fetchServices = async (): Promise<ServiceModel[]> => {
-    const response: AxiosResponse<FetchServicesResponse> = await axios.get(`${API_URL}services`);
-    return response.data.services.map(service => service);
+export const fetchServices = async (query = ''): Promise<ServiceModel[]> => {
+    try {
+        const response: AxiosResponse<FetchServicesResponse> = await axios.get(`${API_URL}services`, {
+            params: { query }
+        });
+        return response.data.services;
+    } catch (error) {
+        console.error('Error fetching services:', error);
+        throw error;
+    }
 };
 
 // Export all functions as a single default object
@@ -105,6 +131,8 @@ export default {
     getCurrentUser,
     logout,
     createReservation,
-    updateReservation,  // Added the updateReservation method
-    fetchReservations
+    updateReservation,
+    deleteReservation,
+    fetchReservations,
+    getReservationsByUserId, // Ensure this function is exported
 };
