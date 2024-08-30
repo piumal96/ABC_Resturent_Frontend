@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -16,7 +16,7 @@ import {
   Container
 } from '@mui/material';
 import Layout from '@/components/Layout/Layout';
-import { uploadImage } from '@/services/api'; // Import the uploadImage function
+import { getGalleryImages, uploadImage, deleteImage } from '@/services/api'; // Import the necessary functions
 
 interface GalleryImage {
   id: string;
@@ -34,17 +34,46 @@ const GalleryList: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Fetch images from the API on component mount
+    const fetchImages = async () => {
+      try {
+        const galleryImages = await getGalleryImages();
+        setImages(galleryImages.map(image => ({
+          id: image._id,
+          url: image.imageUrl,
+          caption: image.title,
+          location: image.description,
+        })));
+      } catch (error) {
+        console.error('Error fetching images:', error);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
   const handleEdit = (id: string) => {
     // Handle edit image action
     console.log(`Edit image with id: ${id}`);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (imageToDelete) {
-      setImages(images.filter((image) => image.id !== imageToDelete));
-      console.log(`Delete image with id: ${imageToDelete}`);
-      setDeleteDialogOpen(false);
-      setImageToDelete(null);
+      try {
+        const response = await deleteImage(imageToDelete); // Call API to delete image
+        if (response.success) {
+          setImages(images.filter((image) => image.id !== imageToDelete));
+          console.log(`Deleted image with id: ${imageToDelete}`);
+        } else {
+          console.error('Failed to delete image:', response.message);
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      } finally {
+        setDeleteDialogOpen(false);
+        setImageToDelete(null);
+      }
     }
   };
 
@@ -53,8 +82,8 @@ const GalleryList: React.FC = () => {
       try {
         const response = await uploadImage(newImage, newCaption, newLocation); // Call API to upload image
         const newGalleryImage: GalleryImage = {
-          id: response.image.id, 
-          url: response.image.imageUrl, 
+          id: response.image.id, // Assuming the API returns an image object with id
+          url: response.image.imageUrl, // Use imageUrl from the response
           caption: newCaption,
           location: newLocation,
         };
@@ -227,4 +256,4 @@ const GalleryList: React.FC = () => {
   );
 };
 
-export default GalleryList;
+export default GalleryList

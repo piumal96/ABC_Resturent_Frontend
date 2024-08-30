@@ -74,8 +74,22 @@ interface FetchQueriesResponse {
         uploadedAt: string;
     };
 }
-  
+interface FetchGalleryImagesResponse {
+    success: boolean;
+    message: string;
+    images: {
+        _id: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        uploadedAt: string;
+    }[];
+}
 
+interface DeleteImageResponse {
+    success: boolean;
+    message: string;
+}
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -189,9 +203,27 @@ export const uploadImage = async (imageFile: File, title: string, description: s
     }
 };
 
+// Get all images from the gallery
+export const getGalleryImages = async (): Promise<FetchGalleryImagesResponse['images']> => {
+    const response: AxiosResponse<FetchGalleryImagesResponse> = await axios.get(`${API_URL}gallery`);
+    return response.data.images.map(image => ({
+        ...image,
+        imageUrl: `${API_URL}${image.imageUrl}`  // Ensure the full URL is used for images
+    }));
+};
 
+export const deleteImage = async (id: string): Promise<DeleteImageResponse> => {
+    try {
+        const response: AxiosResponse<DeleteImageResponse> = await axios.delete(`${API_URL}gallery/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        throw error;
+    }
+};
 // Export all functions as a single default object
 export default {
+    getGalleryImages,
     deleteQuery,
     fetchQueries,
     createQuery,
