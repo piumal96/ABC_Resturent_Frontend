@@ -3,6 +3,7 @@ import UserModel from '../models/UserModel';
 import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
+import QueryModel from '@/models/QueryModel';
 
 // Constants
 const API_URL = 'http://localhost:5001/api/';
@@ -55,6 +56,13 @@ export interface ServiceModel {
     price: number;
     createdAt: Date;
 }
+
+interface FetchQueriesResponse {
+    success: boolean;
+    message: string;
+    queries: QueryModel[];
+  }
+  
 
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
@@ -123,8 +131,30 @@ export const fetchServices = async (query = ''): Promise<ServiceModel[]> => {
     }
 };
 
+export const createQuery = async (queryData: Partial<QueryModel>): Promise<QueryModel> => {
+    const response = await axios.post(`${API_URL}queries`, queryData);
+    return response.data.query as QueryModel;
+};
+
+export const fetchQueries = async (): Promise<QueryModel[]> => {
+    const response: AxiosResponse<FetchQueriesResponse> = await axios.get(`${API_URL}queries`);
+  
+    // Convert raw API data to QueryModel instances
+    return response.data.queries.map(query => ({
+      ...query,
+      createdAt: new Date(query.createdAt),
+    }));
+  };
+
+  export const deleteQuery = async (id: string): Promise<QueryModel> => {
+    const response: AxiosResponse<{ success: boolean; message: string; query: QueryModel }> = await axios.delete(`${API_URL}queries/${id}`);
+    return response.data.query;
+};
 // Export all functions as a single default object
 export default {
+    deleteQuery,
+    fetchQueries,
+    createQuery,
     fetchServices,
     fetchRestaurants,
     login,
