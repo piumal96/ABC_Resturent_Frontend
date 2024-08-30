@@ -62,6 +62,18 @@ interface FetchQueriesResponse {
     message: string;
     queries: QueryModel[];
   }
+
+  interface UploadImageResponse {
+    success: boolean;
+    message: string;
+    image: {
+        id: string;
+        title: string;
+        description: string;
+        imageUrl: string;
+        uploadedAt: string;
+    };
+}
   
 
 // API functions
@@ -150,6 +162,34 @@ export const fetchQueries = async (): Promise<QueryModel[]> => {
     const response: AxiosResponse<{ success: boolean; message: string; query: QueryModel }> = await axios.delete(`${API_URL}queries/${id}`);
     return response.data.query;
 };
+
+export const uploadImage = async (imageFile: File, title: string, description: string): Promise<UploadImageResponse> => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('title', title);
+    formData.append('description', description);
+
+    try {
+        console.log('Uploading image with title:', title);
+        const response: AxiosResponse<UploadImageResponse> = await axios.post(`${API_URL}gallery`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        console.log('Image uploaded successfully:', response.data);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error response:', error.response);
+        } else {
+            console.error('Unexpected error:', error);
+        }
+        throw error;
+    }
+};
+
+
 // Export all functions as a single default object
 export default {
     deleteQuery,
@@ -164,5 +204,6 @@ export default {
     updateReservation,
     deleteReservation,
     fetchReservations,
-    getReservationsByUserId, // Ensure this function is exported
+    getReservationsByUserId, 
+    uploadImage,
 };
