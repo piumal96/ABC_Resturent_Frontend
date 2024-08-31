@@ -6,6 +6,7 @@ import OffersSection from '@/components/HomeScreen/OffersSection';
 import GallerySection from '@/components/HomeScreen/GallerySection';
 import QuerySection from '@/components/HomeScreen/QuerySection';
 import Footer from '@/components/HomeScreen/Footer';
+import FacilitiesSection from '@/components/HomeScreen/FacilitiesSection';
 
 const HomeScreen: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const HomeScreen: React.FC = () => {
       <ServicesSection />
       <OffersSection />
       <GallerySection />
+      <FacilitiesSection />
       <QuerySection />
       <Footer />
     </div>

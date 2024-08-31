@@ -22,9 +22,9 @@ import {
   IconButton,
   Dialog as ConfirmDialog,
   DialogContentText,
-  SelectChangeEvent, // Import this type
+  SelectChangeEvent,
 } from '@mui/material';
-import { getReservationsByUserId, deleteReservation } from '@/services/api'; // Import deleteReservation function
+import { getReservationsByUserId, deleteReservation, updateReservation } from '@/services/api'; // Import both deleteReservation and updateReservation
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -40,6 +40,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(''); // Track snackbar message
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
 
@@ -67,16 +68,33 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
 
   const handleConfirmCloseReservation = async () => {
     if (selectedReservationId) {
-      try {
-        await deleteReservation(selectedReservationId);
-        setReservations((prevReservations) =>
-          prevReservations.filter((reservation) => reservation._id !== selectedReservationId)
-        );
+      const reservationToCancel = reservations.find(res => res._id === selectedReservationId);
+
+      if (reservationToCancel?.status === 'Confirmed') {
+        // If the status is already Confirmed, show a message to contact the office
+        setSnackbarMessage('This reservation is already confirmed. Please contact our office to make changes.');
         setSnackbarOpen(true);
-      } catch (err) {
-        console.error('Failed to delete reservation:', err);
-      } finally {
-        setConfirmDialogOpen(false);
+      } else {
+        try {
+          // First, update the reservation status to "Cancelled"
+          const updateData = { status: 'Cancelled' };
+          const updatedReservation = await updateReservation(selectedReservationId, updateData);
+
+          // Optionally, delete the reservation after updating its status
+          await deleteReservation(selectedReservationId);
+
+          // Update the local state by removing the reservation
+          setReservations((prevReservations) =>
+            prevReservations.filter((reservation) => reservation._id !== selectedReservationId)
+          );
+
+          setSnackbarMessage('Reservation closed and deleted successfully');
+          setSnackbarOpen(true);
+        } catch (err) {
+          console.error('Failed to update or delete reservation:', err);
+        } finally {
+          setConfirmDialogOpen(false);
+        }
       }
     }
   };
@@ -113,6 +131,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
                 <MenuItem value="all">All</MenuItem>
                 <MenuItem value="confirmed">Confirmed</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
               </Select>
             </Box>
             <List>
@@ -136,7 +155,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
                         </Typography>
                         <br />
                         <Badge
-                          badgeContent={reservation.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                          badgeContent={reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
                           color={reservation.status === 'confirmed' ? 'success' : 'warning'}
                         />
                       </>
@@ -186,7 +205,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
         open={snackbarOpen}
         autoHideDuration={4000}
         onClose={handleSnackbarClose}
-        message="Reservation closed successfully"
+        message={snackbarMessage} // Use the snackbarMessage state
         action={
           <IconButton size="small" aria-label="close" color="inherit" onClick={handleSnackbarClose}>
             <CloseIcon fontSize="small" />

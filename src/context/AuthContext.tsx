@@ -8,6 +8,7 @@ interface AuthContextProps {
     isAuthenticated: boolean;
     loading: boolean;
     login: (email: string, password: string) => Promise<UserModel>;
+    register: (username: string, email: string, password: string, role: string) => Promise<UserModel>;
     logout: () => void;
 }
 
@@ -42,6 +43,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const register = async (username: string, email: string, password: string, role: string): Promise<UserModel> => {
+        try {
+            const registeredUser = await api.registerUser({ username, email, password, role });
+            setUser(registeredUser);
+            localStorage.setItem('user', JSON.stringify(registeredUser));
+            console.log('User registered and session stored');
+            navigate('/dashboard');
+            return registeredUser;
+        } catch (error) {
+            console.error('Registration failed:', error);
+            throw new Error('Registration failed');
+        }
+    };
+
     const logout = () => {
         api.logout();
         setUser(null);
@@ -51,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, isAuthenticated, loading, login, register, logout }}>
             {children}
         </AuthContext.Provider>
     );

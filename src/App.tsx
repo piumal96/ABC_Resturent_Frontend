@@ -43,6 +43,7 @@ import { ReservationProvider } from './context/ReservationContext';
 
 // Import ProtectedRoute
 import ProtectedRoute from './components/ProtectedRoute';
+import Register from './pages/Auth/Register';
 
 function App() {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomeScreen />} /> 
           <Route path="/login" element={<SignIn />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Protected routes */}
           <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

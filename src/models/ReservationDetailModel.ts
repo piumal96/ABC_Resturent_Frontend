@@ -21,6 +21,7 @@ export default class ReservationDetailModel {
     time: string;
     type: string;
     deliveryAddress?: string | null;
+    contactNumber?: string | null;
     specialRequests: string;
     status: string;
     paymentStatus: string;
@@ -50,7 +51,9 @@ export default class ReservationDetailModel {
         this.date = data.date;
         this.time = data.time;
         this.type = data.type;
-        this.deliveryAddress = data.deliveryAddress || null;
+        // Only assign deliveryAddress and contactNumber if type is 'Delivery'
+        this.deliveryAddress = data.type === 'Delivery' ? data.deliveryAddress || null : null;
+        this.contactNumber = data.type === 'Delivery' ? data.contactNumber || null : null;
         this.specialRequests = data.specialRequests;
         this.status = data.status;
         this.paymentStatus = data.paymentStatus;
