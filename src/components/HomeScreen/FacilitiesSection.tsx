@@ -1,38 +1,63 @@
-import React from 'react';
-import { Container, Typography, Grid, Card, CardContent, Button, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Typography, Grid, Card, CardContent, Button, Box, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import WifiIcon from '@mui/icons-material/Wifi';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import DeckIcon from '@mui/icons-material/Deck';
 
-const facilities = [
+interface Facility {
+  icon: JSX.Element;
+  title: string;
+  description: string;
+  extendedDescription: string;
+  link: string;
+}
+
+const facilities: Facility[] = [
   {
     icon: <LocalParkingIcon fontSize="large" />,
     title: 'Parking',
     description: 'Ample parking space available for all our guests.',
+    extendedDescription: 'Our parking area is secured and well-lit, providing easy access to the main entrance. Valet parking is also available.',
     link: '#',
   },
   {
     icon: <WifiIcon fontSize="large" />,
     title: 'Free Wi-Fi',
     description: 'Enjoy complimentary Wi-Fi during your visit.',
+    extendedDescription: 'Our high-speed Wi-Fi covers all areas of the facility, including outdoor seating areas, so you can stay connected wherever you are.',
     link: '#',
   },
   {
     icon: <RestaurantIcon fontSize="large" />,
     title: 'Private Dining',
     description: 'Exclusive private dining areas for special occasions.',
+    extendedDescription: 'Our private dining areas offer a serene and intimate setting, perfect for business meetings, family gatherings, or romantic dinners.',
     link: '#',
   },
   {
     icon: <DeckIcon fontSize="large" />,
     title: 'Outdoor Seating',
     description: 'Beautiful outdoor seating areas with scenic views.',
+    extendedDescription: 'Our outdoor seating provides stunning views of the surrounding landscape, perfect for enjoying a meal or drinks in the open air.',
     link: '#',
   },
 ];
 
 const FacilitiesSection: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
+
+  const handleClickOpen = (facility: Facility) => {
+    setSelectedFacility(facility);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedFacility(null);
+  };
+
   return (
     <Box sx={{ backgroundColor: '#f7f7f7', padding: '60px 0' }}>
       <Container id="facilities" maxWidth="lg">
@@ -54,7 +79,7 @@ const FacilitiesSection: React.FC = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    href={facility.link}
+                    onClick={() => handleClickOpen(facility)}
                     sx={{ marginTop: '20px' }}
                   >
                     Learn More
@@ -65,6 +90,20 @@ const FacilitiesSection: React.FC = () => {
           ))}
         </Grid>
       </Container>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{selectedFacility?.title}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            {selectedFacility?.extendedDescription}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

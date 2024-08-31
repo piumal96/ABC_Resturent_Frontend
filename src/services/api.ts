@@ -150,10 +150,15 @@ export const getReservationsByUserId = async (
     return response.data.reservations;
 };
 
-export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationModel> => {
+export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationDetailModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
-    return response.data.reservation;
+    
+    // Convert ReservationModel to ReservationDetailModel
+    const updatedReservation = new ReservationDetailModel(response.data.reservation);
+    
+    return updatedReservation;
 };
+
 
 export const deleteReservation = async (id: string): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.delete(`${API_URL}reservations/${id}`);
