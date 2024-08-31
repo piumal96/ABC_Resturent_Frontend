@@ -67,8 +67,8 @@ jobs:
         with:
           name: dist
 
-      - name: Verify dist directory
-        run: ls -al dist
+      - name: List all files in the workspace
+        run: ls -al
 
       - name: Install gh-pages
         run: npm install gh-pages@6.1.1
