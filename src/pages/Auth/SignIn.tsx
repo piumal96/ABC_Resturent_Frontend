@@ -12,10 +12,12 @@ import {
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
 import { useNavigate } from 'react-router-dom';
-import authService from '@/services/authService'; // Make sure to import the auth service
+import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
+import UserModel from '@/models/UserModel'; // Import UserModel for typing
 
 const SignIn: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Get the login function from AuthContext
 
   // State for email, password, and error message
   const [email, setEmail] = useState('');
@@ -28,11 +30,21 @@ const SignIn: React.FC = () => {
       // Clear any previous errors
       setError('');
 
-      // Call the login API
-      await authService.login(email, password);
+      // Call the login method from the AuthContext
+      const user: UserModel = await login(email, password);
 
-      // On successful login, navigate to the admin page
-      navigate('/admin');
+      // On successful login, navigate based on user role
+      if (user.role === 'Admin') {
+        navigate('/admin'); // Admin dashboard
+      } else if (user.role === 'Staff') {
+        navigate('/staff/dashboard'); // Staff dashboard
+      } else if (user.role === 'Customer') {
+        navigate('/');
+      }
+      
+      else {
+        setError('Unauthorized role. Please contact the administrator.');
+      }
     } catch (err: any) {
       // If there is an error, set the error message
       setError('Invalid email or password. Please try again.');

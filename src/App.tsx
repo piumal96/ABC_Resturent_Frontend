@@ -1,5 +1,5 @@
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import HomeScreen from './pages/Home'; // Assuming HomeScreen component is in pages/Home.tsx
+import HomeScreen from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
 import ServiceList from './pages/Admin/ServiceList'; 
 import ServiceForm from './pages/Admin/ServiceForm'; 
@@ -19,12 +19,30 @@ import UserList from './pages/Admin/UserList';
 import UserRoleForm from './pages/Admin/UserRoleForm';
 
 import SignIn from './pages/Auth/SignIn';
+// import Register from './pages/Auth/Register';
 
 // Import the gallery components
 import GalleryList from './pages/Admin/GalleryList'; 
 import GalleryForm from './pages/Admin/GalleryForm'; 
-import Register from './pages/Auth/Register';
 
+// Import the staff dashboard and components
+import StaffDashboard from './pages/StaffDashboard';
+import StaffReservationList from './pages/staff/ReservationList';
+import StaffReservationDetail from './pages/staff/ReservationDetail';
+import StaffQueryList from './pages/staff/QueryList';
+import StaffQueryDetail from './pages/staff/QueryDetail';
+import StaffPaymentList from './pages/staff/PaymentList';
+import StaffPaymentDetail from './pages/staff/PaymentDetail';
+import ReservationForm from './pages/client/ReservationForm';
+
+// Import AuthProvider
+import { AuthProvider } from './context/AuthContext';
+
+// Import ReservationProvider
+import { ReservationProvider } from './context/ReservationContext';
+
+// Import ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const navigate = useNavigate();
@@ -35,40 +53,52 @@ function App() {
   };
 
   return (
-    <Routes>
+    <AuthProvider>
+      <ReservationProvider> {/* Ensure ReservationProvider wraps the Routes */}
+        <Routes>
+          <Route path="/" element={<HomeScreen />} /> 
+          <Route path="/login" element={<SignIn />} />
 
-      <Route path="/" element={<HomeScreen />} /> 
-       {/* Set HomeScreen as the default route */}
-       <Route path="/login" element={<SignIn />} />
-       <Route path="/admin" element={<AdminDashboard />} />
-       <Route path="/register" element={<Register/>} />
+          {/* Protected routes */}
+          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/services" element={<ProtectedRoute><ServiceList /></ProtectedRoute>} />
+          <Route path="/services/add" element={<ProtectedRoute><ServiceForm /></ProtectedRoute>} />
+          <Route path="/services/edit/:id" element={<ProtectedRoute><ServiceForm /></ProtectedRoute>} />
+          <Route path="/offers" element={<ProtectedRoute><OfferList /></ProtectedRoute>} />
+          <Route path="/offers/add" element={<ProtectedRoute><OfferForm /></ProtectedRoute>} />
+          <Route path="/offers/edit/:id" element={<ProtectedRoute><OfferForm /></ProtectedRoute>} />
+          <Route path="/facilities" element={<ProtectedRoute><FacilityList /></ProtectedRoute>} />
+          <Route path="/facilities/edit/:id" element={<ProtectedRoute><FacilityForm /></ProtectedRoute>} />
+          <Route path="/reservations" element={<ProtectedRoute><ReservationList /></ProtectedRoute>} />
+          <Route path="/reservations/:id" element={<ProtectedRoute><ReservationDetail /></ProtectedRoute>} />
+          <Route path="/queries" element={<ProtectedRoute><QueryList /></ProtectedRoute>} />
+          <Route path="/queries/:id" element={<ProtectedRoute><QueryDetail /></ProtectedRoute>} />
+          <Route path="/payments" element={<ProtectedRoute><PaymentList /></ProtectedRoute>} />
+          <Route path="/payments/:id" element={<ProtectedRoute><PaymentDetail /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><ReportGenerator /></ProtectedRoute>} />
+          <Route path="/reports/:reportType" element={<ProtectedRoute><ReportView /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
+          <Route path="/users/:id/edit-role" element={<ProtectedRoute><UserRoleForm /></ProtectedRoute>} />
 
-      <Route path="/services" element={<ServiceList />} />
-      <Route path="/services/add" element={<ServiceForm />} />
-      <Route path="/services/edit/:id" element={<ServiceForm />} />
-      <Route path="/offers" element={<OfferList />} />
-      <Route path="/offers/add" element={<OfferForm />} />
-      <Route path="/offers/edit/:id" element={<OfferForm />} />
-      <Route path="/facilities" element={<FacilityList />} />
-      <Route path="/facilities/edit/:id" element={<FacilityForm />} />
-      <Route path="/reservations" element={<ReservationList />} />
-      <Route path="/reservations/:id" element={<ReservationDetail />} />
-      <Route path="/queries" element={<QueryList />} />
-      <Route path="/queries/:id" element={<QueryDetail />} />
-      <Route path="/payments" element={<PaymentList />} />
-      <Route path="/payments/:id" element={<PaymentDetail />} />
-      <Route path="/reports" element={<ReportGenerator />} />
-      <Route path="/reports/:reportType" element={<ReportView />} />
-      <Route path="/users" element={<UserList />} />
-      <Route path="/users/:id/edit-role" element={<UserRoleForm />} />
+          {/* Gallery management routes */}
+          <Route path="/gallery" element={<ProtectedRoute><GalleryList /></ProtectedRoute>} />
+          <Route path="/gallery/add" element={<ProtectedRoute><GalleryForm onSubmit={handleGallerySubmit} /></ProtectedRoute>} />
+          <Route path="/gallery/edit/:id" element={<ProtectedRoute><GalleryForm onSubmit={handleGallerySubmit} /></ProtectedRoute>} />
 
-      {/* Gallery management routes */}
-      <Route path="/gallery" element={<GalleryList />} />
-      <Route path="/gallery/add" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
-      <Route path="/gallery/edit/:id" element={<GalleryForm onSubmit={handleGallerySubmit} />} />
+          {/* Staff dashboard routes */}
+          <Route path="/staff/dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
+          <Route path="/staff/reservations" element={<ProtectedRoute><StaffReservationList /></ProtectedRoute>} />
+          <Route path="/staff/reservations/:id" element={<ProtectedRoute><StaffReservationDetail /></ProtectedRoute>} />
+          <Route path="/staff/queries" element={<ProtectedRoute><StaffQueryList /></ProtectedRoute>} />
+          <Route path="/staff/queries/:id" element={<ProtectedRoute><StaffQueryDetail /></ProtectedRoute>} />
+          <Route path="/staff/payments" element={<ProtectedRoute><StaffPaymentList /></ProtectedRoute>} />
+          <Route path="/staff/payments/:id" element={<ProtectedRoute><StaffPaymentDetail /></ProtectedRoute>} />
 
-      {/* Other routes */}
-    </Routes>
+          {/* Customer reservation form */}
+          <Route path="/customer/reservation" element={<ProtectedRoute><ReservationForm /></ProtectedRoute>} />
+        </Routes>
+      </ReservationProvider>
+    </AuthProvider>
   );
 }
 

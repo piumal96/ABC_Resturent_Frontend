@@ -29,7 +29,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import { fetchQueries, deleteQuery } from '@/services/api'; // Adjust import paths accordingly
-import Layout from '@/components/Layout/Layout';
 
 interface Query {
   _id: string;
@@ -138,7 +137,6 @@ const QueryList: React.FC = () => {
   };
 
   return (
-    <Layout>
     <Paper style={{ padding: '16px', marginTop: '16px' }}>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} sm={8}>
@@ -279,7 +277,6 @@ const QueryList: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Paper>
-    </Layout>
   );
 };
 
