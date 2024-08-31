@@ -62,6 +62,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check if dist directory exists
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build failed: dist directory does not exist."
+            exit 1
+          fi
+
       - name: Deploy to GitHub Pages
         run: |
           git config user.name "github-actions[bot]"
