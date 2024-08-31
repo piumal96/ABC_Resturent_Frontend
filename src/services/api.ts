@@ -103,6 +103,19 @@ interface CreateOfferResponse {
     message: string;
     offers: OfferModel[];
   }
+
+  // API response interfaces for services
+interface CreateServiceResponse {
+    success: boolean;
+    message: string;
+    service: ServiceModel;
+}
+
+interface FetchServicesResponse {
+    success: boolean;
+    message: string;
+    services: ServiceModel[];
+}
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -166,6 +179,42 @@ export const fetchServices = async (query = ''): Promise<ServiceModel[]> => {
         return response.data.services;
     } catch (error) {
         console.error('Error fetching services:', error);
+        throw error;
+    }
+};
+
+// Create a new service
+export const createService = async (serviceData: {
+    name: string;
+    description: string;
+    price: number;
+}): Promise<CreateServiceResponse> => {
+    try {
+        const response: AxiosResponse<CreateServiceResponse> = await axios.post(`${API_URL}services/`, serviceData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating service:', error);
+        throw error;
+    }
+};
+
+// Fetch all services
+export const getServices = async (): Promise<ServiceModel[]> => {
+    try {
+        const response: AxiosResponse<FetchServicesResponse> = await axios.get(`${API_URL}services/`);
+        return response.data.services;
+    } catch (error) {
+        console.error('Error fetching services:', error);
+        throw error;
+    }
+};
+
+// Delete a service
+export const deleteService = async (id: string): Promise<void> => {
+    try {
+        await axios.delete(`${API_URL}services/${id}`);
+    } catch (error) {
+        console.error('Error deleting service:', error);
         throw error;
     }
 };
@@ -269,9 +318,25 @@ export const createOffer = async (offerData: {
       throw error;
     }
   };
+
+  export const updateService = async (id: string, serviceData: {
+    name: string;
+    description: string;
+    price: number;
+}): Promise<ServiceModel> => {
+    try {
+        const response: AxiosResponse<{ success: boolean; message: string; service: ServiceModel }> = await axios.put(`${API_URL}services/${id}`, serviceData);
+        return response.data.service;
+    } catch (error) {
+        console.error('Error updating service:', error);
+        throw error;
+    }
+};
+
   
 // Export all functions as a single default object
 export default {createOffer,
+    updateService,
     getGalleryImages,
     deleteQuery,
     fetchQueries,
