@@ -4,6 +4,7 @@ import ReservationModel from '@/models/ReservationModel';
 import RestaurantModel from '@/models/RestaurantModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
 import QueryModel from '@/models/QueryModel';
+import { OfferModel } from '../models/OfferModel';
 
 // Constants
 const API_URL = 'http://localhost:5001/api/';
@@ -90,6 +91,18 @@ interface DeleteImageResponse {
     success: boolean;
     message: string;
 }
+
+interface CreateOfferResponse {
+    success: boolean;
+    message: string;
+    offer: OfferModel;
+  }
+
+  interface FetchOffersResponse {
+    success: boolean;
+    message: string;
+    offers: OfferModel[];
+  }
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -221,8 +234,44 @@ export const deleteImage = async (id: string): Promise<DeleteImageResponse> => {
         throw error;
     }
 };
+
+export const createOffer = async (offerData: {
+    title: string;
+    description: string;
+    discountPercentage: number;
+    validFrom: string;
+    validTo: string;
+  }): Promise<CreateOfferResponse> => {
+    try {
+      const response: AxiosResponse<CreateOfferResponse> = await axios.post(`${API_URL}offers/`, offerData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      throw error;
+    }
+  };
+
+  export const getOffers = async (): Promise<OfferModel[]> => {
+    try {
+      const response: AxiosResponse<FetchOffersResponse> = await axios.get(`${API_URL}offers/`);
+      return response.data.offers;
+    } catch (error) {
+      console.error('Error fetching offers:', error);
+      throw error;
+    }
+  };
+
+  export const deleteOffer = async (id: string): Promise<void> => {
+    try {
+      await axios.delete(`${API_URL}offers/${id}`);
+    } catch (error) {
+      console.error('Error deleting offer:', error);
+      throw error;
+    }
+  };
+  
 // Export all functions as a single default object
-export default {
+export default {createOffer,
     getGalleryImages,
     deleteQuery,
     fetchQueries,
