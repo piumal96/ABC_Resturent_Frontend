@@ -30,33 +30,27 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useNavigate } from "react-router-dom";
 import { fetchReservations, updateReservation } from "@/services/api";
 
 const ReservationList: React.FC = () => {
-  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [reservations, setReservations] = useState<ReservationDetailModel[]>(
-    []
-  );
+  const [reservations, setReservations] = useState<ReservationDetailModel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(""); // State for status filter
+  const [statusFilter, ] = useState(""); // State for status filter
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] =
-    useState<ReservationDetailModel | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<ReservationDetailModel | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   useEffect(() => {
     const loadReservations = async () => {
       try {
-        const fetchedReservations: ReservationDetailModel[] =
-          await fetchReservations();
+        const fetchedReservations: ReservationDetailModel[] = await fetchReservations();
         setReservations(fetchedReservations);
         setLoading(false);
       } catch (err) {
@@ -96,7 +90,7 @@ const ReservationList: React.FC = () => {
       const updateData: any = {
         status: "Confirmed",
       };
-      console.log("Updating reservation with data:", updateData); // Log the data
+      console.log("Updating reservation with data:", updateData);
   
       const updatedReservation = await updateReservation(
         selectedReservation._id,
@@ -120,10 +114,7 @@ const ReservationList: React.FC = () => {
     }
   };
   
-  
-  
-  
-const handleCancelReservation = async () => {
+  const handleCancelReservation = async () => {
     if (!selectedReservation) return;
 
     try {
@@ -191,7 +182,7 @@ const handleConfirmPayment = async () => {
   }
 };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -200,12 +191,6 @@ const handleConfirmPayment = async () => {
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleStatusFilterChange = (
-    event: React.ChangeEvent<{ value: unknown }>
-  ) => {
-    setStatusFilter(event.target.value as string);
   };
 
   const displayedReservations = useMemo(() => {
@@ -268,7 +253,6 @@ const handleConfirmPayment = async () => {
               labelId="status-filter-label"
               id="status-filter"
               value={statusFilter}
-              // onChange={handleStatusFilterChange}
               label="Status"
               displayEmpty
             >
@@ -307,7 +291,6 @@ const handleConfirmPayment = async () => {
                     <TableCell>Type</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Payment Status</TableCell>{" "}
-                    {/* New column header */}
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -321,8 +304,7 @@ const handleConfirmPayment = async () => {
                       <TableCell>{reservation.time}</TableCell>
                       <TableCell>{reservation.type}</TableCell>
                       <TableCell>{reservation.status}</TableCell>
-                      <TableCell>{reservation.paymentStatus}</TableCell>{" "}
-                      {/* New column data */}
+                      <TableCell>{reservation.paymentStatus}</TableCell>
                       <TableCell align="right">
                         <Button
                           variant="outlined"
