@@ -1,39 +1,78 @@
-deploy:
-  runs-on: ubuntu-latest
-  needs: build
+name: CI/CD Pipeline
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+jobs:
+  install:
+    runs-on: macos-latest
 
-    - name: Install dependencies
-      run: npm install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Verify Current Directory
-      run: pwd
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: List All Files and Folders in Current Directory
-      run: ls -al
+      - name: Install dependencies
+        run: npm install
 
-    - name: Check if dist directory exists
-      run: |
-        if [ ! -d "dist" ]; then
-          echo "Build failed: dist directory does not exist."
-          exit 1
-        fi
+  build:
+    runs-on: macos-latest
+    needs: install
 
-    - name: List build directory contents
-      run: ls -al dist
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to GitHub Pages
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        npx gh-pages -d dist -r https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: List build directory contents
+        run: ls -al dist
+
+  deploy:
+    runs-on: macos-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check if dist directory exists
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build failed: dist directory does not exist."
+            exit 1
+          fi
+
+      - name: Deploy to GitHub Pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npx gh-pages -d dist -r https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
