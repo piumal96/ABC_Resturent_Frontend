@@ -31,7 +31,7 @@ const QuerySection: React.FC = () => {
       };
 
       // Submit the query using the createQuery function
-      const response = await createQuery(newQuery);
+      await createQuery(newQuery);
 
       // Handle success (e.g., show a success message, clear the form)
       setSuccessMessage('Your query has been submitted successfully!');

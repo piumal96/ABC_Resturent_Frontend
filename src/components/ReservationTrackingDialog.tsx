@@ -24,7 +24,7 @@ import {
   DialogContentText,
   SelectChangeEvent,
 } from '@mui/material';
-import { getReservationsByUserId, deleteReservation, updateReservation } from '@/services/api'; // Import both deleteReservation and updateReservation
+import { getReservationsByUserId, deleteReservation, updateReservation } from '@/services/api';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -78,7 +78,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
         try {
           // First, update the reservation status to "Cancelled"
           const updateData = { status: 'Cancelled' };
-          const updatedReservation = await updateReservation(selectedReservationId, updateData);
+          await updateReservation(selectedReservationId, updateData);
 
           // Optionally, delete the reservation after updating its status
           await deleteReservation(selectedReservationId);
