@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Grid, Box, Modal, CircularProgress, Skeleton } from '@mui/material';
+import { Container, Typography, Grid, Box, Modal, Skeleton } from '@mui/material';
 import { getGalleryImages } from '@/services/api';  // Adjust the import path based on your project structure
 
 interface GalleryImage {

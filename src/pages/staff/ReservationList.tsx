@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
 import {
   Box,
@@ -31,12 +31,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
 import { fetchReservations, updateReservation, deleteReservation } from '@/services/api';
 import StaffLayout from '@/components/Layout/StaffLayout';
 
 const ReservationList: React.FC = () => {
-  const navigate = useNavigate();
   const [reservations, setReservations] = useState<ReservationDetailModel[]>([]);
   const [displayedReservations, setDisplayedReservations] = useState<ReservationDetailModel[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -137,7 +135,7 @@ const ReservationList: React.FC = () => {
     }
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
