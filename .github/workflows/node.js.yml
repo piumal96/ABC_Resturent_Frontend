@@ -53,29 +53,28 @@ jobs:
           path: dist
 
   deploy:
-  runs-on: macos-latest
-  needs: build
+    runs-on: macos-latest
+    needs: build
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Download dist directory
-      uses: actions/download-artifact@v3
-      with:
-        name: dist
+      - name: Download dist directory
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
 
-    - name: Verify dist directory
-      run: ls -al dist
+      - name: Verify dist directory
+        run: ls -al dist
 
-    - name: Install gh-pages
-      run: npm install gh-pages@6.1.1
+      - name: Install gh-pages
+        run: npm install gh-pages@6.1.1
 
-    - name: Deploy to GitHub Pages
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        npx gh-pages -d dist -r https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Deploy to GitHub Pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          npx gh-pages -d dist -r https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
