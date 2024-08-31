@@ -55,6 +55,8 @@ jobs:
   deploy:
     runs-on: macos-latest
     needs: build
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
