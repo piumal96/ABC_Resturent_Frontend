@@ -8,7 +8,7 @@ class ReservationModel {
     type: string;
     deliveryAddress?: string;
     paymentStatus?:string;
-    contactNumber?: string; // Added contactNumber as an optional field
+    contactNumber?: string;
     specialRequests: string;
     status: string;
     createdAt: string;
@@ -23,7 +23,7 @@ class ReservationModel {
         this.type = data.type;
         this.deliveryAddress = data.type === 'Delivery' ? data.deliveryAddress : undefined;
         this.paymentStatus = data.paymentStatus;
-        this.contactNumber = data.type === 'Delivery' ? data.contactNumber : undefined; // Only assign contactNumber if type is 'Delivery'
+        this.contactNumber = data.type === 'Delivery' ? data.contactNumber : undefined; 
         this.specialRequests = data.specialRequests;
         this.status = data.status;
         this.createdAt = data.createdAt;

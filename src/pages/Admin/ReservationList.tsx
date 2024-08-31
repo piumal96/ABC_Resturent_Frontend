@@ -91,97 +91,106 @@ const ReservationList: React.FC = () => {
 
   const handleConfirmReservation = async () => {
     if (!selectedReservation) return;
-
+  
     try {
+      const updateData: any = {
+        status: "Confirmed",
+      };
+      console.log("Updating reservation with data:", updateData); // Log the data
+  
       const updatedReservation = await updateReservation(
         selectedReservation._id,
-        { status: "Confirmed" }
+        updateData
       );
-
-      // Convert the ReservationModel to ReservationDetailModel
-      const updatedReservationDetail = new ReservationDetailModel(
-        updatedReservation
-      );
-
+      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+  
       setReservations((prev) =>
         prev.map((res) =>
-          res._id === updatedReservationDetail._id
-            ? updatedReservationDetail
-            : res
+          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
         )
       );
       setSnackbarMessage(`Confirmed reservation with ID: ${selectedReservation._id}`);
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Failed to confirm reservation", error);
-    } finally {
-      handleCloseConfirmDialog();
-    }
-  };
-
-  const handleCancelReservation = async () => {
-    if (!selectedReservation) return;
-
-    try {
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        { status: "Cancelled" }
-      );
-
-      // Convert the ReservationModel to ReservationDetailModel
-      const updatedReservationDetail = new ReservationDetailModel(
-        updatedReservation
-      );
-
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id
-            ? updatedReservationDetail
-            : res
-        )
-      );
-      setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id}`);
+      setSnackbarMessage("Failed to confirm reservation. Please try again.");
       setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to cancel reservation", error);
     } finally {
       handleCloseConfirmDialog();
     }
   };
-
-  const handleConfirmPayment = async () => {
-    if (!selectedReservation) return;
-
-    try {
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        { paymentStatus: "Completed" }
-      );
-
-      // Convert the ReservationModel to ReservationDetailModel
-      const updatedReservationDetail = new ReservationDetailModel(
-        updatedReservation
-      );
-
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id
-            ? updatedReservationDetail
-            : res
-        )
-      );
-      setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to confirm payment", error);
-    } finally {
-      handleCloseConfirmDialog();
-    }
-  };
-
-
-
   
+  
+  
+  
+const handleCancelReservation = async () => {
+    if (!selectedReservation) return;
+
+    try {
+        const updateData: any = {
+            status: "Cancelled", // Corrected from "Cancel" to "Cancelled"
+        };
+
+        if (selectedReservation.type === "Delivery") {
+            updateData.deliveryAddress = selectedReservation.deliveryAddress;
+            updateData.contactNumber = selectedReservation.contactNumber;
+        }
+
+        const updatedReservation = await updateReservation(
+            selectedReservation._id,
+            updateData
+        );
+
+        const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+
+        setReservations((prev) =>
+            prev.map((res) =>
+                res._id === updatedReservationDetail._id ? updatedReservationDetail : res
+            )
+        );
+        setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id}`);
+        setSnackbarOpen(true);
+    } catch (error) {
+        console.error("Failed to cancel reservation", error);
+    } finally {
+        handleCloseConfirmDialog();
+    }
+};
+
+const handleConfirmPayment = async () => {
+  if (!selectedReservation) return;
+
+  try {
+    const updateData: any = {
+      paymentStatus: "Paid", // Updated to match the correct enum value
+    };
+
+    if (selectedReservation.type === "Delivery") {
+      updateData.deliveryAddress = selectedReservation.deliveryAddress;
+      updateData.contactNumber = selectedReservation.contactNumber;
+    }
+
+    const updatedReservation = await updateReservation(
+      selectedReservation._id,
+      updateData
+    );
+
+    const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+
+    setReservations((prev) =>
+      prev.map((res) =>
+        res._id === updatedReservationDetail._id ? updatedReservationDetail : res
+      )
+    );
+    setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
+    setSnackbarOpen(true);
+  } catch (error) {
+    console.error("Failed to confirm payment", error);
+  } finally {
+    handleCloseConfirmDialog();
+  }
+};
+
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
   };

@@ -151,12 +151,24 @@ export const getReservationsByUserId = async (
 };
 
 export const updateReservation = async (id: string, reservationData: Partial<ReservationModel>): Promise<ReservationDetailModel> => {
-    const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
-    
-    // Convert ReservationModel to ReservationDetailModel
-    const updatedReservation = new ReservationDetailModel(response.data.reservation);
-    
-    return updatedReservation;
+    try {
+        // Log the data being sent to the API
+        console.log("Sending update request to API with ID:", id);
+        console.log("Reservation data being sent:", reservationData);
+
+        const response: AxiosResponse<ReservationResponse> = await axios.put(`${API_URL}reservations/${id}`, reservationData);
+
+        // Log the response received from the API
+        console.log("API response received:", response.data);
+
+        const updatedReservation = new ReservationDetailModel(response.data.reservation);
+        
+        return updatedReservation;
+    } catch (error) {
+        // Log any errors that occur during the request
+        console.error("Error updating reservation:", error);
+        throw error;
+    }
 };
 
 
