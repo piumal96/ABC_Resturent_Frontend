@@ -116,6 +116,13 @@ interface FetchServicesResponse {
     message: string;
     services: ServiceModel[];
 }
+
+interface RegisterResponse {
+    success: boolean;
+    message: string;
+    sessionId: string;
+    user: UserModel;
+}
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -124,6 +131,32 @@ export const login = async (email: string, password: string): Promise<UserModel>
     localStorage.setItem('user', JSON.stringify(user));  // Store user data
     return user;
 };
+
+export const registerUser = async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+}): Promise<UserModel> => {
+    try {
+        const response: AxiosResponse<RegisterResponse> = await axios.post(`${API_URL}users/register`, userData);
+        
+        // Extract sessionId and user from the response data
+        const { sessionId, user } = response.data;
+
+        // Store sessionId and user in localStorage
+        localStorage.setItem('sessionId', sessionId);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        console.log('User registered successfully:', user);
+        return user;
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error;
+    }
+};
+
+
 
 export const getCurrentUser = (): UserModel | null => {
     const userData = localStorage.getItem('user');
@@ -350,9 +383,11 @@ export const createOffer = async (offerData: {
     }
 };
 
+
   
 // Export all functions as a single default object
 export default {createOffer,
+    registerUser,
     updateService,
     getGalleryImages,
     deleteQuery,
