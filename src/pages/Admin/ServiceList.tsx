@@ -25,6 +25,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getServices, createService, updateService, deleteService } from '@/services/api';
 import { ServiceModel } from '@/models/ServiceModel';
+import Layout from '@/components/Layout/Layout';
 
 const ServiceList: React.FC = () => {
   const [services, setServices] = useState<ServiceModel[]>([]);
@@ -158,6 +159,7 @@ const ServiceList: React.FC = () => {
   };
 
   return (
+    <Layout>
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Manage Services</Typography>
@@ -257,6 +259,7 @@ const ServiceList: React.FC = () => {
         </Alert>
       </Snackbar>
     </Box>
+    </Layout>
   );
 };
 

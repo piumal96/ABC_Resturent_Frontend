@@ -44,6 +44,7 @@ import { ReservationProvider } from './context/ReservationContext';
 // Import ProtectedRoute
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Auth/Register';
+import ReportDashboard from './pages/Admin/ReportGenerator';
 
 function App() {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ function App() {
           <Route path="/queries/:id" element={<ProtectedRoute><QueryDetail /></ProtectedRoute>} />
           <Route path="/payments" element={<ProtectedRoute><PaymentList /></ProtectedRoute>} />
           <Route path="/payments/:id" element={<ProtectedRoute><PaymentDetail /></ProtectedRoute>} />
-          <Route path="/reports" element={<ProtectedRoute><ReportGenerator /></ProtectedRoute>} />
+          <Route path="/reports" element={<ProtectedRoute><ReportDashboard /></ProtectedRoute>} />
           <Route path="/reports/:reportType" element={<ProtectedRoute><ReportView /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
           <Route path="/users/:id/edit-role" element={<ProtectedRoute><UserRoleForm /></ProtectedRoute>} />
