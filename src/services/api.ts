@@ -8,6 +8,7 @@ import { OfferModel } from '../models/OfferModel';
 import { ReservationReportResponse } from '@/models/ReservationReportModel';
 import { QueryReportResponse } from '@/models/QueryReportModel';
 import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
+import { PaymentModel } from '@/models/Payments';
 
 // Constants
 const API_URL = 'http://localhost:5001/api/';
@@ -418,6 +419,28 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
     }
   };
   
+  // Function to create a payment
+export const createPayment = async (
+    reservationId: string,
+    amount: number
+  ): Promise<{ success: boolean; payment: PaymentModel; reservation: ReservationModel }> => {
+    const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel; reservation: ReservationModel }> = await axios.post(`${API_URL}payments`, {
+      reservation: reservationId,
+      amount,
+    });
+  
+    if (!response.data.success) {
+      throw new Error('Payment creation failed: ' + response.data.message);
+    }
+  
+    return {
+      success: response.data.success,
+      payment: response.data.payment,
+      reservation: response.data.reservation,
+    };
+  };
+  
+
 // Export all functions as a single default object
 export default {createOffer,
     fetchQueryReport,

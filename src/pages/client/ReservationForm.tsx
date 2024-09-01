@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useReservation } from '@/context/ReservationContext';
-import { fetchRestaurants, fetchServices } from '@/services/api';
+import { fetchRestaurants, fetchServices, createPayment, createReservation } from '@/services/api';
 import RestaurantModel from '@/models/RestaurantModel';
 import { ServiceModel } from '@/models/ServiceModel';
 import ReservationModel from '@/models/ReservationModel';
@@ -21,12 +20,14 @@ import {
 import RoomServiceIcon from '@mui/icons-material/RoomService';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
+import PaymentDialog from './PaymentDialog';  
 
 const ReservationForm: React.FC = () => {
   const [restaurant, setRestaurant] = useState<string>('');
   const [restaurants, setRestaurants] = useState<RestaurantModel[]>([]);
   const [service, setService] = useState<string>('');
   const [services, setServices] = useState<ServiceModel[]>([]);
+  const [serviceCost, setServiceCost] = useState<number>(0);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [type, setType] = useState('Dine-in');
@@ -36,9 +37,10 @@ const ReservationForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null); // Store the current reservation
 
   const { user, isAuthenticated } = useAuth();
-  const { createReservation } = useReservation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +63,19 @@ const ReservationForm: React.FC = () => {
     loadRestaurantsAndServices();
   }, [isAuthenticated, navigate]);
 
+  const handleServiceChange = (serviceId: string) => {
+    setService(serviceId);
+    const selectedService = services.find((s) => s._id === serviceId);
+    if (selectedService) {
+      let cost = selectedService.price;
+      if (type === 'Delivery') {
+        const deliveryFee = 10; // Example delivery fee
+        cost += deliveryFee;
+      }
+      setServiceCost(cost);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
@@ -70,7 +85,7 @@ const ReservationForm: React.FC = () => {
         throw new Error('You must be logged in to make a reservation.');
       }
 
-      const reservationData: ReservationModel = new ReservationModel({
+      const reservationData: ReservationModel = {
         id: '',
         customer: user.id,
         restaurant,
@@ -83,11 +98,18 @@ const ReservationForm: React.FC = () => {
         specialRequests,
         status: 'Pending',
         createdAt: '',
-      });
+      };
 
-      await createReservation(reservationData);
-      setFeedback('Reservation created successfully!');
-      setSnackbarOpen(true);
+      const reservation = await createReservation(reservationData);
+
+      if (reservation && type === 'Delivery') {
+        setCurrentReservation(reservation);  // Set the current reservation
+        setPaymentDialogOpen(true);
+      } else {
+        setFeedback('Reservation created successfully!');
+        setSnackbarOpen(true);
+      }
+
       setLoading(false);
     } catch (error) {
       setFeedback('Failed to create reservation. Please try again.');
@@ -96,6 +118,48 @@ const ReservationForm: React.FC = () => {
       console.error('Error creating reservation:', error);
     }
   };
+
+  const handlePayment = async (method: string, cardDetails?: { cardNumber: string; expiryDate: string; cvv: string }) => {
+    setPaymentDialogOpen(false);
+    try {
+      if (!currentReservation) {
+        throw new Error('No reservation found. Please try again.');
+      }
+  
+      const reservationId = currentReservation.id;
+      const amount = serviceCost; // Amount to be paid
+  
+      if (method === 'Card Payment' && cardDetails) {
+        console.log('Processing card payment with details:', cardDetails);
+      }
+  
+      // Send payment data to the server
+      const paymentResponse = await createPayment(reservationId, amount);
+  
+      // Debugging logs to verify the response structure
+      console.log('Payment response:', paymentResponse);
+  
+      if (paymentResponse.success) {
+        if (paymentResponse.reservation && paymentResponse.reservation.status) {
+          setFeedback(`Reservation confirmed and payment processed successfully! Reservation Status: ${paymentResponse.reservation.status}`);
+        } else {
+          setFeedback('Payment processed, but reservation status is missing.');
+        }
+        setSnackbarOpen(true);
+  
+        // Update the reservation status in the UI
+        setCurrentReservation(paymentResponse.reservation);
+      } else {
+        setFeedback('Payment processing failed. Please try again.');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      setFeedback('Failed to process payment. Please try again.');
+      setSnackbarOpen(true);
+      console.error('Error processing payment:', error);
+    }
+  };
+  
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -154,7 +218,7 @@ const ReservationForm: React.FC = () => {
               <TextField
                 label="Select Service"
                 value={service}
-                onChange={(e) => setService(e.target.value)}
+                onChange={(e) => handleServiceChange(e.target.value)}
                 select
                 fullWidth
                 required
@@ -244,6 +308,13 @@ const ReservationForm: React.FC = () => {
           </Grid>
         </form>
       </Paper>
+
+      <PaymentDialog
+        open={paymentDialogOpen}
+        onClose={() => setPaymentDialogOpen(false)}
+        totalAmount={serviceCost}
+        onPayment={handlePayment}
+      />
 
       <Snackbar
         open={snackbarOpen}
