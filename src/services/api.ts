@@ -5,6 +5,9 @@ import RestaurantModel from '@/models/RestaurantModel';
 import ReservationDetailModel from '@/models/ReservationDetailModel';
 import QueryModel from '@/models/QueryModel';
 import { OfferModel } from '../models/OfferModel';
+import { ReservationReportResponse } from '@/models/ReservationReportModel';
+import { QueryReportResponse } from '@/models/QueryReportModel';
+import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 
 // Constants
 const API_URL = 'http://localhost:5001/api/';
@@ -383,10 +386,43 @@ export const createOffer = async (offerData: {
     }
 };
 
+// Function to fetch reservation report
+export const fetchReservationReport = async (): Promise<ReservationReportResponse> => {
+    try {
+      const response: AxiosResponse<ReservationReportResponse> = await axios.get(`${API_URL}reports/reservations`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching reservation report:', error);
+      throw error;
+    }
+  };
 
+  export const fetchQueryReport = async (): Promise<QueryReportResponse> => {
+    try {
+      const response: AxiosResponse<QueryReportResponse> = await axios.get(`${API_URL}reports/queries`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching query report:', error);
+      throw error;
+    }
+  };
+
+  // Function to fetch user activity report
+export const fetchUserActivityReport = async (): Promise<UserActivityReportResponse> => {
+    try {
+      const response: AxiosResponse<UserActivityReportResponse> = await axios.get(`${API_URL}reports/users`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user activity report:', error);
+      throw error;
+    }
+  };
   
 // Export all functions as a single default object
 export default {createOffer,
+    fetchQueryReport,
+    fetchUserActivityReport,
+    fetchReservationReport,
     registerUser,
     updateService,
     getGalleryImages,
