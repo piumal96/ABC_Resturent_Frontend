@@ -14,8 +14,13 @@ import {
   Paper,
   TableContainer,
   CircularProgress,
+  IconButton,
+  Tooltip,
+  Button,
 } from '@mui/material';
 import { Bar, Pie } from 'react-chartjs-2';
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,10 +28,12 @@ import {
   BarElement,
   ArcElement,
   Title,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Legend,
 } from 'chart.js';
 import { Pagination } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
+import Layout from '@/components/Layout/Layout';
 
 // Register Chart.js components
 ChartJS.register(
@@ -35,7 +42,7 @@ ChartJS.register(
   BarElement,
   ArcElement,
   Title,
-  Tooltip,
+  ChartTooltip,
   Legend
 );
 
@@ -65,6 +72,32 @@ const ReportDashboard: React.FC = () => {
 
     loadData();
   }, []);
+
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+
+    const reservationsSheet = XLSX.utils.json_to_sheet(reservationData);
+    XLSX.utils.book_append_sheet(wb, reservationsSheet, 'Reservations');
+
+    const queriesSheet = XLSX.utils.json_to_sheet(queryData);
+    XLSX.utils.book_append_sheet(wb, queriesSheet, 'Queries');
+
+    const usersSheet = XLSX.utils.json_to_sheet(userData);
+    XLSX.utils.book_append_sheet(wb, usersSheet, 'Users');
+
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+    const s2ab = (s: string) => {
+      const buf = new ArrayBuffer(s.length);
+      const view = new Uint8Array(buf);
+      for (let i = 0; i < s.length; i++) {
+        view[i] = s.charCodeAt(i) & 0xFF;
+      }
+      return buf;
+    };
+
+    saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), 'report.xlsx');
+  };
 
   if (loading) {
     return (
@@ -98,59 +131,88 @@ const ReportDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h3" gutterBottom>
-        Report Dashboard
-      </Typography>
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5">Total Reservations</Typography>
-              <Typography variant="h4">{reservationData.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5">Total Queries</Typography>
-              <Typography variant="h4">{queryData.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent>
-              <Typography variant="h5">Active Users</Typography>
-              <Typography variant="h4">{userData.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box sx={{ my: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Overview
+    <Layout>
+      <Box sx={{ p: 3 }}>
+        {/* Summary Metrics */}
+        <Typography variant="h4" gutterBottom>
+          Admin Report Dashboard
+          <Tooltip title="Overview of all key metrics">
+            <IconButton>
+              <InfoIcon />
+            </IconButton>
+          </Tooltip>
         </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Bar data={chartData} options={{ responsive: true }} />
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+              <CardContent>
+                <Typography variant="h6">Total Reservations</Typography>
+                <Typography variant="h4">{reservationData.length}</Typography>
+              </CardContent>
+            </Card>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Pie data={pieChartData} options={{ responsive: true }} />
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+              <CardContent>
+                <Typography variant="h6">Total Queries</Typography>
+                <Typography variant="h4">{queryData.length}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+              <CardContent>
+                <Typography variant="h6">Active Users</Typography>
+                <Typography variant="h4">{userData.length}</Typography>
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
-      </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
+        {/* Charts Overview */}
+        <Box sx={{ my: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Data Visualization
+            <Tooltip title="Visual representation of key metrics">
+              <IconButton>
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card sx={{ p: 2 }}>
+                <Bar data={chartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card sx={{ p: 2 }}>
+                <Pie data={pieChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Export to Excel Button */}
+        <Box sx={{ textAlign: 'center', my: 4 }}>
+          <Button variant="contained" color="primary" onClick={exportToExcel}>
+            Export to Excel
+          </Button>
+        </Box>
+
+        {/* Detailed Tables */}
+        <Box sx={{ my: 4 }}>
           <Typography variant="h5" gutterBottom>
             Reservations
+            <Tooltip title="Detailed list of all reservations">
+              <IconButton>
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
           </Typography>
-          <TableContainer component={Paper}>
-            <Table>
+          <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>Email</TableCell>
@@ -175,14 +237,19 @@ const ReportDashboard: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12}>
+        <Box sx={{ my: 4 }}>
           <Typography variant="h5" gutterBottom>
             Queries
+            <Tooltip title="Detailed list of all customer queries">
+              <IconButton>
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
           </Typography>
-          <TableContainer component={Paper}>
-            <Table>
+          <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>Email</TableCell>
@@ -203,14 +270,19 @@ const ReportDashboard: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12}>
+        <Box sx={{ my: 4 }}>
           <Typography variant="h5" gutterBottom>
             User Activity
+            <Tooltip title="Detailed list of user activities">
+              <IconButton>
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
           </Typography>
-          <TableContainer component={Paper}>
-            <Table>
+          <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>Email</TableCell>
@@ -229,15 +301,14 @@ const ReportDashboard: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Grid>
-      </Grid>
+        </Box>
 
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        <Grid item xs={12} md={6}>
+        {/* Pagination */}
+        <Grid container justifyContent="center" sx={{ mt: 3 }}>
           <Pagination count={10} variant="outlined" shape="rounded" />
         </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </Layout>
   );
 };
 
