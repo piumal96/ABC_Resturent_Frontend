@@ -174,6 +174,7 @@ export const logout = (): void => {
 
 export const createReservation = async (reservationData: ReservationModel): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.post(`${API_URL}reservations`, reservationData);
+    console.log(response.data.reservation.payment?.id)
     return response.data.reservation;
 };
 
@@ -419,34 +420,17 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
     }
   };
   
-//   // Function to create a payment
-// export const createPayment = async (
-//     reservationId: string,
-//     amount: number
-//   ): Promise<{ success: boolean; payment: PaymentModel; reservation: ReservationModel }> => {
-//     const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel; reservation: ReservationModel }> = await axios.post(`${API_URL}payments`, {
-//       reservation: reservationId,
-//       amount,
-//     });
-  
-//     if (!response.data.success) {
-//       throw new Error('Payment creation failed: ' + response.data.message);
-//     }
-  
-//     return {
-//       success: response.data.success,
-//       payment: response.data.payment,
-//       reservation: response.data.reservation,
-//     };
-//   };
- 
   // Function to update a payment status
   export const updatePayment = async (
     paymentId: string,
-    status: 'Pending' | 'Paid' | 'Failed'
+    amount: number,
+    paymentMethod: string,
+    paymentStatus: 'Pending' | 'Paid' | 'Failed'
 ): Promise<{ success: boolean; message: string; payment: PaymentModel }> => {
     const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel }> = await axios.put(`${API_URL}payments/${paymentId}`, {
-        status,
+        amount,
+        paymentMethod,
+        paymentStatus, 
     });
 
     if (!response.data.success) {
@@ -462,6 +446,7 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
         payment: updatedPayment,
     };
 };
+
 // Export all functions as a single default object
 export default {createOffer,
     updatePayment,

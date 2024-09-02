@@ -38,7 +38,7 @@ const ReservationForm: React.FC = () => {
   const [feedback, setFeedback] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null); // Store the current reservation
+  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null); 
 
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -101,9 +101,11 @@ const ReservationForm: React.FC = () => {
       };
 
       const reservation = await createReservation(reservationData);
-
+      // console.log(reservation.payment?._id)
+      // console.log(reservation.payment?.customer)
       if (reservation && type === 'Delivery') {
         setCurrentReservation(reservation);  // Set the current reservation
+        // console.log(reservation.payment?._id)
         setPaymentDialogOpen(true);
       } else {
         setFeedback('Reservation created successfully!');
@@ -126,15 +128,15 @@ const ReservationForm: React.FC = () => {
         throw new Error('No payment information found. Please try again.');
       }
   
-      const paymentId = currentReservation.payment._id; // Payment ID now exists on currentReservation
+      const paymentId = currentReservation.payment.id; // Payment ID now exists on currentReservation
       const amount = serviceCost; // Amount to be paid
   
       if (method === 'Card Payment' && cardDetails) {
         console.log('Processing card payment with details:', cardDetails);
       }
   
-      // Update the payment data with the correct payment ID
-      const paymentResponse = await updatePayment(paymentId, 'Paid');  // Updating the payment status to 'Paid'
+    
+      const paymentResponse = await updatePayment(paymentId, amount,"credit-card", "Paid");  
   
       console.log('Payment response:', paymentResponse);
   

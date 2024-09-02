@@ -13,12 +13,12 @@ class ReservationModel {
     status: string;
     createdAt: string;
     payment?: {
-        _id: string;
+        id: string;
         customer: string;
-        amount: number;
+        amount?: number;
         status: string;
-        paymentDate: string;
-        reservation: string;
+        paymentDate?: string;
+        reservation?: string;
         paymentMethod?: string;
     } | null;  // Add the payment field
   
@@ -38,7 +38,7 @@ class ReservationModel {
       this.createdAt = data.createdAt;
       this.payment = data.payment
       ? {
-            _id: data.payment._id,
+            id: data.payment.id,
             customer: data.payment.customer,
             amount: data.payment.amount,
             status: data.payment.status,
