@@ -74,6 +74,7 @@ const ReservationList: React.FC = () => {
   };
 
   const handleDetail = (reservation: ReservationDetailModel) => {
+
     setSelectedReservation(reservation);
     setConfirmDialogOpen(true);
   };
@@ -149,47 +150,61 @@ const ReservationList: React.FC = () => {
   };
 
   const handleConfirmPayment = async () => {
-    if (!selectedReservation) return;
+    if (!selectedReservation || !selectedReservation.payment?._id) {
+        console.error("Invalid payment details:", selectedReservation?.payment);
+        setSnackbarMessage("Invalid payment details. Please try again.");
+        setSnackbarOpen(true);
+        return;
+    }
 
     try {
-      // First, update the payment status to 'Paid'
-      const paymentUpdateResponse = await updatePayment(selectedReservation.payment?._id!, "Paid");
-      if (!paymentUpdateResponse.success) {
-        throw new Error('Failed to update payment status.');
-      }
+        // Log the payment details for debugging purposes
+        console.log('Payment details:', selectedReservation.payment);
 
-      // Then, update the reservation status if necessary
-      const updateData: any = {
-        paymentStatus: "Paid",
-      };
+        // Update the payment status to 'Paid'
+        const paymentUpdateResponse = await updatePayment(
+            selectedReservation.payment._id, // Payment ID
+            selectedReservation.payment.amount, // Payment amount
+            selectedReservation.payment.paymentMethod || "credit-card", // Payment method
+            "Paid" // Desired payment status
+        );
 
-      if (selectedReservation.type === "Delivery") {
-        updateData.deliveryAddress = selectedReservation.deliveryAddress;
-        updateData.contactNumber = selectedReservation.contactNumber;
-      }
+        if (!paymentUpdateResponse.success) {
+            throw new Error('Failed to update payment status.');
+        }
 
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        updateData
-      );
+        // Update the reservation status to reflect the payment status
+        const updateData: any = {
+            paymentStatus: "Paid",
+        };
 
-      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+        const updatedReservation = await updateReservation(
+            selectedReservation._id,
+            updateData
+        );
 
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-        )
-      );
-      setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
-      setSnackbarOpen(true);
+        const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+
+        // Update the state with the modified reservation
+        setReservations((prev) =>
+            prev.map((res) =>
+                res._id === updatedReservationDetail._id ? updatedReservationDetail : res
+            )
+        );
+
+        setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
+        setSnackbarOpen(true);
     } catch (error) {
-      console.error("Failed to confirm payment", error);
-      setSnackbarMessage("Failed to confirm payment. Please try again.");
-      setSnackbarOpen(true);
+        console.error("Failed to confirm payment", error);
+        setSnackbarMessage("Failed to confirm payment. Please try again.");
+        setSnackbarOpen(true);
     } finally {
-      handleCloseConfirmDialog();
+        handleCloseConfirmDialog();
     }
-  };
+};
+
+
+
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);

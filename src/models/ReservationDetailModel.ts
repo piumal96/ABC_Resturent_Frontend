@@ -68,7 +68,7 @@ export default class ReservationDetailModel {
         this.paymentStatus = data.paymentStatus;
         this.payment = data.payment
             ? {
-                  _id: data.payment._id,
+                  _id: data.payment.id,
                   customer: data.payment.customer,
                   amount: data.payment.amount,
                   status: data.payment.status,
