@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { fetchRestaurants, fetchServices, createPayment, createReservation } from '@/services/api';
+import { fetchRestaurants, fetchServices,updatePayment, createReservation } from '@/services/api';
 import RestaurantModel from '@/models/RestaurantModel';
 import { ServiceModel } from '@/models/ServiceModel';
 import ReservationModel from '@/models/ReservationModel';
@@ -122,33 +122,40 @@ const ReservationForm: React.FC = () => {
   const handlePayment = async (method: string, cardDetails?: { cardNumber: string; expiryDate: string; cvv: string }) => {
     setPaymentDialogOpen(false);
     try {
-      if (!currentReservation) {
-        throw new Error('No reservation found. Please try again.');
+      if (!currentReservation || !currentReservation.payment) {
+        throw new Error('No payment information found. Please try again.');
       }
   
-      const reservationId = currentReservation.id;
+      const paymentId = currentReservation.payment._id; // Payment ID now exists on currentReservation
       const amount = serviceCost; // Amount to be paid
   
       if (method === 'Card Payment' && cardDetails) {
         console.log('Processing card payment with details:', cardDetails);
       }
   
-      // Send payment data to the server
-      const paymentResponse = await createPayment(reservationId, amount);
+      // Update the payment data with the correct payment ID
+      const paymentResponse = await updatePayment(paymentId, 'Paid');  // Updating the payment status to 'Paid'
   
-      // Debugging logs to verify the response structure
       console.log('Payment response:', paymentResponse);
   
       if (paymentResponse.success) {
-        if (paymentResponse.reservation && paymentResponse.reservation.status) {
-          setFeedback(`Reservation confirmed and payment processed successfully! Reservation Status: ${paymentResponse.reservation.status}`);
+        if (paymentResponse.payment && paymentResponse.payment.status) {
+          setFeedback(`Reservation confirmed and payment processed successfully! Payment Status: ${paymentResponse.payment.status}`);
         } else {
-          setFeedback('Payment processed, but reservation status is missing.');
+          setFeedback('Payment processed, but payment status is missing.');
         }
         setSnackbarOpen(true);
   
-        // Update the reservation status in the UI
-        setCurrentReservation(paymentResponse.reservation);
+        // Optionally, update the reservation status in the UI
+        setCurrentReservation((prev) => {
+          if (prev) {
+            return {
+              ...prev,
+              status: paymentResponse.payment.status,
+            };
+          }
+          return prev;
+        });
       } else {
         setFeedback('Payment processing failed. Please try again.');
         setSnackbarOpen(true);

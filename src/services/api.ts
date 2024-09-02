@@ -131,8 +131,8 @@ interface RegisterResponse {
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
     const { sessionId, user } = response.data;
-    localStorage.setItem('sessionId', sessionId);  // Store the session ID
-    localStorage.setItem('user', JSON.stringify(user));  // Store user data
+    localStorage.setItem('sessionId', sessionId);  
+    localStorage.setItem('user', JSON.stringify(user));  
     return user;
 };
 
@@ -419,30 +419,52 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
     }
   };
   
-  // Function to create a payment
-export const createPayment = async (
-    reservationId: string,
-    amount: number
-  ): Promise<{ success: boolean; payment: PaymentModel; reservation: ReservationModel }> => {
-    const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel; reservation: ReservationModel }> = await axios.post(`${API_URL}payments`, {
-      reservation: reservationId,
-      amount,
+//   // Function to create a payment
+// export const createPayment = async (
+//     reservationId: string,
+//     amount: number
+//   ): Promise<{ success: boolean; payment: PaymentModel; reservation: ReservationModel }> => {
+//     const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel; reservation: ReservationModel }> = await axios.post(`${API_URL}payments`, {
+//       reservation: reservationId,
+//       amount,
+//     });
+  
+//     if (!response.data.success) {
+//       throw new Error('Payment creation failed: ' + response.data.message);
+//     }
+  
+//     return {
+//       success: response.data.success,
+//       payment: response.data.payment,
+//       reservation: response.data.reservation,
+//     };
+//   };
+ 
+  // Function to update a payment status
+  export const updatePayment = async (
+    paymentId: string,
+    status: 'Pending' | 'Paid' | 'Failed'
+): Promise<{ success: boolean; message: string; payment: PaymentModel }> => {
+    const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel }> = await axios.put(`${API_URL}payments/${paymentId}`, {
+        status,
     });
-  
-    if (!response.data.success) {
-      throw new Error('Payment creation failed: ' + response.data.message);
-    }
-  
-    return {
-      success: response.data.success,
-      payment: response.data.payment,
-      reservation: response.data.reservation,
-    };
-  };
-  
 
+    if (!response.data.success) {
+        throw new Error('Payment update failed: ' + response.data.message);
+    }
+
+    // No need to use `new` since PaymentModel is an interface
+    const updatedPayment: PaymentModel = response.data.payment;
+
+    return {
+        success: response.data.success,
+        message: response.data.message,
+        payment: updatedPayment,
+    };
+};
 // Export all functions as a single default object
 export default {createOffer,
+    updatePayment,
     fetchQueryReport,
     fetchUserActivityReport,
     fetchReservationReport,
