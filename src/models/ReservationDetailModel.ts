@@ -25,6 +25,15 @@ export default class ReservationDetailModel {
     specialRequests: string;
     status: string;
     paymentStatus: string;
+    payment?: {
+        _id: string;
+        customer: string;
+        amount: number;
+        status: string;
+        paymentDate: string;
+        reservation: string;
+        paymentMethod?: string;
+    } | null;
     createdAt: string;
 
     constructor(data: any) {
@@ -57,6 +66,17 @@ export default class ReservationDetailModel {
         this.specialRequests = data.specialRequests;
         this.status = data.status;
         this.paymentStatus = data.paymentStatus;
+        this.payment = data.payment
+            ? {
+                  _id: data.payment.id,
+                  customer: data.payment.customer,
+                  amount: data.payment.amount,
+                  status: data.payment.status,
+                  paymentDate: data.payment.paymentDate,
+                  reservation: data.payment.reservation,
+                  paymentMethod: data.payment.paymentMethod || null,
+              }
+            : null;
         this.createdAt = data.createdAt;
     }
 

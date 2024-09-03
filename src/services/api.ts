@@ -8,6 +8,7 @@ import { OfferModel } from '../models/OfferModel';
 import { ReservationReportResponse } from '@/models/ReservationReportModel';
 import { QueryReportResponse } from '@/models/QueryReportModel';
 import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
+import { PaymentModel } from '@/models/Payments';
 
 // Constants
 const API_URL = 'http://localhost:5001/api/';
@@ -130,8 +131,8 @@ interface RegisterResponse {
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
     const { sessionId, user } = response.data;
-    localStorage.setItem('sessionId', sessionId);  // Store the session ID
-    localStorage.setItem('user', JSON.stringify(user));  // Store user data
+    localStorage.setItem('sessionId', sessionId);  
+    localStorage.setItem('user', JSON.stringify(user));  
     return user;
 };
 
@@ -173,6 +174,7 @@ export const logout = (): void => {
 
 export const createReservation = async (reservationData: ReservationModel): Promise<ReservationModel> => {
     const response: AxiosResponse<ReservationResponse> = await axios.post(`${API_URL}reservations`, reservationData);
+    console.log(response.data.reservation.payment?.id)
     return response.data.reservation;
 };
 
@@ -418,8 +420,36 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
     }
   };
   
+  // Function to update a payment status
+  export const updatePayment = async (
+    paymentId: string,
+    amount: number,
+    paymentMethod: string,
+    paymentStatus: 'Pending' | 'Paid' | 'Failed'
+): Promise<{ success: boolean; message: string; payment: PaymentModel }> => {
+    const response: AxiosResponse<{ success: boolean; message: string; payment: PaymentModel }> = await axios.put(`${API_URL}payments/${paymentId}`, {
+        amount,
+        paymentMethod,
+        paymentStatus, 
+    });
+
+    if (!response.data.success) {
+        throw new Error('Payment update failed: ' + response.data.message);
+    }
+
+    // No need to use `new` since PaymentModel is an interface
+    const updatedPayment: PaymentModel = response.data.payment;
+
+    return {
+        success: response.data.success,
+        message: response.data.message,
+        payment: updatedPayment,
+    };
+};
+
 // Export all functions as a single default object
 export default {createOffer,
+    updatePayment,
     fetchQueryReport,
     fetchUserActivityReport,
     fetchReservationReport,

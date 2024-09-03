@@ -30,14 +30,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { fetchReservations, updateReservation } from "@/services/api";
+import { fetchReservations, updateReservation, updatePayment } from "@/services/api"; // Import updatePayment function
 
 const ReservationList: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [reservations, setReservations] = useState<ReservationDetailModel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, ] = useState(""); // State for status filter
+  const [statusFilter, setStatusFilter] = useState(""); // State for status filter
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
@@ -74,6 +74,7 @@ const ReservationList: React.FC = () => {
   };
 
   const handleDetail = (reservation: ReservationDetailModel) => {
+
     setSelectedReservation(reservation);
     setConfirmDialogOpen(true);
   };
@@ -85,19 +86,19 @@ const ReservationList: React.FC = () => {
 
   const handleConfirmReservation = async () => {
     if (!selectedReservation) return;
-  
+
     try {
       const updateData: any = {
         status: "Confirmed",
       };
       console.log("Updating reservation with data:", updateData);
-  
+
       const updatedReservation = await updateReservation(
         selectedReservation._id,
         updateData
       );
       const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
-  
+
       setReservations((prev) =>
         prev.map((res) =>
           res._id === updatedReservationDetail._id ? updatedReservationDetail : res
@@ -113,19 +114,69 @@ const ReservationList: React.FC = () => {
       handleCloseConfirmDialog();
     }
   };
-  
+
   const handleCancelReservation = async () => {
     if (!selectedReservation) return;
 
     try {
-        const updateData: any = {
-            status: "Cancelled", // Corrected from "Cancel" to "Cancelled"
-        };
+      const updateData: any = {
+        status: "Cancelled",
+      };
 
-        if (selectedReservation.type === "Delivery") {
-            updateData.deliveryAddress = selectedReservation.deliveryAddress;
-            updateData.contactNumber = selectedReservation.contactNumber;
+      if (selectedReservation.type === "Delivery") {
+        updateData.deliveryAddress = selectedReservation.deliveryAddress;
+        updateData.contactNumber = selectedReservation.contactNumber;
+      }
+
+      const updatedReservation = await updateReservation(
+        selectedReservation._id,
+        updateData
+      );
+
+      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+
+      setReservations((prev) =>
+        prev.map((res) =>
+          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
+        )
+      );
+      setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id}`);
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Failed to cancel reservation", error);
+    } finally {
+      handleCloseConfirmDialog();
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!selectedReservation || !selectedReservation.payment?._id) {
+        console.error("Invalid payment details:", selectedReservation?.payment);
+        setSnackbarMessage("Invalid payment details. Please try again.");
+        setSnackbarOpen(true);
+        return;
+    }
+
+    try {
+        // Log the payment details for debugging purposes
+        console.log('Payment details:', selectedReservation.payment);
+
+        // Update the payment status to 'Paid'
+        const paymentUpdateResponse = await updatePayment(
+            selectedReservation.payment._id, // Payment ID
+            selectedReservation.payment.amount, // Payment amount
+            selectedReservation.payment.paymentMethod || "credit-card", // Payment method
+            "Paid" // Desired payment status
+        );
+
+        if (!paymentUpdateResponse.success) {
+            throw new Error('Failed to update payment status.');
         }
+
+        // Update the reservation status to reflect the payment status
+        const updateData: any = {
+            paymentStatus: "Paid",
+        };
 
         const updatedReservation = await updateReservation(
             selectedReservation._id,
@@ -134,61 +185,32 @@ const ReservationList: React.FC = () => {
 
         const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
 
+        // Update the state with the modified reservation
         setReservations((prev) =>
             prev.map((res) =>
                 res._id === updatedReservationDetail._id ? updatedReservationDetail : res
             )
         );
-        setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id}`);
+
+        setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
         setSnackbarOpen(true);
     } catch (error) {
-        console.error("Failed to cancel reservation", error);
+        console.error("Failed to confirm payment", error);
+        setSnackbarMessage("Failed to confirm payment. Please try again.");
+        setSnackbarOpen(true);
     } finally {
         handleCloseConfirmDialog();
     }
 };
 
-const handleConfirmPayment = async () => {
-  if (!selectedReservation) return;
 
-  try {
-    const updateData: any = {
-      paymentStatus: "Paid", // Updated to match the correct enum value
-    };
 
-    if (selectedReservation.type === "Delivery") {
-      updateData.deliveryAddress = selectedReservation.deliveryAddress;
-      updateData.contactNumber = selectedReservation.contactNumber;
-    }
-
-    const updatedReservation = await updateReservation(
-      selectedReservation._id,
-      updateData
-    );
-
-    const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
-
-    setReservations((prev) =>
-      prev.map((res) =>
-        res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-      )
-    );
-    setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
-    setSnackbarOpen(true);
-  } catch (error) {
-    console.error("Failed to confirm payment", error);
-  } finally {
-    handleCloseConfirmDialog();
-  }
-};
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -255,6 +277,7 @@ const handleConfirmPayment = async () => {
               value={statusFilter}
               label="Status"
               displayEmpty
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
               <MenuItem value="">
                 <em>All Statuses</em>
