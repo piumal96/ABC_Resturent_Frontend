@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { fetchRestaurants, fetchServices,updatePayment, createReservation } from '@/services/api';
+import { fetchRestaurants, fetchServices, updatePayment, createReservation } from '@/services/api';
 import RestaurantModel from '@/models/RestaurantModel';
 import { ServiceModel } from '@/models/ServiceModel';
 import ReservationModel from '@/models/ReservationModel';
@@ -16,11 +16,13 @@ import {
   CircularProgress,
   Snackbar,
   IconButton,
+  Box,
 } from '@mui/material';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
-import PaymentDialog from './PaymentDialog';  
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PaymentDialog from './PaymentDialog';
 
 const ReservationForm: React.FC = () => {
   const [restaurant, setRestaurant] = useState<string>('');
@@ -38,7 +40,7 @@ const ReservationForm: React.FC = () => {
   const [feedback, setFeedback] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null); 
+  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null);
 
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -101,11 +103,8 @@ const ReservationForm: React.FC = () => {
       };
 
       const reservation = await createReservation(reservationData);
-      // console.log(reservation.payment?._id)
-      // console.log(reservation.payment?.customer)
       if (reservation && type === 'Delivery') {
-        setCurrentReservation(reservation);  // Set the current reservation
-        // console.log(reservation.payment?._id)
+        setCurrentReservation(reservation);
         setPaymentDialogOpen(true);
       } else {
         setFeedback('Reservation created successfully!');
@@ -127,19 +126,18 @@ const ReservationForm: React.FC = () => {
       if (!currentReservation || !currentReservation.payment) {
         throw new Error('No payment information found. Please try again.');
       }
-  
+
       const paymentId = currentReservation.payment.id; // Payment ID now exists on currentReservation
       const amount = serviceCost; // Amount to be paid
-  
+
       if (method === 'Card Payment' && cardDetails) {
         console.log('Processing card payment with details:', cardDetails);
       }
-  
-    
-      const paymentResponse = await updatePayment(paymentId, amount,"credit-card", "Paid");  
-  
+
+      const paymentResponse = await updatePayment(paymentId, amount, "credit-card", "Paid");
+
       console.log('Payment response:', paymentResponse);
-  
+
       if (paymentResponse.success) {
         if (paymentResponse.payment && paymentResponse.payment.status) {
           setFeedback(`Reservation confirmed and payment processed successfully! Payment Status: ${paymentResponse.payment.status}`);
@@ -147,7 +145,7 @@ const ReservationForm: React.FC = () => {
           setFeedback('Payment processed, but payment status is missing.');
         }
         setSnackbarOpen(true);
-  
+
         // Optionally, update the reservation status in the UI
         setCurrentReservation((prev) => {
           if (prev) {
@@ -168,7 +166,6 @@ const ReservationForm: React.FC = () => {
       console.error('Error processing payment:', error);
     }
   };
-  
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -177,10 +174,17 @@ const ReservationForm: React.FC = () => {
 
   return (
     <Container maxWidth="sm" sx={{ padding: '40px 0', backgroundImage: 'url(/path-to-background-image.jpg)', backgroundSize: 'cover', minHeight: '100vh' }}>
-      <Paper elevation={4} sx={{ padding: '30px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center', marginBottom: '20px', fontFamily: 'Georgia, serif' }}>
+      {/* Header with Go Back Button */}
+      <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ marginRight: '10px' }}>
+          <ArrowBackIcon />
+        </IconButton>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', fontFamily: 'Georgia, serif' }}>
           Make a Reservation
         </Typography>
+      </Box>
+
+      <Paper elevation={4} sx={{ padding: '30px', borderRadius: '12px', backgroundColor: 'rgba(255, 255, 255, 0.8)' }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -235,7 +239,7 @@ const ReservationForm: React.FC = () => {
               >
                 {services.map((service) => (
                   <MenuItem key={service._id} value={service._id}>
-                    {service.name} - ${service.price.toFixed(2)}
+                    {service.name} - LKR {service.price.toFixed(2)}
                   </MenuItem>
                 ))}
               </TextField>
