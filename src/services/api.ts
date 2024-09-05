@@ -127,10 +127,16 @@ interface RegisterResponse {
     sessionId: string;
     user: UserModel;
 }
+interface FetchUsersResponse {
+    success: boolean;
+    message: string;
+    users: UserModel[];
+}
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
     const { sessionId, user } = response.data;
+    console.log(sessionId)
     localStorage.setItem('sessionId', sessionId);  
     localStorage.setItem('user', JSON.stringify(user));  
     return user;
@@ -156,6 +162,22 @@ export const registerUser = async (userData: {
     }
 };
 
+export const registerUserAdmin = async (userData: {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+}): Promise<UserModel> => {
+    try {
+        const response: AxiosResponse<RegisterResponse> = await axios.post(`${API_URL}users/register`, userData);
+        const { user } = response.data;
+    
+        return user;
+    } catch (error) {
+        console.error('Error registering user:', error);
+        throw error;
+    }
+};
 
 
 export const getCurrentUser = (): UserModel | null => {
@@ -443,8 +465,49 @@ export const fetchUserActivityReport = async (): Promise<UserActivityReportRespo
     };
 };
 
+export const updateUser = async (id: string, userData: Partial<UserModel>): Promise<UserModel> => {
+    try {
+        const response: AxiosResponse<{ success: boolean; message: string; user: UserModel }> = await axios.put(`${API_URL}users/${id}`, userData);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'User update failed');
+        }
+        return response.data.user;
+    } catch (error) {
+        console.error('Error updating user:', error);
+        throw error;
+    }
+};
+
+export const deleteUser = async (id: string): Promise<void> => {
+    try {
+        const response: AxiosResponse<{ success: boolean; message: string }> = await axios.delete(`${API_URL}users/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'User deletion failed');
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        throw error;
+    }
+};
+
+export const fetchUsers = async (): Promise<UserModel[]> => {
+    try {
+        const response: AxiosResponse<FetchUsersResponse> = await axios.get(`${API_URL}users`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to fetch users');
+        }
+        return response.data.users;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+};
 // Export all functions as a single default object
-export default {createOffer,
+export default {
+    deleteUser,
+    fetchUsers,
+    updateUser,
+    createOffer,
     updatePayment,
     fetchQueryReport,
     fetchUserActivityReport,
