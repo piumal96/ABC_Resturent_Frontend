@@ -41,7 +41,7 @@ const HeroSection: React.FC = () => {
 
   const handleSelectService = (service: ServiceModel) => {
     setQuery(service.name);
-    setShowSuggestions(false);  // Hide suggestions when a service is selected
+    setShowSuggestions(false);  
   };
 
   return (
@@ -169,7 +169,7 @@ const HeroSection: React.FC = () => {
                 <li key={service._id} style={{ marginBottom: '10px' }}>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{service.name}</Typography>
                   <Typography>{service.description}</Typography>
-                  <Typography sx={{ fontWeight: 'bold', color: '#ff5722' }}>Price: ${service.price}</Typography>
+                  <Typography sx={{ fontWeight: 'bold', color: '#ff5722' }}>Price: Rs {service.price}</Typography>
                 </li>
               ))}
             </ul>

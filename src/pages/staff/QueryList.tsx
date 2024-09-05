@@ -29,17 +29,18 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import { fetchQueries, deleteQuery } from '@/services/api'; // Adjust import paths accordingly
+import StaffLayout from '@/components/Layout/StaffLayout';
 
 interface Query {
   _id: string;
   customer: {
     _id: string;
-    email: string;
-  };
-  subject: string;
-  message: string;
+    email: string | null;
+  } | null;
+  subject: string | null;
+  message: string | null;
   status: 'Pending' | 'Resolved' | 'In Progress' | 'Closed';  
-  createdAt: Date;
+  createdAt: Date | null;
 }
 
 const QueryList: React.FC = () => {
@@ -73,8 +74,8 @@ const QueryList: React.FC = () => {
   const handleSearch = () => {
     const lowercasedFilter = filter.toLowerCase();
     const filteredData = queries.filter(query =>
-      query.subject.toLowerCase().includes(lowercasedFilter) ||
-      query.createdAt.toLocaleDateString().includes(lowercasedFilter)
+      (query.subject?.toLowerCase().includes(lowercasedFilter) || '') ||
+      (query.createdAt?.toLocaleDateString().includes(lowercasedFilter) || '')
     );
     setFilteredQueries(filteredData);
   };
@@ -137,6 +138,7 @@ const QueryList: React.FC = () => {
   };
 
   return (
+    <StaffLayout>
     <Paper style={{ padding: '16px', marginTop: '16px' }}>
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} sm={8}>
@@ -180,12 +182,12 @@ const QueryList: React.FC = () => {
                 <React.Fragment key={query._id}>
                   <TableRow onClick={() => handleRowClick(query._id)} style={{ cursor: 'pointer' }}>
                     <TableCell>{query._id}</TableCell>
-                    <TableCell>{query.customer.email}</TableCell>
-                    <TableCell>{query.subject}</TableCell>
+                    <TableCell>{query.customer?.email ?? 'N/A'}</TableCell>
+                    <TableCell>{query.subject ?? 'N/A'}</TableCell>
                     <TableCell>
                       <Badge badgeContent={query.status} color={getStatusColor(query.status)} />
                     </TableCell>
-                    <TableCell>{query.createdAt.toLocaleDateString()}</TableCell>
+                    <TableCell>{query.createdAt ? query.createdAt.toLocaleDateString() : 'N/A'}</TableCell>
                     <TableCell>
                       <Tooltip title="More">
                         <IconButton color="secondary" onClick={(e) => { e.stopPropagation(); handleMenuOpen(e, query); }}>
@@ -214,7 +216,7 @@ const QueryList: React.FC = () => {
                         <div style={{ margin: 16 }}>
                           <Typography variant="subtitle1">Message:</Typography>
                           <Typography variant="body2" color="textSecondary" paragraph>
-                            {query.message}
+                            {query.message ?? 'No message available.'}
                           </Typography>
                           <div style={{ marginTop: 16 }}>
                             <TextareaAutosize
@@ -277,6 +279,7 @@ const QueryList: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Paper>
+    </StaffLayout>
   );
 };
 

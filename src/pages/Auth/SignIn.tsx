@@ -9,8 +9,10 @@ import {
   Paper,
   Divider,
   Alert,
+  IconButton,
 } from "@mui/material";
 import logo from "@/assets/images/logo.png"; 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // Import back icon
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext'; // Import the useAuth hook
 import UserModel from '@/models/UserModel'; // Import UserModel for typing
@@ -23,9 +25,36 @@ const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
+  // Form Validation
+  const validateForm = () => {
+    let valid = true;
+    // Email validation (simple regex)
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError(true);
+      valid = false;
+    } else {
+      setEmailError(false);
+    }
+
+    // Password validation (min 6 characters)
+    if (password.length < 6) {
+      setPasswordError(true);
+      valid = false;
+    } else {
+      setPasswordError(false);
+    }
+    return valid;
+  };
 
   // Handle SignIn
   const handleSignIn = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       // Clear any previous errors
       setError('');
@@ -40,9 +69,7 @@ const SignIn: React.FC = () => {
         navigate('/staff/dashboard'); // Staff dashboard
       } else if (user.role === 'Customer') {
         navigate('/');
-      }
-      
-      else {
+      } else {
         setError('Unauthorized role. Please contact the administrator.');
       }
     } catch (err: any) {
@@ -54,9 +81,23 @@ const SignIn: React.FC = () => {
   return (
     <Container maxWidth="xs" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={4} sx={{ padding: 3, borderRadius: 2 }}>
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <img src={logo} alt="Logo" style={{ width: "200px", height: "80px" }} />
+        {/* Back Button and Logo */}
+        <Box position="relative">
+          {/* Back Button, positioned in the top-left */}
+          <IconButton 
+            onClick={() => navigate(-1)} 
+            sx={{ position: "absolute", top: 16, left: 16 }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          
+          {/* Logo centered */}
+          <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <img src={logo} alt="Logo" style={{ width: "200px", height: "80px" }} />
+          </Box>
         </Box>
+        
+        {/* Sign In Text */}
         <Typography
           variant="h5"
           align="center"
@@ -70,6 +111,8 @@ const SignIn: React.FC = () => {
           Sign In
         </Typography>
         <Divider sx={{ my: 2 }} />
+
+        {/* Form */}
         <Box
           component="form"
           sx={{
@@ -90,6 +133,8 @@ const SignIn: React.FC = () => {
             variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={emailError}
+            helperText={emailError ? "Please enter a valid email address" : ""}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -107,6 +152,8 @@ const SignIn: React.FC = () => {
             variant="outlined"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={passwordError}
+            helperText={passwordError ? "Password must be at least 6 characters" : ""}
             InputProps={{
               style: {
                 borderRadius: "8px",
@@ -141,23 +188,20 @@ const SignIn: React.FC = () => {
             Sign In
           </Button>
         </Box>
+        
+        {/* Register Link */}
         <Grid container justifyContent="flex-end" sx={{ mt: 1.5 }}>
-          <Grid item>
-            <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-              Don't have an account?{" "}
-              <a
-                href="/register"
-                style={{
-                  textDecoration: "none",
-                  color: "#1976d2",
-                  fontWeight: "bold",
-                }}
-              >
-                Register
-              </a>
-            </Typography>
-          </Grid>
-        </Grid>
+  <Grid item>
+    <Typography 
+      variant="body2" 
+      sx={{ fontSize: "0.75rem", cursor: 'pointer', color: "#1976d2", fontWeight: "bold" }} 
+      onClick={() => navigate('/register')} // Use navigate instead of href
+    >
+      Don't have an account? Register
+    </Typography>
+  </Grid>
+</Grid>
+
       </Paper>
     </Container>
   );

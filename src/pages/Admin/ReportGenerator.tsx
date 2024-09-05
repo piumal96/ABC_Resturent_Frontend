@@ -225,13 +225,13 @@ const ReportDashboard: React.FC = () => {
               </TableHead>
               <TableBody>
                 {reservationData.map((reservation) => (
-                  <TableRow key={reservation._id}>
-                    <TableCell>{reservation.customer.email}</TableCell>
-                    <TableCell>{reservation.restaurant.name}</TableCell>
-                    <TableCell>{reservation.service.name}</TableCell>
-                    <TableCell>{new Date(reservation.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{reservation.status}</TableCell>
-                    <TableCell>{reservation.paymentStatus}</TableCell>
+                  <TableRow key={reservation?._id}>
+                    <TableCell>{reservation?.customer?.email || 'null'}</TableCell>
+                    <TableCell>{reservation?.restaurant?.name || 'null'}</TableCell>
+                    <TableCell>{reservation?.service?.name || 'null'}</TableCell>
+                    <TableCell>{reservation?.date ? new Date(reservation.date).toLocaleDateString() : 'null'}</TableCell>
+                    <TableCell>{reservation?.status || 'null'}</TableCell>
+                    <TableCell>{reservation?.paymentStatus || 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -260,11 +260,11 @@ const ReportDashboard: React.FC = () => {
               </TableHead>
               <TableBody>
                 {queryData.map((query) => (
-                  <TableRow key={query._id}>
-                    <TableCell>{query.customer.email}</TableCell>
-                    <TableCell>{query.subject}</TableCell>
-                    <TableCell>{query.message}</TableCell>
-                    <TableCell>{query.status}</TableCell>
+                  <TableRow key={query?._id}>
+                    <TableCell>{query?.customer?.email || 'null'}</TableCell>
+                    <TableCell>{query?.subject || 'null'}</TableCell>
+                    <TableCell>{query?.message || 'null'}</TableCell>
+                    <TableCell>{query?.status || 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -292,10 +292,10 @@ const ReportDashboard: React.FC = () => {
               </TableHead>
               <TableBody>
                 {userData.map((user) => (
-                  <TableRow key={user._id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableRow key={user?._id}>
+                    <TableCell>{user?.email || 'null'}</TableCell>
+                    <TableCell>{user?.role || 'null'}</TableCell>
+                    <TableCell>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

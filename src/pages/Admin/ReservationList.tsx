@@ -54,6 +54,7 @@ const ReservationList: React.FC = () => {
         setReservations(fetchedReservations);
         setLoading(false);
       } catch (err) {
+        console.error("Error fetching reservations:", err);
         setError("Failed to load reservations. Please try again later.");
         setLoading(false);
       }
@@ -65,16 +66,13 @@ const ReservationList: React.FC = () => {
   const handleSearch = () => {
     const filteredReservations = reservations.filter(
       (reservation) =>
-        reservation.customer.username
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) &&
-        (statusFilter === "" || reservation.status === statusFilter)
+        reservation?.customer?.username?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (statusFilter === "" || reservation?.status === statusFilter)
     );
     setReservations(filteredReservations);
   };
 
   const handleDetail = (reservation: ReservationDetailModel) => {
-
     setSelectedReservation(reservation);
     setConfirmDialogOpen(true);
   };
@@ -104,7 +102,7 @@ const ReservationList: React.FC = () => {
           res._id === updatedReservationDetail._id ? updatedReservationDetail : res
         )
       );
-      setSnackbarMessage(`Confirmed reservation with ID: ${selectedReservation._id}`);
+      setSnackbarMessage(`Confirmed reservation with ID: ${selectedReservation._id || 'null'}`);
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Failed to confirm reservation", error);
@@ -124,8 +122,8 @@ const ReservationList: React.FC = () => {
       };
 
       if (selectedReservation.type === "Delivery") {
-        updateData.deliveryAddress = selectedReservation.deliveryAddress;
-        updateData.contactNumber = selectedReservation.contactNumber;
+        updateData.deliveryAddress = selectedReservation.deliveryAddress || null;
+        updateData.contactNumber = selectedReservation.contactNumber || null;
       }
 
       const updatedReservation = await updateReservation(
@@ -140,10 +138,12 @@ const ReservationList: React.FC = () => {
           res._id === updatedReservationDetail._id ? updatedReservationDetail : res
         )
       );
-      setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id}`);
+      setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id || 'null'}`);
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Failed to cancel reservation", error);
+      setSnackbarMessage("Failed to cancel reservation. Please try again.");
+      setSnackbarOpen(true);
     } finally {
       handleCloseConfirmDialog();
     }
@@ -151,60 +151,57 @@ const ReservationList: React.FC = () => {
 
   const handleConfirmPayment = async () => {
     if (!selectedReservation || !selectedReservation.payment?._id) {
-        console.error("Invalid payment details:", selectedReservation?.payment);
-        setSnackbarMessage("Invalid payment details. Please try again.");
-        setSnackbarOpen(true);
-        return;
+      console.error("Invalid payment details:", selectedReservation?.payment);
+      setSnackbarMessage("Invalid payment details. Please try again.");
+      setSnackbarOpen(true);
+      return;
     }
 
     try {
-        // Log the payment details for debugging purposes
-        console.log('Payment details:', selectedReservation.payment);
+      // Log the payment details for debugging purposes
+      console.log('Payment details:', selectedReservation.payment);
 
-        // Update the payment status to 'Paid'
-        const paymentUpdateResponse = await updatePayment(
-            selectedReservation.payment._id, // Payment ID
-            selectedReservation.payment.amount, // Payment amount
-            selectedReservation.payment.paymentMethod || "credit-card", // Payment method
-            "Paid" // Desired payment status
-        );
+      // Update the payment status to 'Paid'
+      const paymentUpdateResponse = await updatePayment(
+        selectedReservation.payment._id, // Payment ID
+        selectedReservation.payment.amount || 0, // Payment amount
+        selectedReservation.payment.paymentMethod || "credit-card", // Payment method
+        "Paid" // Desired payment status
+      );
 
-        if (!paymentUpdateResponse.success) {
-            throw new Error('Failed to update payment status.');
-        }
+      if (!paymentUpdateResponse.success) {
+        throw new Error('Failed to update payment status.');
+      }
 
-        // Update the reservation status to reflect the payment status
-        const updateData: any = {
-            paymentStatus: "Paid",
-        };
+      // Update the reservation status to reflect the payment status
+      const updateData: any = {
+        paymentStatus: "Paid",
+      };
 
-        const updatedReservation = await updateReservation(
-            selectedReservation._id,
-            updateData
-        );
+      const updatedReservation = await updateReservation(
+        selectedReservation._id,
+        updateData
+      );
 
-        const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
+      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
 
-        // Update the state with the modified reservation
-        setReservations((prev) =>
-            prev.map((res) =>
-                res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-            )
-        );
+      // Update the state with the modified reservation
+      setReservations((prev) =>
+        prev.map((res) =>
+          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
+        )
+      );
 
-        setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id}`);
-        setSnackbarOpen(true);
+      setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id || 'null'}`);
+      setSnackbarOpen(true);
     } catch (error) {
-        console.error("Failed to confirm payment", error);
-        setSnackbarMessage("Failed to confirm payment. Please try again.");
-        setSnackbarOpen(true);
+      console.error("Failed to confirm payment", error);
+      setSnackbarMessage("Failed to confirm payment. Please try again.");
+      setSnackbarOpen(true);
     } finally {
-        handleCloseConfirmDialog();
+      handleCloseConfirmDialog();
     }
-};
-
-
-
+  };
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -232,6 +229,7 @@ const ReservationList: React.FC = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          height: "100vh",
         }}
       >
         <CircularProgress />
@@ -253,7 +251,7 @@ const ReservationList: React.FC = () => {
         <Typography variant="h4" mb={3}>
           Manage Reservations
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: 'wrap', gap: 2 }}>
           <TextField
             label="Search by Customer Name"
             placeholder="Enter customer name..."
@@ -261,14 +259,12 @@ const ReservationList: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ mr: 2 }}
-            fullWidth={isMobile}
+            sx={{ mr: 2, flex: isMobile ? '1 1 100%' : 'auto' }}
           />
           <FormControl
             variant="outlined"
             size="small"
-            sx={{ minWidth: isMobile ? "100%" : 150, mr: 2 }}
-            fullWidth={isMobile}
+            sx={{ minWidth: isMobile ? "100%" : 150, mr: 2, flex: isMobile ? '1 1 100%' : 'auto' }}
           >
             <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
@@ -313,21 +309,21 @@ const ReservationList: React.FC = () => {
                     <TableCell>Time</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Payment Status</TableCell>{" "}
+                    <TableCell>Payment Status</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {displayedReservations.map((reservation) => (
-                    <TableRow key={reservation._id} hover>
-                      <TableCell>{reservation.customer.username}</TableCell>
+                    <TableRow key={reservation._id || 'unknown-id'} hover>
+                      <TableCell>{reservation?.customer?.username || 'null'}</TableCell>
                       <TableCell>
-                        {new Date(reservation.date).toLocaleDateString()}
+                        {reservation?.date ? new Date(reservation.date).toLocaleDateString() : 'null'}
                       </TableCell>
-                      <TableCell>{reservation.time}</TableCell>
-                      <TableCell>{reservation.type}</TableCell>
-                      <TableCell>{reservation.status}</TableCell>
-                      <TableCell>{reservation.paymentStatus}</TableCell>
+                      <TableCell>{reservation?.time || 'null'}</TableCell>
+                      <TableCell>{reservation?.type || 'null'}</TableCell>
+                      <TableCell>{reservation?.status || 'null'}</TableCell>
+                      <TableCell>{reservation?.paymentStatus || 'null'}</TableCell>
                       <TableCell align="right">
                         <Button
                           variant="outlined"
@@ -359,24 +355,24 @@ const ReservationList: React.FC = () => {
             <DialogTitle>Reservation Details</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                <strong>Customer:</strong> {selectedReservation.customer.username}
+                <strong>Customer:</strong> {selectedReservation?.customer?.username || 'null'}
                 <br />
-                <strong>Date:</strong> {new Date(selectedReservation.date).toLocaleDateString()}
+                <strong>Date:</strong> {selectedReservation?.date ? new Date(selectedReservation.date).toLocaleDateString() : 'null'}
                 <br />
-                <strong>Time:</strong> {selectedReservation.time}
+                <strong>Time:</strong> {selectedReservation?.time || 'null'}
                 <br />
-                <strong>Type:</strong> {selectedReservation.type}
+                <strong>Type:</strong> {selectedReservation?.type || 'null'}
                 <br />
-                <strong>Status:</strong> {selectedReservation.status}
+                <strong>Status:</strong> {selectedReservation?.status || 'null'}
                 <br />
-                <strong>Payment Status:</strong> {selectedReservation.paymentStatus}
+                <strong>Payment Status:</strong> {selectedReservation?.paymentStatus || 'null'}
                 <br />
-                <strong>Special Requests:</strong> {selectedReservation.specialRequests}
+                <strong>Special Requests:</strong> {selectedReservation?.specialRequests || 'null'}
                 <br />
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              {selectedReservation.status === "Pending" && (
+              {selectedReservation?.status === "Pending" && (
                 <>
                   <Button onClick={handleCancelReservation} color="secondary">
                     Cancel Reservation
@@ -386,7 +382,7 @@ const ReservationList: React.FC = () => {
                   </Button>
                 </>
               )}
-              {selectedReservation.paymentStatus === "Pending" && (
+              {selectedReservation?.paymentStatus === "Pending" && (
                 <Button onClick={handleConfirmPayment} color="primary">
                   Confirm Payment
                 </Button>
@@ -401,7 +397,7 @@ const ReservationList: React.FC = () => {
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={handleSnackbarClose}
-          message={snackbarMessage}
+          message={snackbarMessage || 'Operation completed'}
         />
       </Box>
     </Layout>
