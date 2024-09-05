@@ -225,22 +225,17 @@ const Register: React.FC = () => {
 
         {/* Sign-in Redirect */}
         <Grid container justifyContent="flex-end" sx={{ mt: 1.5 }}>
-          <Grid item>
-            <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-              Already have an account?{" "}
-              <a
-                href="/login"
-                style={{
-                  textDecoration: "none",
-                  color: "#1976d2",
-                  fontWeight: "bold",
-                }}
-              >
-                Sign in
-              </a>
-            </Typography>
-          </Grid>
-        </Grid>
+  <Grid item>
+    <Typography 
+      variant="body2" 
+      sx={{ fontSize: "0.75rem", cursor: 'pointer', color: "#1976d2", fontWeight: "bold" }} 
+      onClick={() => navigate('/login')} 
+    >
+      Don You have an account? Login
+    </Typography>
+  </Grid>
+</Grid>
+
       </Paper>
     </Container>
   );

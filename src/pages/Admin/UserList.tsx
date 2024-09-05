@@ -23,6 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchUsers, updateUser, deleteUser, registerUserAdmin } from '@/services/api'; // Import API functions
 import UserModel from '@/models/UserModel';
+import Layout from '@/components/Layout/Layout';
 
 interface User {
   id: string;
@@ -116,6 +117,11 @@ const UserManagementDashboard: React.FC = () => {
 
   // Handle deleting a user
   const handleDeleteUser = async (id: string) => {
+    if (!id) {
+      setNotification('User ID is missing.');
+      return;
+    }
+
     try {
       await deleteUser(id);
       setUsers(users.filter((user) => user.id !== id)); // Remove deleted user from the list
@@ -126,6 +132,7 @@ const UserManagementDashboard: React.FC = () => {
   };
 
   return (
+    <Layout>
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         User Management Dashboard
@@ -257,6 +264,7 @@ const UserManagementDashboard: React.FC = () => {
         </Box>
       </Modal>
     </Box>
+    </Layout>
   );
 };
 

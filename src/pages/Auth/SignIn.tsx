@@ -191,22 +191,17 @@ const SignIn: React.FC = () => {
         
         {/* Register Link */}
         <Grid container justifyContent="flex-end" sx={{ mt: 1.5 }}>
-          <Grid item>
-            <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-              Don't have an account?{" "}
-              <a
-                href="/register"
-                style={{
-                  textDecoration: "none",
-                  color: "#1976d2",
-                  fontWeight: "bold",
-                }}
-              >
-                Register
-              </a>
-            </Typography>
-          </Grid>
-        </Grid>
+  <Grid item>
+    <Typography 
+      variant="body2" 
+      sx={{ fontSize: "0.75rem", cursor: 'pointer', color: "#1976d2", fontWeight: "bold" }} 
+      onClick={() => navigate('/register')} // Use navigate instead of href
+    >
+      Don't have an account? Register
+    </Typography>
+  </Grid>
+</Grid>
+
       </Paper>
     </Container>
   );
