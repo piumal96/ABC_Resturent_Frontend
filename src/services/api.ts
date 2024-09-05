@@ -144,10 +144,9 @@ export const registerUser = async (userData: {
 }): Promise<UserModel> => {
     try {
         const response: AxiosResponse<RegisterResponse> = await axios.post(`${API_URL}users/register`, userData);
-        
-        // Extract sessionId and user from the response data
         const { sessionId, user } = response.data;
-        localStorage.setItem('sessionId', sessionId);  
+        localStorage.setItem('sessionId', sessionId);
+        console.log(sessionId)  
         localStorage.setItem('user', JSON.stringify(user));  
         console.log('User registered successfully:', user);
         return user;
