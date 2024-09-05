@@ -17,7 +17,7 @@ export interface ReservationCustomer {
   
   export interface Reservation {
     _id: string;
-    customer: ReservationCustomer;
+    customer: ReservationCustomer | null
     restaurant: ReservationRestaurant;
     service: ReservationService;
     date: string; // ISO Date string
