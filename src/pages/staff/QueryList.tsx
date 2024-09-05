@@ -29,7 +29,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import { fetchQueries, deleteQuery } from '@/services/api'; // Adjust import paths accordingly
-import Layout from '@/components/Layout/Layout';
 import StaffLayout from '@/components/Layout/StaffLayout';
 
 interface Query {
