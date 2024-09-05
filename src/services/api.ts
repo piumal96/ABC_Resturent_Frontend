@@ -147,11 +147,8 @@ export const registerUser = async (userData: {
         
         // Extract sessionId and user from the response data
         const { sessionId, user } = response.data;
-
-        // Store sessionId and user in localStorage
-        localStorage.setItem('sessionId', sessionId);
-        localStorage.setItem('user', JSON.stringify(user));
-
+        localStorage.setItem('sessionId', sessionId);  
+        localStorage.setItem('user', JSON.stringify(user));  
         console.log('User registered successfully:', user);
         return user;
     } catch (error) {
