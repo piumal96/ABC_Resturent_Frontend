@@ -95,10 +95,10 @@ const AdminDashboard: React.FC = () => {
           </Grid>
           <Grid item>
             <DashboardCard
-              title="System Settings"
+              title="Menu Items"
               description="Manage system settings and configurations."
               icon={BuildIcon}
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate('/dish')}
             />
           </Grid>
         </Grid>

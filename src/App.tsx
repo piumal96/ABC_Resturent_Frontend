@@ -42,6 +42,9 @@ import { ReservationProvider } from './context/ReservationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from './pages/Auth/Register';
 import ReportDashboard from './pages/Admin/ReportGenerator';
+import CartManagement from './pages/client/Cart';
+import MenuPage from './pages/client/MenuPage';
+import DishList from './pages/Admin/MenuList';
 
 function App() {
   const navigate = useNavigate();
@@ -70,6 +73,7 @@ function App() {
           <Route path="/facilities" element={<ProtectedRoute><FacilityList /></ProtectedRoute>} />
           <Route path="/facilities/edit/:id" element={<ProtectedRoute><FacilityForm /></ProtectedRoute>} />
           <Route path="/reservations" element={<ProtectedRoute><ReservationList /></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute><CartManagement /></ProtectedRoute>} />
           
           <Route path="/queries" element={<ProtectedRoute><QueryList /></ProtectedRoute>} />
           <Route path="/queries/:id" element={<ProtectedRoute><QueryDetail /></ProtectedRoute>} />
@@ -78,9 +82,11 @@ function App() {
           <Route path="/reports" element={<ProtectedRoute><ReportDashboard /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
           <Route path="/users/:id/edit-role" element={<ProtectedRoute><UserRoleForm /></ProtectedRoute>} />
+          <Route path="/dish" element={<ProtectedRoute><DishList /></ProtectedRoute>} />
 
           {/* Gallery management routes */}
           <Route path="/gallery" element={<ProtectedRoute><GalleryList /></ProtectedRoute>} />
+          <Route path="/menu" element={<ProtectedRoute><MenuPage /></ProtectedRoute>} />
           <Route path="/gallery/add" element={<ProtectedRoute><GalleryForm onSubmit={handleGallerySubmit} /></ProtectedRoute>} />
           <Route path="/gallery/edit/:id" element={<ProtectedRoute><GalleryForm onSubmit={handleGallerySubmit} /></ProtectedRoute>} />
 
