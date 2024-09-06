@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import ReservationDetailModel from "@/models/ReservationDetailModel";
-import Layout from "@/components/Layout/Layout";
+// src/components/ReservationList.tsx
+import React from "react";
 import {
   Box,
   Button,
@@ -30,196 +29,38 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { fetchReservations, updateReservation, updatePayment } from "@/services/api"; // Import updatePayment function
+import Layout from "@/components/Layout/Layout";
+import { useReservationController } from "@/controllers/Admin/ReservationController";
 
 const ReservationList: React.FC = () => {
+  const {
+    reservations,
+    searchTerm,
+    statusFilter,
+    loading,
+    error,
+    page,
+    rowsPerPage,
+    confirmDialogOpen,
+    selectedReservation,
+    snackbarOpen,
+    snackbarMessage,
+    setSearchTerm,
+    setStatusFilter,
+    handleSearch,
+    handleDetail,
+    handleCloseConfirmDialog,
+    handleConfirmReservation,
+    handleCancelReservation,
+    handleConfirmPayment,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    displayedReservations,
+    handleSnackbarClose,
+  } = useReservationController();
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [reservations, setReservations] = useState<ReservationDetailModel[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(""); // State for status filter
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<ReservationDetailModel | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
-  useEffect(() => {
-    const loadReservations = async () => {
-      try {
-        const fetchedReservations: ReservationDetailModel[] = await fetchReservations();
-        setReservations(fetchedReservations);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching reservations:", err);
-        setError("Failed to load reservations. Please try again later.");
-        setLoading(false);
-      }
-    };
-
-    loadReservations();
-  }, []);
-
-  const handleSearch = () => {
-    const filteredReservations = reservations.filter(
-      (reservation) =>
-        reservation?.customer?.username?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (statusFilter === "" || reservation?.status === statusFilter)
-    );
-    setReservations(filteredReservations);
-  };
-
-  const handleDetail = (reservation: ReservationDetailModel) => {
-    setSelectedReservation(reservation);
-    setConfirmDialogOpen(true);
-  };
-
-  const handleCloseConfirmDialog = () => {
-    setConfirmDialogOpen(false);
-    setSelectedReservation(null);
-  };
-
-  const handleConfirmReservation = async () => {
-    if (!selectedReservation) return;
-
-    try {
-      const updateData: any = {
-        status: "Confirmed",
-      };
-      console.log("Updating reservation with data:", updateData);
-
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        updateData
-      );
-      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
-
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-        )
-      );
-      setSnackbarMessage(`Confirmed reservation with ID: ${selectedReservation._id || 'null'}`);
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to confirm reservation", error);
-      setSnackbarMessage("Failed to confirm reservation. Please try again.");
-      setSnackbarOpen(true);
-    } finally {
-      handleCloseConfirmDialog();
-    }
-  };
-
-  const handleCancelReservation = async () => {
-    if (!selectedReservation) return;
-
-    try {
-      const updateData: any = {
-        status: "Cancelled",
-      };
-
-      if (selectedReservation.type === "Delivery") {
-        updateData.deliveryAddress = selectedReservation.deliveryAddress || null;
-        updateData.contactNumber = selectedReservation.contactNumber || null;
-      }
-
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        updateData
-      );
-
-      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
-
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-        )
-      );
-      setSnackbarMessage(`Cancelled reservation with ID: ${selectedReservation._id || 'null'}`);
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to cancel reservation", error);
-      setSnackbarMessage("Failed to cancel reservation. Please try again.");
-      setSnackbarOpen(true);
-    } finally {
-      handleCloseConfirmDialog();
-    }
-  };
-
-  const handleConfirmPayment = async () => {
-    if (!selectedReservation || !selectedReservation.payment?._id) {
-      console.error("Invalid payment details:", selectedReservation?.payment);
-      setSnackbarMessage("Invalid payment details. Please try again.");
-      setSnackbarOpen(true);
-      return;
-    }
-
-    try {
-      // Log the payment details for debugging purposes
-      console.log('Payment details:', selectedReservation.payment);
-
-      // Update the payment status to 'Paid'
-      const paymentUpdateResponse = await updatePayment(
-        selectedReservation.payment._id, // Payment ID
-        selectedReservation.payment.amount || 0, // Payment amount
-        selectedReservation.payment.paymentMethod || "credit-card", // Payment method
-        "Paid" // Desired payment status
-      );
-
-      if (!paymentUpdateResponse.success) {
-        throw new Error('Failed to update payment status.');
-      }
-
-      // Update the reservation status to reflect the payment status
-      const updateData: any = {
-        paymentStatus: "Paid",
-      };
-
-      const updatedReservation = await updateReservation(
-        selectedReservation._id,
-        updateData
-      );
-
-      const updatedReservationDetail = new ReservationDetailModel(updatedReservation);
-
-      // Update the state with the modified reservation
-      setReservations((prev) =>
-        prev.map((res) =>
-          res._id === updatedReservationDetail._id ? updatedReservationDetail : res
-        )
-      );
-
-      setSnackbarMessage(`Confirmed payment for reservation with ID: ${selectedReservation._id || 'null'}`);
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to confirm payment", error);
-      setSnackbarMessage("Failed to confirm payment. Please try again.");
-      setSnackbarOpen(true);
-    } finally {
-      handleCloseConfirmDialog();
-    }
-  };
-
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const displayedReservations = useMemo(() => {
-    const startIndex = page * rowsPerPage;
-    return reservations.slice(startIndex, startIndex + rowsPerPage);
-  }, [reservations, page, rowsPerPage]);
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
 
   if (loading) {
     return (
@@ -251,7 +92,7 @@ const ReservationList: React.FC = () => {
         <Typography variant="h4" mb={3}>
           Manage Reservations
         </Typography>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap", gap: 2 }}>
           <TextField
             label="Search by Customer Name"
             placeholder="Enter customer name..."
@@ -259,12 +100,12 @@ const ReservationList: React.FC = () => {
             size="small"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ mr: 2, flex: isMobile ? '1 1 100%' : 'auto' }}
+            sx={{ mr: 2, flex: isMobile ? "1 1 100%" : "auto" }}
           />
           <FormControl
             variant="outlined"
             size="small"
-            sx={{ minWidth: isMobile ? "100%" : 150, mr: 2, flex: isMobile ? '1 1 100%' : 'auto' }}
+            sx={{ minWidth: isMobile ? "100%" : 150, mr: 2, flex: isMobile ? "1 1 100%" : "auto" }}
           >
             <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
@@ -315,20 +156,15 @@ const ReservationList: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {displayedReservations.map((reservation) => (
-                    <TableRow key={reservation._id || 'unknown-id'} hover>
-                      <TableCell>{reservation?.customer?.username || 'null'}</TableCell>
-                      <TableCell>
-                        {reservation?.date ? new Date(reservation.date).toLocaleDateString() : 'null'}
-                      </TableCell>
-                      <TableCell>{reservation?.time || 'null'}</TableCell>
-                      <TableCell>{reservation?.type || 'null'}</TableCell>
-                      <TableCell>{reservation?.status || 'null'}</TableCell>
-                      <TableCell>{reservation?.paymentStatus || 'null'}</TableCell>
+                    <TableRow key={reservation._id || "unknown-id"} hover>
+                      <TableCell>{reservation?.customer?.username || "null"}</TableCell>
+                      <TableCell>{reservation?.date ? new Date(reservation.date).toLocaleDateString() : "null"}</TableCell>
+                      <TableCell>{reservation?.time || "null"}</TableCell>
+                      <TableCell>{reservation?.type || "null"}</TableCell>
+                      <TableCell>{reservation?.status || "null"}</TableCell>
+                      <TableCell>{reservation?.paymentStatus || "null"}</TableCell>
                       <TableCell align="right">
-                        <Button
-                          variant="outlined"
-                          onClick={() => handleDetail(reservation)}
-                        >
+                        <Button variant="outlined" onClick={() => handleDetail(reservation)}>
                           View Details
                         </Button>
                       </TableCell>
@@ -349,25 +185,24 @@ const ReservationList: React.FC = () => {
           </>
         )}
 
-        {/* Confirm Navigation Dialog */}
         {selectedReservation && (
           <Dialog open={confirmDialogOpen} onClose={handleCloseConfirmDialog} fullWidth maxWidth="sm">
             <DialogTitle>Reservation Details</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                <strong>Customer:</strong> {selectedReservation?.customer?.username || 'null'}
+                <strong>Customer:</strong> {selectedReservation?.customer?.username || "null"}
                 <br />
-                <strong>Date:</strong> {selectedReservation?.date ? new Date(selectedReservation.date).toLocaleDateString() : 'null'}
+                <strong>Date:</strong> {selectedReservation?.date ? new Date(selectedReservation.date).toLocaleDateString() : "null"}
                 <br />
-                <strong>Time:</strong> {selectedReservation?.time || 'null'}
+                <strong>Time:</strong> {selectedReservation?.time || "null"}
                 <br />
-                <strong>Type:</strong> {selectedReservation?.type || 'null'}
+                <strong>Type:</strong> {selectedReservation?.type || "null"}
                 <br />
-                <strong>Status:</strong> {selectedReservation?.status || 'null'}
+                <strong>Status:</strong> {selectedReservation?.status || "null"}
                 <br />
-                <strong>Payment Status:</strong> {selectedReservation?.paymentStatus || 'null'}
+                <strong>Payment Status:</strong> {selectedReservation?.paymentStatus || "null"}
                 <br />
-                <strong>Special Requests:</strong> {selectedReservation?.specialRequests || 'null'}
+                <strong>Special Requests:</strong> {selectedReservation?.specialRequests || "null"}
                 <br />
               </DialogContentText>
             </DialogContent>
@@ -392,12 +227,11 @@ const ReservationList: React.FC = () => {
           </Dialog>
         )}
 
-        {/* Snackbar for feedback */}
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={6000}
           onClose={handleSnackbarClose}
-          message={snackbarMessage || 'Operation completed'}
+          message={snackbarMessage || "Operation completed"}
         />
       </Box>
     </Layout>

@@ -8,12 +8,10 @@ import OfferForm from './pages/Admin/OfferForm';
 import FacilityList from './pages/Admin/FacilityList';
 import FacilityForm from './pages/Admin/FacilityForm';
 import ReservationList from './pages/Admin/ReservationList';
-import ReservationDetail from './pages/Admin/ReservationDetail';
 import QueryList from './pages/Admin/QueryList';
 import QueryDetail from './pages/Admin/QueryDetail';
 import PaymentList from './pages/Admin/PaymentList';
 import PaymentDetail from './pages/Admin/PaymentDetail';
-import ReportView from './pages/Admin/ReportView';
 import UserList from './pages/Admin/UserList';
 import UserRoleForm from './pages/Admin/UserRoleForm';
 
@@ -72,13 +70,12 @@ function App() {
           <Route path="/facilities" element={<ProtectedRoute><FacilityList /></ProtectedRoute>} />
           <Route path="/facilities/edit/:id" element={<ProtectedRoute><FacilityForm /></ProtectedRoute>} />
           <Route path="/reservations" element={<ProtectedRoute><ReservationList /></ProtectedRoute>} />
-          <Route path="/reservations/:id" element={<ProtectedRoute><ReservationDetail /></ProtectedRoute>} />
+          
           <Route path="/queries" element={<ProtectedRoute><QueryList /></ProtectedRoute>} />
           <Route path="/queries/:id" element={<ProtectedRoute><QueryDetail /></ProtectedRoute>} />
           <Route path="/payments" element={<ProtectedRoute><PaymentList /></ProtectedRoute>} />
           <Route path="/payments/:id" element={<ProtectedRoute><PaymentDetail /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportDashboard /></ProtectedRoute>} />
-          <Route path="/reports/:reportType" element={<ProtectedRoute><ReportView /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
           <Route path="/users/:id/edit-role" element={<ProtectedRoute><UserRoleForm /></ProtectedRoute>} />
 

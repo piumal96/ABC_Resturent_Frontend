@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// src/components/OfferList.tsx
+import React from 'react';
 import {
   Box,
   Button,
@@ -21,70 +22,23 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from 'react-router-dom';
-import { getOffers, deleteOffer, createOffer } from '@/services/api';
-import { OfferModel } from '@/models/OfferModel';
+import { useOfferController } from '@/controllers/Admin/OfferController';
 
 const OfferList: React.FC = () => {
   const navigate = useNavigate();
-  const [offers, setOffers] = useState<OfferModel[]>([]);
-  const [open, setOpen] = useState(false);
-  const [newOffer, setNewOffer] = useState({
-    title: '',
-    description: '',
-    discountPercentage: 0,
-    validFrom: '',
-    validTo: '',
-  });
-
-  useEffect(() => {
-    const fetchOffers = async () => {
-      try {
-        const fetchedOffers = await getOffers(); // Fetch offers from the backend
-        setOffers(fetchedOffers);
-      } catch (error) {
-        console.error('Error fetching offers:', error);
-      }
-    };
-
-    fetchOffers();
-  }, []);
+  const {
+    offers,
+    open,
+    newOffer,
+    setNewOffer,
+    handleAdd,
+    handleClose,
+    handleSave,
+    handleDelete,
+  } = useOfferController();
 
   const handleEdit = (id: string) => {
     navigate(`/offers/edit/${id}`);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteOffer(id); // Delete offer from the backend
-      setOffers(offers.filter((offer) => offer._id !== id)); // Remove deleted offer from state
-    } catch (error) {
-      console.error('Error deleting offer:', error);
-    }
-  };
-
-  const handleAdd = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setNewOffer({
-      title: '',
-      description: '',
-      discountPercentage: 0,
-      validFrom: '',
-      validTo: '',
-    });
-  };
-
-  const handleSave = async () => {
-    try {
-      const createdOffer = await createOffer(newOffer); // Create a new offer in the backend
-      setOffers([...offers, createdOffer.offer]); // Add the new offer to the state
-      handleClose();
-    } catch (error) {
-      console.error('Error creating offer:', error);
-    }
   };
 
   return (
