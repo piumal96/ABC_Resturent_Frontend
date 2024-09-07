@@ -9,6 +9,7 @@ import { ReservationReportResponse } from '@/models/ReservationReportModel';
 import { QueryReportResponse } from '@/models/QueryReportModel';
 import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 import { PaymentModel } from '@/models/Payments';
+import { OrderModel } from '@/models/OrderModel';
 
 
 const API_URL = 'http://localhost:5001/api/';
@@ -694,9 +695,72 @@ export const removeCartItem = async (dishId: string): Promise<string> => {
     }
   };
 
+  export const fetchUserOrders = async (): Promise<OrderModel[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/user/orders`); 
+      return response.data.orders;
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      throw error;
+    }
+  };
+
+  export const createOrder = async (
+    restaurantId: string,
+    deliveryAddress: string
+  ): Promise<OrderModel> => {
+    const response: AxiosResponse<{ success: boolean; order: OrderModel }> = await axios.post(`${API_URL}payment`, {
+      restaurantId,
+      deliveryAddress,
+    });
+  
+    if (!response.data.success) {
+      throw new Error('Failed to create order');
+    }
+  
+    return response.data.order;
+  };
+
+  // Fetch all orders with search term and status filter
+export const fetchOrders = async (searchTerm: string, status: string): Promise<{ orders: OrderModel[] }> => {
+    try {
+      const response: AxiosResponse<{ success: boolean; orders: OrderModel[] }> = await axios.get(`${API_URL}orders`, {
+        params: { searchTerm, status }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      throw error;
+    }
+  };
+  
+  // Update order status (e.g., 'Confirmed', 'Cancelled')
+  export const updateOrderStatus = async (orderId: string, status: string): Promise<void> => {
+    try {
+      await axios.put(`${API_URL}orders/${orderId}/status`, { status });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  };
+  
+  // Update payment status
+  export const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
+    try {
+      await axios.put(`${API_URL}orders/${orderId}/payment`, { paymentStatus });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      throw error;
+    }
+  };
 
 // Export all functions as a single default object
 export default {
+    fetchOrders,
+    updateOrderStatus,
+    updatePaymentStatus,
+    createOrder,
+    fetchUserOrders,
     deleteUser,
     fetchUsers,
     updateUser,

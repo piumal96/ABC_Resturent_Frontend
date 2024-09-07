@@ -101,6 +101,14 @@ const AdminDashboard: React.FC = () => {
               onClick={() => navigate('/dish')}
             />
           </Grid>
+          <Grid item>
+            <DashboardCard
+              title="Order Manage"
+              description="Manage system settings and configurations."
+              icon={BuildIcon}
+              onClick={() => navigate('/ordermanage')}
+            />
+          </Grid>
         </Grid>
       </Box>
     </Layout>

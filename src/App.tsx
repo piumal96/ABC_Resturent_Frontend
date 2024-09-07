@@ -45,6 +45,8 @@ import ReportDashboard from './pages/Admin/ReportGenerator';
 import CartManagement from './pages/client/Cart';
 import MenuPage from './pages/client/MenuPage';
 import DishList from './pages/Admin/MenuList';
+import OrderList from './pages/Admin/OrderManage';
+import UserOrderTracking from './pages/client/OrderTracking';
 
 function App() {
   const navigate = useNavigate();
@@ -83,7 +85,8 @@ function App() {
           <Route path="/users" element={<ProtectedRoute><UserList /></ProtectedRoute>} />
           <Route path="/users/:id/edit-role" element={<ProtectedRoute><UserRoleForm /></ProtectedRoute>} />
           <Route path="/dish" element={<ProtectedRoute><DishList /></ProtectedRoute>} />
-
+          <Route path="/track" element={<ProtectedRoute><UserOrderTracking /></ProtectedRoute>} />
+          <Route path="/ordermanage" element={<ProtectedRoute><OrderList /></ProtectedRoute>} />
           {/* Gallery management routes */}
           <Route path="/gallery" element={<ProtectedRoute><GalleryList /></ProtectedRoute>} />
           <Route path="/menu" element={<ProtectedRoute><MenuPage /></ProtectedRoute>} />

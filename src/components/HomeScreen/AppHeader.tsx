@@ -160,6 +160,15 @@ const AppHeader: React.FC = () => {
                     Menu
                   </Button>
                 </Tooltip>
+                <Tooltip title="View our Services">
+                  <Button
+                    color="inherit"
+                    onClick={() => navigate('/track')} 
+                    sx={{ '&:hover': { backgroundColor: '#357a38' } }}
+                  >
+                    Order
+                  </Button>
+                </Tooltip>
                 <Tooltip title="Check our Offers">
                   <Button
                     color="inherit"

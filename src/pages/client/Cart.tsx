@@ -1,155 +1,225 @@
-import React, { useEffect, useState } from 'react';
-import { fetchCart, addToCart, updateCartItem, removeCartItem, CartModel } from '@/services/api';
-import { Card, CardContent, Typography, IconButton, Grid, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  MenuItem,
+  Paper,
+  Grid,
+  CircularProgress,
+  Snackbar,
+  IconButton,
+  Box,
+  Divider,
+  Alert,
+} from '@mui/material';
 import { Add, Remove, Delete } from '@mui/icons-material';
+import { fetchCart, updateCartItem, removeCartItem, createOrder, fetchRestaurants } from '@/services/api';
 
 const CartPage: React.FC = () => {
-  const [cart, setCart] = useState<CartModel | null>(null); // Cart state
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error state
-  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false); // Snackbar state
+  const [cart, setCart] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+  const [restaurantId, setRestaurantId] = useState<string>(''); // Restaurant ID
+  const [restaurants, setRestaurants] = useState<any[]>([]); // List of available restaurants
+  const [deliveryAddress, setDeliveryAddress] = useState<string>(''); // Delivery address input
+  const [totalOrderCost, setTotalOrderCost] = useState<number>(0); // Total order cost
 
-  // Fetch the cart when the component mounts
+  // Fetch the cart and restaurants when the component mounts
   useEffect(() => {
-    const loadCart = async () => {
+    const loadCartAndRestaurants = async () => {
       try {
         const fetchedCart = await fetchCart();
-        setCart(fetchedCart); // Set cart data
+        const fetchedRestaurants = await fetchRestaurants();
+        setCart(fetchedCart);
+        setRestaurants(fetchedRestaurants);
+        calculateTotalOrderCost(fetchedCart);
       } catch (error) {
-        console.error('Error fetching cart:', error);
-        setErrorMessage('Failed to load cart. Please try again.'); // Handle fetch error
+        console.error('Error loading cart or restaurants:', error);
+        setSnackbarMessage('Failed to load data. Please try again.');
+        setSnackbarOpen(true);
       } finally {
-        setLoading(false); // Stop loading spinner
+        setLoading(false);
       }
     };
-    loadCart();
+    loadCartAndRestaurants();
   }, []);
 
-  // Add an item to the cart
-  const handleAddToCart = async (dishId: string, customizations: Record<string, number>, quantity: number) => {
-    try {
-      await addToCart(dishId, customizations, quantity);
-      const updatedCart = await fetchCart(); // Refetch updated cart
-      setCart(updatedCart); // Update cart state
-      setSnackbarMessage('Item added to cart');
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      setErrorMessage('Failed to add item to cart.');
-      setSnackbarOpen(true);
+  // Calculate total order cost
+  const calculateTotalOrderCost = (cart: any) => {
+    if (cart && cart.items) {
+      const totalCost = cart.items.reduce((total: number, item: any) => total + item.totalPrice, 0);
+      setTotalOrderCost(totalCost);
     }
   };
 
   // Update item quantity in the cart
   const handleUpdateQuantity = async (dishId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
-      console.warn('Quantity must be at least 1');
+      setSnackbarMessage('Quantity must be at least 1');
+      setSnackbarOpen(true);
       return;
     }
 
     try {
       await updateCartItem(dishId, newQuantity);
-      const updatedCart = await fetchCart(); // Refetch updated cart
-      setCart(updatedCart); // Update cart state
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+      calculateTotalOrderCost(updatedCart);
       setSnackbarMessage('Quantity updated');
       setSnackbarOpen(true);
     } catch (error) {
-      console.error('Error updating item quantity:', error);
-      setErrorMessage('Failed to update item quantity.');
+      console.error('Error updating quantity:', error);
+      setSnackbarMessage('Failed to update item quantity.');
       setSnackbarOpen(true);
     }
   };
 
-  // Remove an item from the cart
+  // Remove item from cart
   const handleRemoveFromCart = async (dishId: string) => {
     try {
       await removeCartItem(dishId);
-      const updatedCart = await fetchCart(); // Refetch updated cart
-      setCart(updatedCart); // Update cart state
-      setSnackbarMessage('Item removed from cart');
+      const updatedCart = await fetchCart();
+      setCart(updatedCart);
+      calculateTotalOrderCost(updatedCart);
+      setSnackbarMessage('Item removed');
       setSnackbarOpen(true);
     } catch (error) {
       console.error('Error removing item from cart:', error);
-      setErrorMessage('Failed to remove item from cart.');
+      setSnackbarMessage('Failed to remove item.');
       setSnackbarOpen(true);
     }
   };
 
+  // Handle order creation
+  const handlePlaceOrder = async () => {
+    if (!restaurantId || !deliveryAddress) {
+      setSnackbarMessage('Please select a restaurant and provide a delivery address.');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    try {
+      await createOrder(restaurantId, deliveryAddress);
+      setSnackbarMessage('Order placed successfully!');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      setSnackbarMessage('Failed to place order.');
+      setSnackbarOpen(true);
+    }
+  };
+
+  // Handle snackbar close
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
 
-  // Loading state
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
         <CircularProgress />
-        <Typography variant="body1" sx={{ marginLeft: 2 }}>
-          Loading cart...
-        </Typography>
       </Box>
     );
   }
 
-  // Error state
-  if (errorMessage) return <p>{errorMessage}</p>;
-
-  // Empty cart state
-  if (!cart || cart.items.length === 0) return <p>Your cart is empty.</p>;
+  if (!cart || cart.items.length === 0) {
+    return <Typography variant="h6" align="center">Your cart is empty.</Typography>;
+  }
 
   return (
-    <Box sx={{ padding: '20px' }}>
-      <Typography variant="h4" gutterBottom>
-        Your Cart
-      </Typography>
+    <Container maxWidth="md" sx={{ padding: '20px' }}>
+      <Typography variant="h4" gutterBottom>Your Cart</Typography>
       <Grid container spacing={2}>
-        {cart.items.map((item, index) => (
-          <Grid item xs={12} md={6} key={`${item.dish._id}-${index}`}>
-            <Card sx={{ display: 'flex', justifyContent: 'space-between', padding: '16px', alignItems: 'center' }}>
-              <CardContent>
-                <Typography variant="h6">{item.dish.name}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Quantity: {item.quantity}
-                </Typography>
-                <Typography variant="body2" color="primary">
-                  Total: ${(item.totalPrice).toFixed(2)}
-                </Typography>
-              </CardContent>
+        {cart.items.map((item: any, index: number) => (
+          <Grid item xs={12} sm={6} key={`${item.dish._id}-${index}`}>
+            <Paper
+              sx={{
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+                boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
+              }}
+            >
               <Box>
-                <IconButton
-                  color="primary"
-                  onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}
-                >
+                <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
+                <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
+                <Typography variant="body2" color="primary">Total: ${item.totalPrice.toFixed(2)}</Typography>
+              </Box>
+              <Box>
+                <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
                   <Remove />
                 </IconButton>
-                <IconButton
-                  color="primary"
-                  onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}
-                >
+                <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}>
                   <Add />
                 </IconButton>
-                <IconButton
-                  color="secondary"
-                  onClick={() => handleRemoveFromCart(item.dish._id)}
-                >
+                <IconButton onClick={() => handleRemoveFromCart(item.dish._id)}>
                   <Delete />
                 </IconButton>
               </Box>
-            </Card>
+            </Paper>
           </Grid>
         ))}
       </Grid>
-      <Box mt={4}>
+
+      <Divider sx={{ my: 3 }} />
+
+      {/* Total Price */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5" color="primary">
-          Total Price: ${cart.totalPrice.toFixed(2)}
+          Total Order Cost: ${totalOrderCost.toFixed(2)}
         </Typography>
       </Box>
+
+      {/* Restaurant Selection */}
+      <Box mb={3}>
+        <TextField
+          label="Select Restaurant"
+          value={restaurantId}
+          onChange={(e) => setRestaurantId(e.target.value)}
+          select
+          fullWidth
+          required
+        >
+          {restaurants.map((restaurant) => (
+            <MenuItem key={restaurant._id} value={restaurant._id}>
+              {restaurant.name} - {restaurant.location}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
+
+      {/* Delivery Address */}
+      <Box mb={3}>
+        <TextField
+          label="Delivery Address"
+          value={deliveryAddress}
+          onChange={(e) => setDeliveryAddress(e.target.value)}
+          fullWidth
+          required
+          placeholder="Enter your delivery address"
+        />
+      </Box>
+
+      {/* Place Order Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handlePlaceOrder}
+        fullWidth
+        sx={{ padding: '12px', fontSize: '16px' }}
+      >
+        Place Order
+      </Button>
 
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
@@ -157,7 +227,7 @@ const CartPage: React.FC = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
 };
 
