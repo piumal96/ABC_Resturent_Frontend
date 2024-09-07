@@ -1,191 +1,157 @@
-import React, { useState } from 'react';
-import {
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Snackbar,
-  Alert,
-  IconButton,
-  Divider,
-  Box,
-  Paper,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  TextField,
-} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { fetchCart, addToCart, updateCartItem, removeCartItem, CartModel } from '@/services/api';
+import { Card, CardContent, Typography, IconButton, Grid, Box, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { Add, Remove, Delete } from '@mui/icons-material';
 
-// Dummy cart data
-const dummyCart = {
-  items: [
-    {
-      dish: {
-        _id: '1',
-        name: 'Spaghetti Carbonara',
-        price: 12,
-      },
-      quantity: 2,
-      totalPrice: 24,
-    },
-    {
-      dish: {
-        _id: '2',
-        name: 'Margherita Pizza',
-        price: 10,
-      },
-      quantity: 1,
-      totalPrice: 10,
-    },
-  ],
-  totalPrice: 34,
-};
-
 const CartPage: React.FC = () => {
-  const [cart, setCart] = useState(dummyCart);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState('creditCard');
+  const [cart, setCart] = useState<CartModel | null>(null); // Cart state
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error state
+  const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false); // Snackbar state
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
-  const handleRemoveFromCart = (dishId: string) => {
-    const updatedCart = {
-      ...cart,
-      items: cart.items.filter((item) => item.dish._id !== dishId),
-      totalPrice: cart.items
-        .filter((item) => item.dish._id !== dishId)
-        .reduce((total, item) => total + item.totalPrice, 0),
-    };
-    setCart(updatedCart);
-    setSnackbarMessage('Item removed from cart');
-    setSnackbarOpen(true);
-  };
-
-  const handleUpdateQuantity = (dishId: string, newQuantity: number) => {
-    if (newQuantity <= 0) return; // Prevent quantity below 1
-    const updatedItems = cart.items.map((item) => {
-      if (item.dish._id === dishId && newQuantity > 0) {
-        const newTotalPrice = newQuantity * item.dish.price;
-        return { ...item, quantity: newQuantity, totalPrice: newTotalPrice };
+  // Fetch the cart when the component mounts
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const fetchedCart = await fetchCart();
+        setCart(fetchedCart); // Set cart data
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+        setErrorMessage('Failed to load cart. Please try again.'); // Handle fetch error
+      } finally {
+        setLoading(false); // Stop loading spinner
       }
-      return item;
-    });
-    const updatedTotalPrice = updatedItems.reduce((total, item) => total + item.totalPrice, 0);
-    setCart({ items: updatedItems, totalPrice: updatedTotalPrice });
+    };
+    loadCart();
+  }, []);
+
+  // Add an item to the cart
+  const handleAddToCart = async (dishId: string, customizations: Record<string, number>, quantity: number) => {
+    try {
+      await addToCart(dishId, customizations, quantity);
+      const updatedCart = await fetchCart(); // Refetch updated cart
+      setCart(updatedCart); // Update cart state
+      setSnackbarMessage('Item added to cart');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setErrorMessage('Failed to add item to cart.');
+      setSnackbarOpen(true);
+    }
   };
 
-  const handlePaymentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedPayment(event.target.value);
+  // Update item quantity in the cart
+  const handleUpdateQuantity = async (dishId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      console.warn('Quantity must be at least 1');
+      return;
+    }
+
+    try {
+      await updateCartItem(dishId, newQuantity);
+      const updatedCart = await fetchCart(); // Refetch updated cart
+      setCart(updatedCart); // Update cart state
+      setSnackbarMessage('Quantity updated');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error updating item quantity:', error);
+      setErrorMessage('Failed to update item quantity.');
+      setSnackbarOpen(true);
+    }
   };
 
-  const handleCheckout = () => {
-    // Checkout logic placeholder
-    setSnackbarMessage('Checkout successful!');
-    setSnackbarOpen(true);
+  // Remove an item from the cart
+  const handleRemoveFromCart = async (dishId: string) => {
+    try {
+      await removeCartItem(dishId);
+      const updatedCart = await fetchCart(); // Refetch updated cart
+      setCart(updatedCart); // Update cart state
+      setSnackbarMessage('Item removed from cart');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+      setErrorMessage('Failed to remove item from cart.');
+      setSnackbarOpen(true);
+    }
   };
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <CircularProgress />
+        <Typography variant="body1" sx={{ marginLeft: 2 }}>
+          Loading cart...
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Error state
+  if (errorMessage) return <p>{errorMessage}</p>;
+
+  // Empty cart state
+  if (!cart || cart.items.length === 0) return <p>Your cart is empty.</p>;
+
   return (
     <Box sx={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
         Your Cart
       </Typography>
-      {cart && cart.items.length > 0 ? (
-        <Grid container spacing={3}>
-          {cart.items.map((item) => (
-            <Grid item xs={12} md={6} key={item.dish._id}>
-              <Card elevation={3}>
-                <CardContent>
-                  <Typography variant="h6">{item.dish.name}</Typography>
-                  <Typography variant="body2">Price: ${item.dish.price}</Typography>
-                  <Box display="flex" alignItems="center" mt={2}>
-                    <IconButton
-                      onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}
-                    >
-                      <Remove />
-                    </IconButton>
-                    <TextField
-                      type="number"
-                      value={item.quantity}
-                      inputProps={{ min: 1, style: { textAlign: 'center' } }}
-                      onChange={(e) =>
-                        handleUpdateQuantity(item.dish._id, parseInt(e.target.value, 10))
-                      }
-                      sx={{ width: '50px', marginRight: '10px', marginLeft: '10px' }}
-                    />
-                    <IconButton
-                      onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}
-                    >
-                      <Add />
-                    </IconButton>
-                  </Box>
-                  <Typography variant="subtitle1" mt={2}>
-                    Total: ${item.totalPrice}
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button
-                    color="secondary"
-                    startIcon={<Delete />}
-                    onClick={() => handleRemoveFromCart(item.dish._id)}
-                  >
-                    Remove
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-          {/* Summary and Payment Section */}
-          <Grid item xs={12}>
-            <Paper elevation={3} sx={{ padding: '20px', marginTop: '20px' }}>
-              <Typography variant="h5">Total Cart Price: ${cart.totalPrice}</Typography>
-              <Divider sx={{ marginY: '20px' }} />
-              <FormControl component="fieldset">
-                <FormLabel component="legend">Select Payment Method</FormLabel>
-                <RadioGroup
-                  aria-label="payment-method"
-                  value={selectedPayment}
-                  onChange={handlePaymentChange}
+      <Grid container spacing={2}>
+        {cart.items.map((item, index) => (
+          <Grid item xs={12} md={6} key={`${item.dish._id}-${index}`}>
+            <Card sx={{ display: 'flex', justifyContent: 'space-between', padding: '16px', alignItems: 'center' }}>
+              <CardContent>
+                <Typography variant="h6">{item.dish.name}</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Quantity: {item.quantity}
+                </Typography>
+                <Typography variant="body2" color="primary">
+                  Total: ${(item.totalPrice).toFixed(2)}
+                </Typography>
+              </CardContent>
+              <Box>
+                <IconButton
+                  color="primary"
+                  onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}
                 >
-                  <FormControlLabel
-                    value="creditCard"
-                    control={<Radio />}
-                    label="Credit Card"
-                  />
-                  <FormControlLabel value="paypal" control={<Radio />} label="PayPal" />
-                  <FormControlLabel
-                    value="bankTransfer"
-                    control={<Radio />}
-                    label="Bank Transfer"
-                  />
-                </RadioGroup>
-              </FormControl>
-              <Box display="flex" justifyContent="space-between" mt={3}>
-                <Button variant="contained" color="primary" onClick={handleCheckout}>
-                  Checkout
-                </Button>
-                <Button variant="outlined" color="secondary">
-                  Clear Cart
-                </Button>
+                  <Remove />
+                </IconButton>
+                <IconButton
+                  color="primary"
+                  onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}
+                >
+                  <Add />
+                </IconButton>
+                <IconButton
+                  color="secondary"
+                  onClick={() => handleRemoveFromCart(item.dish._id)}
+                >
+                  <Delete />
+                </IconButton>
               </Box>
-            </Paper>
+            </Card>
           </Grid>
-        </Grid>
-      ) : (
-        <Typography variant="body1">Your cart is empty.</Typography>
-      )}
+        ))}
+      </Grid>
+      <Box mt={4}>
+        <Typography variant="h5" color="primary">
+          Total Price: ${cart.totalPrice.toFixed(2)}
+        </Typography>
+      </Box>
 
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
           {snackbarMessage}

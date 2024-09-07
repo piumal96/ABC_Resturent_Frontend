@@ -1,15 +1,24 @@
-// models/Cart.ts
+import { DishModel } from '../models/Dish Model'; 
 
-import { DishModel } from '../models/Dish Model';  
-
-export interface CartItemModel {
-    dish: DishModel;             
-    quantity: number;            
-    customizations: Record<string, string>;  
-    totalPrice: number;          
+// Interface for individual customization options in a cart item
+export interface CustomizationOptions {
+    [key: string]: string; 
 }
 
+// Interface for individual cart items
+export interface CartItemModel {
+    _id: string;                         
+    dish: DishModel;                     
+    quantity: number;                    
+    customizations: CustomizationOptions; 
+    totalPrice: number;                  
+}
+
+// Interface for the entire cart
 export interface CartModel {
-    items: CartItemModel[];      
-    totalPrice: number;          
+    _id?: string;                         
+    customer?: string;                    
+    items: CartItemModel[];               
+    totalPrice: number;                   
+    __v?: number;                         
 }

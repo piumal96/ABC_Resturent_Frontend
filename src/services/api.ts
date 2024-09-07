@@ -134,9 +134,10 @@ export interface CustomizationModel {
     name: string;
     options: string[];
     price: number;
-}
+  }
+  
 
-export interface DishModel {
+  export interface DishModel {
     _id: string;
     name: string;
     description: string;
@@ -144,7 +145,7 @@ export interface DishModel {
     category: 'Starter' | 'Main Course' | 'Dessert' | 'Drinks';
     customizations: CustomizationModel[];
     imageUrl: string;
-}
+  }
 
 // Dish API responses
 interface FetchDishesResponse {
@@ -176,28 +177,26 @@ export interface CustomizationModel {
     price: number;
 }
 
-export interface DishModel {  // Exporting DishModel
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    category: 'Starter' | 'Main Course' | 'Dessert' | 'Drinks';
-    customizations: CustomizationModel[];
-    imageUrl: string;
+export interface CartItemModel {
+  dish: DishModel;
+  quantity: number;
+  customizations: Record<string, number>; // Customization choices, prices included
+  totalPrice: number;
 }
 
 
 export interface CartItemModel {
     dish: DishModel;
     quantity: number;
-    customizations: Record<string, string>;  // Customization choices
+    customizations: Record<string, number>; // Customization choices, prices included
     totalPrice: number;
-}
+  }
+  
 
-export interface CartModel {
+  export interface CartModel {
     items: CartItemModel[];
     totalPrice: number;
-}
+  }
 
 // Cart API Responses
 interface FetchCartResponse {
@@ -641,56 +640,59 @@ export const deleteDish = async (id: string): Promise<string> => {
 
 // Fetch the current cart
 export const fetchCart = async (): Promise<CartModel> => {
-    try {
-        const response: AxiosResponse<FetchCartResponse> = await axios.get(`${API_URL}cart`);
-        return response.data.cart;
-    } catch (error) {
-        console.error('Error fetching cart:', error);
-        throw error;
-    }
+  try {
+    const response: AxiosResponse<{ success: boolean; cart: CartModel }> = await axios.get(`${API_URL}cart`);
+    return response.data.cart;
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    throw error;
+  }
 };
 
 // Add a dish to the cart
-export const addToCart = async (dishId: string, customizations: Record<string, string>, quantity: number): Promise<CartItemModel> => {
+export const addToCart = async (dishId: string, customizations: Record<string, number>, quantity: number): Promise<CartItemModel> => {
     try {
-        const response: AxiosResponse<AddCartItemResponse> = await axios.post(`${API_URL}cart`, {
-            dishId,
-            customizations,
-            quantity,
-        });
-        return response.data.cartItem;
+      const response: AxiosResponse<{ success: boolean; cartItem: CartItemModel }> = await axios.post(`${API_URL}cart`, {
+        dishId,
+        customizations,
+        quantity,
+      });
+      return response.data.cartItem;
     } catch (error) {
-        console.error('Error adding item to cart:', error);
-        throw error;
+      console.error('Error adding item to cart:', error);
+      throw error;
     }
-};
+  };
+  
+  
 
 // Update the quantity of an item in the cart
 export const updateCartItem = async (dishId: string, quantity: number): Promise<CartModel> => {
     try {
-        const response: AxiosResponse<UpdateCartItemResponse> = await axios.put(`${API_URL}cart`, {
-            dishId,
-            quantity,
-        });
-        return response.data.cart;
+      const response: AxiosResponse<{ success: boolean; cart: CartModel }> = await axios.put(`${API_URL}cart`, {
+        dishId,
+        quantity,
+      });
+      return response.data.cart;
     } catch (error) {
-        console.error('Error updating cart item:', error);
-        throw error;
+      console.error('Error updating cart item:', error);
+      throw error;
     }
-};
+  };
+  
 
 // Remove an item from the cart
 export const removeCartItem = async (dishId: string): Promise<string> => {
     try {
-        const response: AxiosResponse<DeleteCartItemResponse> = await axios.delete(`${API_URL}cart`, {
-            data: { dishId }
-        });
-        return response.data.message; // Return the message if needed
+      const response: AxiosResponse<{ success: boolean; message: string }> = await axios.delete(`${API_URL}cart`, {
+        data: { dishId },
+      });
+      return response.data.message;
     } catch (error) {
-        console.error('Error removing cart item:', error);
-        throw error;
+      console.error('Error removing cart item:', error);
+      throw error;
     }
-};
+  };
 
 
 // Export all functions as a single default object

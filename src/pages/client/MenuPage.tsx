@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchDishes, addToCart } from '@/services/api';
-import { DishModel } from '@/models/Dish Model';
+import { fetchDishes, addToCart,DishModel } from '@/services/api';
+//import { DishModel } from '@/models/DishModel'; // Ensure this path is correct
 import {
   Grid,
   Card,
@@ -57,12 +57,25 @@ const MenuPage: React.FC = () => {
 
   const handleAddToCart = async (dish: DishModel) => {
     try {
-      const customizations = { 'Spice Level': 'Medium' };
-      await addToCart(dish._id, customizations, 1);
+      const customizations = { 'Spice Level': 50, 'Extra Cheese': 100 };
+      const quantity = 2;
+
+      // Validate price before adding to cart
+      if (isNaN(dish.price)) {
+        setSnackbarMessage('Invalid price for this dish');
+        setSnackbarOpen(true);
+        return;
+      }
+
+      // Add item to cart
+      await addToCart(dish._id, customizations, quantity);
+
       setSnackbarMessage('Dish added to cart');
       setSnackbarOpen(true);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      setSnackbarMessage('Failed to add dish to cart');
+      setSnackbarOpen(true);
     }
   };
 
