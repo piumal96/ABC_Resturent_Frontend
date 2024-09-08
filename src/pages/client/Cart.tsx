@@ -19,42 +19,47 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import { Add, Remove, Delete } from '@mui/icons-material';
+import { Add, Remove, Delete, ArrowBack, Home, ShoppingCart } from '@mui/icons-material'; // Added ShoppingCart icon
 import { fetchCart, updateCartItem, removeCartItem, createOrder, fetchRestaurants } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
 
 const CartPage: React.FC = () => {
   const [cart, setCart] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
-  const [restaurantId, setRestaurantId] = useState<string>(''); // Restaurant ID
-  const [restaurants, setRestaurants] = useState<any[]>([]); // List of available restaurants
-  const [deliveryAddress, setDeliveryAddress] = useState<string>(''); // Delivery address input
-  const [totalOrderCost, setTotalOrderCost] = useState<number>(0); // Total order cost
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState<boolean>(false); // Payment dialog
-  const [cardNumber, setCardNumber] = useState<string>(''); // Card Number
-  const [cardExpiry, setCardExpiry] = useState<string>(''); // Card Expiry
-  const [cardCvc, setCardCvc] = useState<string>(''); // Card CVC
+  const [restaurantId, setRestaurantId] = useState<string>(''); 
+  const [restaurants, setRestaurants] = useState<any[]>([]); 
+  const [deliveryAddress, setDeliveryAddress] = useState<string>(''); 
+  const [totalOrderCost, setTotalOrderCost] = useState<number>(0); 
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState<boolean>(false); 
+  const [cardNumber, setCardNumber] = useState<string>(''); 
+  const [cardExpiry, setCardExpiry] = useState<string>(''); 
+  const [cardCvc, setCardCvc] = useState<string>(''); 
 
-  // Fetch the cart and restaurants when the component mounts
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const loadCartAndRestaurants = async () => {
-      try {
-        const fetchedCart = await fetchCart();
-        const fetchedRestaurants = await fetchRestaurants();
-        setCart(fetchedCart);
-        setRestaurants(fetchedRestaurants);
-        calculateTotalOrderCost(fetchedCart);
-      } catch (error) {
-        console.error('Error loading cart or restaurants:', error);
-        setSnackbarMessage('Failed to load data. Please try again.');
-        setSnackbarOpen(true);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadCartAndRestaurants();
   }, []);
+
+  // Fetch cart and restaurant data
+  const loadCartAndRestaurants = async () => {
+    setLoading(true);
+    try {
+      const fetchedCart = await fetchCart();
+      const fetchedRestaurants = await fetchRestaurants();
+      setCart(fetchedCart);
+      setRestaurants(fetchedRestaurants);
+      calculateTotalOrderCost(fetchedCart);
+    } catch (error) {
+      console.error('Error loading cart or restaurants:', error);
+      setSnackbarMessage('Failed to load data. Please try again.');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate total order cost
   const calculateTotalOrderCost = (cart: any) => {
@@ -74,9 +79,7 @@ const CartPage: React.FC = () => {
 
     try {
       await updateCartItem(dishId, newQuantity);
-      const updatedCart = await fetchCart();
-      setCart(updatedCart);
-      calculateTotalOrderCost(updatedCart);
+      await loadCartAndRestaurants(); // Reload cart after updating quantity
       setSnackbarMessage('Quantity updated');
       setSnackbarOpen(true);
     } catch (error) {
@@ -90,9 +93,7 @@ const CartPage: React.FC = () => {
   const handleRemoveFromCart = async (dishId: string) => {
     try {
       await removeCartItem(dishId);
-      const updatedCart = await fetchCart();
-      setCart(updatedCart);
-      calculateTotalOrderCost(updatedCart);
+      await loadCartAndRestaurants(); // Reload cart after removing an item
       setSnackbarMessage('Item removed');
       setSnackbarOpen(true);
     } catch (error) {
@@ -127,6 +128,7 @@ const CartPage: React.FC = () => {
       setSnackbarMessage('Order placed successfully!');
       setSnackbarOpen(true);
       setPaymentDialogOpen(false); // Close payment dialog
+      await loadCartAndRestaurants(); // Reload cart after order completion
     } catch (error) {
       console.error('Error placing order:', error);
       setSnackbarMessage('Failed to place order.');
@@ -147,12 +149,79 @@ const CartPage: React.FC = () => {
     );
   }
 
+  // UI for when the cart is empty
   if (!cart || cart.items.length === 0) {
-    return <Typography variant="h6" align="center">Your cart is empty.</Typography>;
+    return (
+      <Container maxWidth="sm" sx={{ textAlign: 'center', padding: '20px' }}>
+        <ShoppingCart fontSize="large" color="primary" sx={{ fontSize: '80px', mb: 2 }} />
+        <Typography variant="h5" gutterBottom>
+          Your cart is empty.
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 3 }}>
+          Looks like you haven't added anything to your cart yet.
+        </Typography>
+
+        {/* Back and Home Buttons */}
+        <Box display="flex" justifyContent="center" gap={2}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(-1)} // Navigate back to the previous page
+            sx={{
+              borderColor: '#ff5722',
+              color: '#ff5722',
+              '&:hover': { backgroundColor: '#ffccbc', borderColor: '#ff5722' },
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<Home />}
+            onClick={() => navigate('/')} // Navigate to the home page
+            sx={{
+              borderColor: '#ff5722',
+              color: '#ff5722',
+              '&:hover': { backgroundColor: '#ffccbc', borderColor: '#ff5722' },
+            }}
+          >
+            Home
+          </Button>
+        </Box>
+      </Container>
+    );
   }
 
   return (
     <Container maxWidth="md" sx={{ padding: '20px' }}>
+      {/* Back and Home Buttons */}
+      <Box display="flex" justifyContent="space-between" mb={3}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBack />}
+          onClick={() => navigate(-1)} // Navigate back to the previous page
+          sx={{
+            borderColor: '#ff5722',
+            color: '#ff5722',
+            '&:hover': { backgroundColor: '#ffccbc', borderColor: '#ff5722' },
+          }}
+        >
+          Back
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<Home />}
+          onClick={() => navigate('/')} // Navigate to the home page
+          sx={{
+            borderColor: '#ff5722',
+            color: '#ff5722',
+            '&:hover': { backgroundColor: '#ffccbc', borderColor: '#ff5722' },
+          }}
+        >
+          Home
+        </Button>
+      </Box>
+
       <Typography variant="h4" gutterBottom>Your Cart</Typography>
       <Grid container spacing={2}>
         {cart.items.map((item: any, index: number) => (
@@ -170,7 +239,7 @@ const CartPage: React.FC = () => {
               <Box>
                 <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
                 <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
-                <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography> {/* Currency changed to LKR */}
+                <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography>
               </Box>
               <Box>
                 <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
@@ -193,7 +262,7 @@ const CartPage: React.FC = () => {
       {/* Total Price */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5" color="primary">
-          Total Order Cost: LKR {totalOrderCost.toFixed(2)} {/* Currency changed to LKR */}
+          Total Order Cost: LKR {totalOrderCost.toFixed(2)}
         </Typography>
       </Box>
 
