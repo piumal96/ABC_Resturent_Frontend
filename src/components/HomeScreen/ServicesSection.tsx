@@ -3,11 +3,14 @@ import { Container, Typography, Card, CardContent, Box, Button, CircularProgress
 import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { getServices } from '@/services/api'; // Adjust the import path as needed
 import { ServiceModel } from '@/models/ServiceModel';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 const ServicesSection: React.FC = () => {
   const [services, setServices] = useState<ServiceModel[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const navigate = useNavigate(); // Initialize navigate function
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -136,7 +139,7 @@ const ServicesSection: React.FC = () => {
                   <Button
                     variant="contained"
                     color="primary"
-                    href="#reservation-form"
+                    onClick={() => navigate('/customer/reservation')}
                     sx={{
                       width: '80%',
                       transition: 'background-color 0.3s ease',
