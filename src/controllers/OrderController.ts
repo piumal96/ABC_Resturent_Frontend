@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { OrderModel } from '@/models/OrderModel'; // Define OrderModel in your models
-import { CartModel } from '@/services/api';
+import { OrderModel } from '@/models/OrderModel'; 
 const API_URL = 'http://localhost:5001/api/orders';
 
 export const useOrderController = () => {
