@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import api from '@/services/api'; // Import API functions
-import { OrderModel } from '@/models/OrderModel';
+import axios from 'axios';
+import { OrderModel } from '@/models/OrderModel'; // Define OrderModel in your models
+import { CartModel } from '@/services/api';
+const API_URL = 'http://localhost:5001/api/orders';
 
 export const useOrderController = () => {
   const [orders, setOrders] = useState<OrderModel[]>([]);
@@ -15,7 +17,6 @@ export const useOrderController = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
-  // Fetch orders based on search term and status filter
   useEffect(() => {
     fetchOrders();
   }, [searchTerm, statusFilter]);
@@ -23,8 +24,8 @@ export const useOrderController = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await api.fetchOrders(searchTerm, statusFilter); // API call from api.ts
-      setOrders(response.orders);
+      const response = await axios.get(`${API_URL}?searchTerm=${searchTerm}&status=${statusFilter}`);
+      setOrders(response.data.orders);
     } catch (error) {
       setError('Error fetching orders');
     } finally {
@@ -44,7 +45,7 @@ export const useOrderController = () => {
   const handleConfirmOrder = async () => {
     if (selectedOrder) {
       try {
-        await api.updateOrderStatus(selectedOrder._id, 'Confirmed');
+        await axios.put(`${API_URL}/status`, { orderId: selectedOrder._id, status: 'Confirmed' });
         setSnackbarMessage('Order confirmed successfully');
         fetchOrders(); // Refresh orders
       } catch (error) {
@@ -59,7 +60,7 @@ export const useOrderController = () => {
   const handleConfirmPayment = async () => {
     if (selectedOrder) {
       try {
-        await api.updatePaymentStatus(selectedOrder._id, 'Paid');
+        await axios.put(`${API_URL}/status`, { orderId: selectedOrder._id, paymentStatus: 'Paid' });
         setSnackbarMessage('Payment confirmed successfully');
         fetchOrders(); // Refresh orders
       } catch (error) {
@@ -74,7 +75,7 @@ export const useOrderController = () => {
   const handleCancelOrder = async () => {
     if (selectedOrder) {
       try {
-        await api.updateOrderStatus(selectedOrder._id, 'Cancelled');
+        await axios.put(`${API_URL}/status`, { orderId: selectedOrder._id, status: 'Cancelled' });
         setSnackbarMessage('Order cancelled successfully');
         fetchOrders(); // Refresh orders
       } catch (error) {

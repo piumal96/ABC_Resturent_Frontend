@@ -84,7 +84,7 @@ const ReservationTrackingDialog: React.FC<ReservationTrackingDialogProps> = ({ o
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        <Tabs value={tabIndex} onChange={(e, newValue) => handleTabChange(newValue)} centered>
+        <Tabs value={tabIndex} onChange={(_e, newValue) => handleTabChange(newValue)} centered>
           <Tab label="Delivery Orders" />
           <Tab label="Reservations" />
         </Tabs>

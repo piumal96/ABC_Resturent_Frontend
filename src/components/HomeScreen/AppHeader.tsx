@@ -277,6 +277,7 @@ const AppHeader: React.FC = () => {
 
       {/* Reservation Tracking Dialog */}
       {user && <ReservationTrackingDialog open={dialogOpen} onClose={() => setDialogOpen(false)} userId={user.id} />}
+
     </>
   );
 };

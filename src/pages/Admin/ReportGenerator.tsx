@@ -1,4 +1,3 @@
-// src/pages/Admin/ReportDashboard.tsx
 import React from 'react';
 import {
   Box,
@@ -33,12 +32,13 @@ import {
   Tooltip as ChartTooltip,
   Legend,
 } from 'chart.js';
+import { OrderModel } from '@/models/OrderModel';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, ChartTooltip, Legend);
 
 const ReportDashboard: React.FC = () => {
-  const { reservationData, queryData, userData, loading, exportToExcel } = useReportController();
+  const { reservationData, queryData, userData, paymentData, loading, exportToExcel } = useReportController(); // Added paymentData
 
   if (loading) {
     return (
@@ -85,27 +85,37 @@ const ReportDashboard: React.FC = () => {
         </Typography>
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3, backgroundColor: '#f0f4f8' }}>
+              <CardContent>
+                <Typography variant="h6" color="textSecondary">Total Sales</Typography>
+                <Typography variant="h4" color="primary">Rs {paymentData.reduce((acc: number, order: OrderModel) => acc + order.totalPrice, 0)}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3, backgroundColor: '#f0f4f8' }}>
+              <CardContent>
+                <Typography variant="h6" color="textSecondary">Total Orders</Typography>
+                <Typography variant="h4" color="primary">{paymentData.length}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3 }}>
               <CardContent>
                 <Typography variant="h6">Total Reservations</Typography>
                 <Typography variant="h4">{reservationData.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3 }}>
               <CardContent>
                 <Typography variant="h6">Total Queries</Typography>
                 <Typography variant="h4">{queryData.length}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
-              <CardContent>
-                <Typography variant="h6">Active Users</Typography>
-                <Typography variant="h4">{userData.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -145,8 +155,8 @@ const ReportDashboard: React.FC = () => {
         {/* Detailed Tables */}
         <Box sx={{ my: 4 }}>
           <Typography variant="h5" gutterBottom>
-            Reservations
-            <Tooltip title="Detailed list of all reservations">
+            Payment Report
+            <Tooltip title="Detailed list of payments">
               <IconButton>
                 <InfoIcon />
               </IconButton>
@@ -156,23 +166,21 @@ const ReportDashboard: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Restaurant</TableCell>
-                  <TableCell>Service</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>Order ID</TableCell>
+                  <TableCell>Total Price</TableCell>
                   <TableCell>Payment Status</TableCell>
+                  <TableCell>Order Status</TableCell>
+                  <TableCell>Created At</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {reservationData.map((reservation) => (
-                  <TableRow key={reservation?._id}>
-                    <TableCell>{reservation?.customer?.email || 'null'}</TableCell>
-                    <TableCell>{reservation?.restaurant?.name || 'null'}</TableCell>
-                    <TableCell>{reservation?.service?.name || 'null'}</TableCell>
-                    <TableCell>{reservation?.date ? new Date(reservation.date).toLocaleDateString() : 'null'}</TableCell>
-                    <TableCell>{reservation?.status || 'null'}</TableCell>
-                    <TableCell>{reservation?.paymentStatus || 'null'}</TableCell>
+                {paymentData.map((order: OrderModel) => (
+                  <TableRow key={order._id}>
+                    <TableCell>{order._id || 'null'}</TableCell>
+                    <TableCell>Rs {order.totalPrice || 'null'}</TableCell>
+                    <TableCell>{order.paymentStatus || 'null'}</TableCell>
+                    <TableCell>{order.orderStatus || 'null'}</TableCell>
+                    <TableCell>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

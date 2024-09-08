@@ -10,6 +10,7 @@ import { QueryReportResponse } from '@/models/QueryReportModel';
 import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 import { PaymentModel } from '@/models/Payments';
 import { OrderModel } from '@/models/OrderModel';
+import { PaymentReportResponse } from '@/models/PaymentReport';
 
 
 const API_URL = 'http://localhost:5001/api/';
@@ -199,29 +200,6 @@ export interface CartItemModel {
     totalPrice: number;
   }
 
-// Cart API Responses
-interface FetchCartResponse {
-    success: boolean;
-    message: string;
-    cart: CartModel;
-}
-
-interface AddCartItemResponse {
-    success: boolean;
-    message: string;
-    cartItem: CartItemModel;
-}
-
-interface UpdateCartItemResponse {
-    success: boolean;
-    message: string;
-    cart: CartModel;
-}
-
-interface DeleteCartItemResponse {
-    success: boolean;
-    message: string;
-}
 
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
@@ -754,8 +732,19 @@ export const fetchOrders = async (searchTerm: string, status: string): Promise<{
     }
   };
 
+  export const fetchPaymentReport = async (): Promise<PaymentReportResponse> => {
+    try {
+      const response: AxiosResponse<PaymentReportResponse> = await axios.get(`${API_URL}orders/report`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching payment report:', error);
+      throw error;
+    }
+  };
+
 // Export all functions as a single default object
 export default {
+  fetchPaymentReport,
     fetchOrders,
     updateOrderStatus,
     updatePaymentStatus,
