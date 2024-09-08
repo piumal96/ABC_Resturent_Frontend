@@ -119,7 +119,7 @@ const UserOrderTracking: React.FC = () => {
                   <TableRow key={order._id}>
                     <TableCell>{order._id}</TableCell>
                     <TableCell>{order.restaurant?.name || 'Unknown'}</TableCell>
-                    <TableCell>${order.totalPrice.toFixed(2)}</TableCell> {/* Total Price */}
+                    <TableCell>LKR{order.totalPrice.toFixed(2)}</TableCell> {/* Total Price */}
                     <TableCell>{getStatusChip(order.orderStatus)}</TableCell> {/* Order Status */}
                     <TableCell>{order.paymentStatus}</TableCell> {/* Payment Status */}
                     <TableCell>{order.deliveryAddress}</TableCell>

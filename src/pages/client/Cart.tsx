@@ -13,6 +13,11 @@ import {
   Box,
   Divider,
   Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 import { Add, Remove, Delete } from '@mui/icons-material';
 import { fetchCart, updateCartItem, removeCartItem, createOrder, fetchRestaurants } from '@/services/api';
@@ -26,6 +31,10 @@ const CartPage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<any[]>([]); // List of available restaurants
   const [deliveryAddress, setDeliveryAddress] = useState<string>(''); // Delivery address input
   const [totalOrderCost, setTotalOrderCost] = useState<number>(0); // Total order cost
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState<boolean>(false); // Payment dialog
+  const [cardNumber, setCardNumber] = useState<string>(''); // Card Number
+  const [cardExpiry, setCardExpiry] = useState<string>(''); // Card Expiry
+  const [cardCvc, setCardCvc] = useState<string>(''); // Card CVC
 
   // Fetch the cart and restaurants when the component mounts
   useEffect(() => {
@@ -101,10 +110,23 @@ const CartPage: React.FC = () => {
       return;
     }
 
+    // Open the payment dialog when placing order
+    setPaymentDialogOpen(true);
+  };
+
+  // Handle payment and order confirmation
+  const handleConfirmPayment = async () => {
+    if (!cardNumber || !cardExpiry || !cardCvc) {
+      setSnackbarMessage('Please fill in all card details.');
+      setSnackbarOpen(true);
+      return;
+    }
+
     try {
       await createOrder(restaurantId, deliveryAddress);
       setSnackbarMessage('Order placed successfully!');
       setSnackbarOpen(true);
+      setPaymentDialogOpen(false); // Close payment dialog
     } catch (error) {
       console.error('Error placing order:', error);
       setSnackbarMessage('Failed to place order.');
@@ -148,7 +170,7 @@ const CartPage: React.FC = () => {
               <Box>
                 <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
                 <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
-                <Typography variant="body2" color="primary">Total: ${item.totalPrice.toFixed(2)}</Typography>
+                <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography> {/* Currency changed to LKR */}
               </Box>
               <Box>
                 <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
@@ -171,7 +193,7 @@ const CartPage: React.FC = () => {
       {/* Total Price */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5" color="primary">
-          Total Order Cost: ${totalOrderCost.toFixed(2)}
+          Total Order Cost: LKR {totalOrderCost.toFixed(2)} {/* Currency changed to LKR */}
         </Typography>
       </Box>
 
@@ -215,6 +237,47 @@ const CartPage: React.FC = () => {
       >
         Place Order
       </Button>
+
+      {/* Payment Confirmation Dialog */}
+      <Dialog open={paymentDialogOpen} onClose={() => setPaymentDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Payment Details</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Please enter your card details to complete the order.</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Card Number"
+            type="text"
+            fullWidth
+            value={cardNumber}
+            onChange={(e) => setCardNumber(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Card Expiry (MM/YY)"
+            type="text"
+            fullWidth
+            value={cardExpiry}
+            onChange={(e) => setCardExpiry(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="CVC"
+            type="text"
+            fullWidth
+            value={cardCvc}
+            onChange={(e) => setCardCvc(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPaymentDialogOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmPayment} color="primary">
+            Confirm Payment
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Snackbar for notifications */}
       <Snackbar
