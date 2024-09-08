@@ -4,9 +4,9 @@ import RoomServiceIcon from '@mui/icons-material/RoomService';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom'; // Make sure this is imported
-import { useReservationController } from '@/controllers/Customer/ReservationController'; // Custom controller to handle logic
-import PaymentDialog from './PaymentDialog'; // Your payment dialog component
+import { useNavigate } from 'react-router-dom'; 
+import { useReservationController } from '@/controllers/Customer/ReservationController'; 
+import PaymentDialog from './PaymentDialog'; 
 
 const ReservationForm: React.FC = () => {
   const navigate = useNavigate(); // useNavigate hook called inside the component

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { fetchReservationReport, fetchQueryReport, fetchUserActivityReport } from '@/services/api';
+import { fetchReservationReport, fetchQueryReport, fetchUserActivityReport, fetchPaymentReport } from '@/services/api';
+import { PaymentReportResponse } from '@/models/PaymentReport'; 
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -7,19 +8,23 @@ export const useReportController = () => {
   const [reservationData, setReservationData] = useState<any[]>([]);
   const [queryData, setQueryData] = useState<any[]>([]);
   const [userData, setUserData] = useState<any[]>([]);
+  const [paymentData, setPaymentData] = useState<any[]>([]); 
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
+
         const reservationResponse = await fetchReservationReport();
         const queryResponse = await fetchQueryReport();
         const userResponse = await fetchUserActivityReport();
+        const paymentResponse: PaymentReportResponse = await fetchPaymentReport(); // Fetch payment report
 
         setReservationData(reservationResponse.reservations);
         setQueryData(queryResponse.queries);
         setUserData(userResponse.users);
+        setPaymentData(paymentResponse.report.paidOrders); // Ensure the correct path to payment data
       } catch (error) {
         console.error('Failed to load data:', error);
       } finally {
@@ -33,14 +38,21 @@ export const useReportController = () => {
   const exportToExcel = () => {
     const wb = XLSX.utils.book_new();
 
+    // Export Reservations
     const reservationsSheet = XLSX.utils.json_to_sheet(reservationData);
     XLSX.utils.book_append_sheet(wb, reservationsSheet, 'Reservations');
 
+    // Export Queries
     const queriesSheet = XLSX.utils.json_to_sheet(queryData);
     XLSX.utils.book_append_sheet(wb, queriesSheet, 'Queries');
 
+    // Export Users
     const usersSheet = XLSX.utils.json_to_sheet(userData);
     XLSX.utils.book_append_sheet(wb, usersSheet, 'Users');
+
+    // Export Payment Report
+    const paymentSheet = XLSX.utils.json_to_sheet(paymentData);
+    XLSX.utils.book_append_sheet(wb, paymentSheet, 'PaymentReport');
 
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
 
@@ -56,5 +68,5 @@ export const useReportController = () => {
     saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), 'report.xlsx');
   };
 
-  return { reservationData, queryData, userData, loading, exportToExcel };
+  return { reservationData, queryData, userData, paymentData, loading, exportToExcel };
 };

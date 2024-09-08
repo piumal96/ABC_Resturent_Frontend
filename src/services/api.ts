@@ -9,12 +9,12 @@ import { ReservationReportResponse } from '@/models/ReservationReportModel';
 import { QueryReportResponse } from '@/models/QueryReportModel';
 import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 import { PaymentModel } from '@/models/Payments';
+import { OrderModel } from '@/models/OrderModel';
+import { PaymentReportResponse } from '@/models/PaymentReport';
 
-// Constants
+
 const API_URL = 'http://localhost:5001/api/';
-
-// Axios setup to automatically include session ID in headers and handle credentials
-axios.defaults.withCredentials = true; // Ensures cookies are sent with requests
+axios.defaults.withCredentials = true; 
 
 axios.interceptors.request.use(config => {
     const sessionId = localStorage.getItem('sessionId');
@@ -27,7 +27,6 @@ axios.interceptors.request.use(config => {
     return config;
 }, error => Promise.reject(error));
 
-// API response interfaces
 interface LoginResponse {
     success: boolean;
     message: string;
@@ -132,6 +131,76 @@ interface FetchUsersResponse {
     message: string;
     users: UserModel[];
 }
+
+export interface CustomizationModel {
+    name: string;
+    options: string[];
+    price: number;
+  }
+  
+
+  export interface DishModel {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: 'Starter' | 'Main Course' | 'Dessert' | 'Drinks';
+    customizations: CustomizationModel[];
+    imageUrl: string;
+  }
+
+// Dish API responses
+interface FetchDishesResponse {
+    success: boolean;
+    message: string;
+    dishes: DishModel[];
+}
+
+interface CreateDishResponse {
+    success: boolean;
+    message: string;
+    dish: DishModel;
+}
+
+interface UpdateDishResponse {
+    success: boolean;
+    message: string;
+    dish: DishModel;
+}
+
+interface DeleteDishResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface CustomizationModel {
+    name: string;
+    options: string[];
+    price: number;
+}
+
+export interface CartItemModel {
+  dish: DishModel;
+  quantity: number;
+  customizations: Record<string, number>; // Customization choices, prices included
+  totalPrice: number;
+}
+
+
+export interface CartItemModel {
+    dish: DishModel;
+    quantity: number;
+    customizations: Record<string, number>; // Customization choices, prices included
+    totalPrice: number;
+  }
+  
+
+  export interface CartModel {
+    items: CartItemModel[];
+    totalPrice: number;
+  }
+
+
 // API functions
 export const login = async (email: string, password: string): Promise<UserModel> => {
     const response: AxiosResponse<LoginResponse> = await axios.post(`${API_URL}auth/login`, { email, password });
@@ -502,8 +571,185 @@ export const fetchUsers = async (): Promise<UserModel[]> => {
         throw error;
     }
 };
+
+// Fetch all dishes
+export const fetchDishes = async (): Promise<DishModel[]> => {
+    try {
+        const response: AxiosResponse<FetchDishesResponse> = await axios.get(`${API_URL}dishes`);
+        return response.data.dishes;
+    } catch (error) {
+        console.error('Error fetching dishes:', error);
+        throw error;
+    }
+};
+
+// Create a new dish
+export const createDish = async (dishData: Partial<DishModel>): Promise<DishModel> => {
+    try {
+        const response: AxiosResponse<CreateDishResponse> = await axios.post(`${API_URL}dishes`, dishData);
+        return response.data.dish;
+    } catch (error) {
+        console.error('Error creating dish:', error);
+        throw error;
+    }
+};
+
+// Update an existing dish
+export const updateDish = async (id: string, dishData: Partial<DishModel>): Promise<DishModel> => {
+    try {
+        const response: AxiosResponse<UpdateDishResponse> = await axios.put(`${API_URL}dishes/${id}`, dishData);
+        return response.data.dish;
+    } catch (error) {
+        console.error('Error updating dish:', error);
+        throw error;
+    }
+};
+
+// Delete a dish
+export const deleteDish = async (id: string): Promise<string> => {
+    try {
+        const response: AxiosResponse<DeleteDishResponse> = await axios.delete(`${API_URL}dishes/${id}`);
+        return response.data.message; // Return the message as a string
+    } catch (error) {
+        console.error('Error deleting dish:', error);
+        throw error;
+    }
+};
+
+
+// Fetch the current cart
+export const fetchCart = async (): Promise<CartModel> => {
+  try {
+    const response: AxiosResponse<{ success: boolean; cart: CartModel }> = await axios.get(`${API_URL}cart`);
+    return response.data.cart;
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    throw error;
+  }
+};
+
+// Add a dish to the cart
+export const addToCart = async (dishId: string, customizations: Record<string, number>, quantity: number): Promise<CartItemModel> => {
+    try {
+      const response: AxiosResponse<{ success: boolean; cartItem: CartItemModel }> = await axios.post(`${API_URL}cart`, {
+        dishId,
+        customizations,
+        quantity,
+      });
+      return response.data.cartItem;
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+      throw error;
+    }
+  };
+  
+  
+
+// Update the quantity of an item in the cart
+export const updateCartItem = async (dishId: string, quantity: number): Promise<CartModel> => {
+    try {
+      const response: AxiosResponse<{ success: boolean; cart: CartModel }> = await axios.put(`${API_URL}cart`, {
+        dishId,
+        quantity,
+      });
+      return response.data.cart;
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+      throw error;
+    }
+  };
+  
+
+// Remove an item from the cart
+export const removeCartItem = async (dishId: string): Promise<string> => {
+    try {
+      const response: AxiosResponse<{ success: boolean; message: string }> = await axios.delete(`${API_URL}cart`, {
+        data: { dishId },
+      });
+      return response.data.message;
+    } catch (error) {
+      console.error('Error removing cart item:', error);
+      throw error;
+    }
+  };
+
+  export const fetchUserOrders = async (): Promise<OrderModel[]> => {
+    try {
+      const response = await axios.get(`${API_URL}/user/orders`); 
+      return response.data.orders;
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      throw error;
+    }
+  };
+
+  export const createOrder = async (
+    restaurantId: string,
+    deliveryAddress: string
+  ): Promise<OrderModel> => {
+    const response: AxiosResponse<{ success: boolean; order: OrderModel }> = await axios.post(`${API_URL}payment`, {
+      restaurantId,
+      deliveryAddress,
+    });
+  
+    if (!response.data.success) {
+      throw new Error('Failed to create order');
+    }
+  
+    return response.data.order;
+  };
+
+  // Fetch all orders with search term and status filter
+export const fetchOrders = async (searchTerm: string, status: string): Promise<{ orders: OrderModel[] }> => {
+    try {
+      const response: AxiosResponse<{ success: boolean; orders: OrderModel[] }> = await axios.get(`${API_URL}orders`, {
+        params: { searchTerm, status }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      throw error;
+    }
+  };
+  
+  // Update order status (e.g., 'Confirmed', 'Cancelled')
+  export const updateOrderStatus = async (orderId: string, status: string): Promise<void> => {
+    try {
+      await axios.put(`${API_URL}orders/${orderId}/status`, { status });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  };
+  
+  // Update payment status
+  export const updatePaymentStatus = async (orderId: string, paymentStatus: string): Promise<void> => {
+    try {
+      await axios.put(`${API_URL}orders/${orderId}/payment`, { paymentStatus });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      throw error;
+    }
+  };
+
+  export const fetchPaymentReport = async (): Promise<PaymentReportResponse> => {
+    try {
+      const response: AxiosResponse<PaymentReportResponse> = await axios.get(`${API_URL}orders/report`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching payment report:', error);
+      throw error;
+    }
+  };
+
 // Export all functions as a single default object
 export default {
+  fetchPaymentReport,
+    fetchOrders,
+    updateOrderStatus,
+    updatePaymentStatus,
+    createOrder,
+    fetchUserOrders,
     deleteUser,
     fetchUsers,
     updateUser,
