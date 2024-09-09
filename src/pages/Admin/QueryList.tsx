@@ -1,5 +1,4 @@
-// src/pages/QueryList.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   TableHead,
@@ -21,16 +20,18 @@ import {
   Tooltip,
   Collapse,
   TextareaAutosize,
-  Menu,
-  MenuItem,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ReplyIcon from '@mui/icons-material/Reply';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import Layout from '@/components/Layout/Layout';
 import { useQueryController } from '@/controllers/Admin/QueryController';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import DoneIcon from '@mui/icons-material/Done';
+import SyncIcon from '@mui/icons-material/Sync';
 
 const QueryList: React.FC = () => {
   const {
@@ -38,9 +39,8 @@ const QueryList: React.FC = () => {
     filteredQueries,
     replyMessage,
     expandedQueryId,
-    anchorEl,
     queryToDelete,
-    setQueryToDelete, 
+    setQueryToDelete,
     handleFilterChange,
     handleSearch,
     handleRowClick,
@@ -48,15 +48,46 @@ const QueryList: React.FC = () => {
     handleSendReply,
     handleDeleteConfirmation,
     handleConfirmDelete,
-    handleMenuOpen,
-    handleMenuClose,
     getStatusColor,
   } = useQueryController();
 
+  // UI state for snackbars and real-time status updates
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
+
+  // Helper function to get status icons
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return <HourglassEmptyIcon color="warning" />;
+      case 'Resolved':
+        return <DoneIcon color="success" />;
+      case 'In Progress':
+        return <SyncIcon color="info" />;
+      default:
+        return null;
+    }
+  };
+
+  // Real-time status update for reply
+  const handleRealTimeReply = async () => {
+    try {
+      await handleSendReply(); // Call the reply API function
+      setSnackbarMessage('Reply sent successfully, and status updated!');
+      setSnackbarSeverity('success');
+      setShowSnackbar(true);
+    } catch (error) {
+      setSnackbarMessage('Failed to send reply.');
+      setSnackbarSeverity('error');
+      setShowSnackbar(true);
+    }
+  };
+
   return (
     <Layout>
-      <Paper style={{ padding: '16px', marginTop: '16px' }}>
-        <Grid container spacing={2} alignItems="center">
+      <Paper style={{ padding: '24px', marginTop: '24px', borderRadius: '12px' }}>
+        <Grid container spacing={2} alignItems="center" style={{ marginBottom: '16px' }}>
           <Grid item xs={12} sm={8}>
             <TextField
               fullWidth
@@ -65,6 +96,7 @@ const QueryList: React.FC = () => {
               onChange={(e) => handleFilterChange(e.target.value)}
               variant="outlined"
               placeholder="e.g., Inquiry about reservation, 2024-08-30"
+              style={{ borderRadius: '8px' }}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -74,6 +106,7 @@ const QueryList: React.FC = () => {
               onClick={handleSearch}
               fullWidth
               startIcon={<SearchIcon />}
+              style={{ borderRadius: '8px' }}
             >
               Search
             </Button>
@@ -94,70 +127,65 @@ const QueryList: React.FC = () => {
             </TableHead>
             <TableBody>
               {filteredQueries.length > 0 ? (
-                filteredQueries.map(query => (
+                filteredQueries.map((query) => (
                   <React.Fragment key={query._id}>
-                    <TableRow onClick={() => handleRowClick(query._id)} style={{ cursor: 'pointer' }}>
+                    <TableRow
+                      onClick={() => handleRowClick(query._id)}
+                      style={{ cursor: 'pointer', transition: 'background-color 0.3s ease' }}
+                    >
                       <TableCell>{query._id}</TableCell>
                       <TableCell>{query.customer?.email ?? 'N/A'}</TableCell>
                       <TableCell>{query.subject ?? 'N/A'}</TableCell>
                       <TableCell>
-                        <Badge badgeContent={query.status} color={getStatusColor(query.status)} />
+                        <Badge badgeContent={query.status} color={getStatusColor(query.status)}>
+                          {getStatusIcon(query.status)}
+                        </Badge>
                       </TableCell>
                       <TableCell>{query.createdAt ? query.createdAt.toLocaleDateString() : 'N/A'}</TableCell>
                       <TableCell>
-                        <Tooltip title="More">
-                          <IconButton color="secondary" onClick={(e) => { e.stopPropagation(); handleMenuOpen(e, query); }}>
-                            <MoreVertIcon />
+                        <Tooltip title="Reply">
+                          <IconButton color="primary" onClick={() => handleRowClick(query._id)}>
+                            <ReplyIcon />
                           </IconButton>
                         </Tooltip>
-                        <Menu
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl)}
-                          onClose={handleMenuClose}
-                        >
-                          <MenuItem onClick={() => handleRowClick(query._id)}>
-                            <ReplyIcon color="primary" style={{ marginRight: 8 }} />
-                            Reply
-                          </MenuItem>
-                          <MenuItem onClick={() => handleDeleteConfirmation(query)}>
-                            <DeleteIcon color="error" style={{ marginRight: 8 }} />
-                            Delete
-                          </MenuItem>
-                        </Menu>
+                        <Tooltip title="Delete">
+                          <IconButton color="error" onClick={() => handleDeleteConfirmation(query)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-    <Collapse in={expandedQueryId === query._id} timeout="auto" unmountOnExit>
-      <div style={{ margin: 16 }}>
-        <Typography variant="subtitle1">Message:</Typography>
-        <Typography variant="body2" color="textSecondary" paragraph>
-          {query.message ?? 'No message available.'}
-        </Typography>
-        <div style={{ marginTop: 16 }}>
-          <TextareaAutosize
-            minRows={3}
-            placeholder="Write your reply here..."
-            style={{ width: '100%' }}
-            value={replyMessage}
-            onChange={(e) => handleReplyChange(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<SendIcon />}
-            onClick={handleSendReply} // This triggers the reply
-            style={{ marginTop: 8 }}
-            disabled={!replyMessage.trim()} // Disable if reply is empty
-          >
-            Send Reply
-          </Button>
-        </div>
-      </div>
-    </Collapse>
-  </TableCell>
-</TableRow>
-
+                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                        <Collapse in={expandedQueryId === query._id} timeout="auto" unmountOnExit>
+                          <div style={{ margin: 16 }}>
+                            <Typography variant="subtitle1">Message:</Typography>
+                            <Typography variant="body2" color="textSecondary" paragraph>
+                              {query.message ?? 'No message available.'}
+                            </Typography>
+                            <div style={{ marginTop: 16 }}>
+                              <TextareaAutosize
+                                minRows={3}
+                                placeholder="Write your reply here..."
+                                style={{ width: '100%' }}
+                                value={replyMessage}
+                                onChange={(e) => handleReplyChange(e.target.value)}
+                              />
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<SendIcon />}
+                                onClick={handleRealTimeReply} // Trigger real-time reply with status update
+                                style={{ marginTop: 8 }}
+                                disabled={!replyMessage.trim()} // Disable if reply is empty
+                              >
+                                Send Reply
+                              </Button>
+                            </div>
+                          </div>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
                   </React.Fragment>
                 ))
               ) : (
@@ -195,6 +223,17 @@ const QueryList: React.FC = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={showSnackbar}
+          autoHideDuration={3000}
+          onClose={() => setShowSnackbar(false)}
+        >
+          <Alert onClose={() => setShowSnackbar(false)} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Paper>
     </Layout>
   );
