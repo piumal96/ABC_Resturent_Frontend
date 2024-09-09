@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchQueries, deleteQuery } from '@/services/api'; // Adjust import paths accordingly
+import { fetchQueries, deleteQuery,sendQueryReply } from '@/services/api'; // Adjust import paths accordingly
 
 export interface Query {
   _id: string;
@@ -55,15 +55,25 @@ export const useQueryController = () => {
     setReplyMessage(''); // Clear reply message when opening a different row
   };
 
+  
+
   const handleReplyChange = (message: string) => {
     setReplyMessage(message);
   };
 
-  const handleSendReply = () => {
-    // Implement the send reply logic
-    alert('Reply sent: ' + replyMessage);
-    setExpandedQueryId(null); // Close the row after sending the reply
-  };
+  const handleSendReply = async () => {
+    if (!expandedQueryId || !replyMessage.trim()) return; 
+
+    try {
+        await sendQueryReply(expandedQueryId, replyMessage); 
+        alert('Reply sent successfully!');
+        setExpandedQueryId(null); 
+        setReplyMessage(''); 
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        alert('Failed to send reply. Please try again.');
+    }
+};
 
   const handleDeleteConfirmation = (query: Query) => {
     setQueryToDelete(query);

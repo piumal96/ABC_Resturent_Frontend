@@ -16,7 +16,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   useTheme,
   useMediaQuery,
@@ -80,7 +79,7 @@ const OrderList: React.FC = () => {
         <Typography variant="h4" mb={3}>
           Manage Orders
         </Typography>
-        {orders.length === 0 ? (
+        {(!orders || orders.length === 0) ? (
           <Typography variant="body1" align="center" color="textSecondary">
             No orders found.
           </Typography>
@@ -100,7 +99,7 @@ const OrderList: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {displayedOrders.map((order) => (
+                  {displayedOrders && displayedOrders.map((order) => (
                     <TableRow key={order._id || "unknown-id"} hover>
                       <TableCell>{order?.customer?.username || "null"}</TableCell>
                       <TableCell>{order?.restaurant?.name || "null"}</TableCell>
@@ -121,7 +120,7 @@ const OrderList: React.FC = () => {
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={orders.length}
+              count={orders?.length || 0}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}
@@ -164,7 +163,7 @@ const OrderList: React.FC = () => {
        
            <Box sx={{ mb: 3 }}>
              <Typography variant="h6" sx={{ mb: 1 }}>Items Ordered</Typography>
-             {selectedOrder.items.length > 0 ? (
+             {(selectedOrder?.items && selectedOrder?.items.length > 0) ? (
                <TableContainer component={Paper}>
                  <Table size="small">
                    <TableHead>
@@ -184,7 +183,7 @@ const OrderList: React.FC = () => {
                          <TableCell>{item.quantity}</TableCell>
                          <TableCell>Rs {item.totalPrice.toFixed(2)}</TableCell>
                          <TableCell>
-                           {item.dish.customizations.length > 0 ? (
+                           {item.dish.customizations && item.dish.customizations.length > 0 ? (
                              <ul>
                                {item.dish.customizations.map((customization, index) => (
                                  <li key={index}>{customization.name}: {customization.options.join(", ")}</li>

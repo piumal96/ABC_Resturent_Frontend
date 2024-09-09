@@ -70,32 +70,33 @@ const UserManagementDashboard: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={user.role}
-                          onChange={(e) => handleRoleChange(user.id, e.target.value as string)}
-                        >
-                          {roles.map((roleOption) => (
-                            <MenuItem key={roleOption} value={roleOption}>
-                              {roleOption}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="Delete">
-                          <IconButton color="error" onClick={() => handleDeleteUser(user.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+  {users.map((user) => (
+    <TableRow key={user.id || user.email || user.name}> {/* Ensure unique key, fallback to email or name */}
+      <TableCell>{user.name}</TableCell>
+      <TableCell>{user.email}</TableCell>
+      <TableCell>
+        <Select
+          value={user.role}
+          onChange={(e) => handleRoleChange(user.id, e.target.value as string)}
+        >
+          {roles.map((roleOption) => (
+            <MenuItem key={roleOption} value={roleOption}>
+              {roleOption}
+            </MenuItem>
+          ))}
+        </Select>
+      </TableCell>
+      <TableCell>
+        <Tooltip title="Delete">
+          <IconButton color="error" onClick={() => handleDeleteUser(user.id)}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+
               </Table>
             </TableContainer>
 

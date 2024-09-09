@@ -1,4 +1,3 @@
-// src/components/ReservationList.tsx
 import React from "react";
 import {
   Box,
@@ -29,7 +28,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useReservationController } from "@/controllers/Staff/ReservationController";
+import { useReservationController } from "@/controllers/Admin/ReservationController";
 import StaffLayout from "@/components/Layout/StaffLayout";
 
 const ReservationList: React.FC = () => {
@@ -52,7 +51,6 @@ const ReservationList: React.FC = () => {
     handleCloseConfirmDialog,
     handleConfirmReservation,
     handleCancelReservation,
-    handleConfirmPayment,
     handleChangePage,
     handleChangeRowsPerPage,
     displayedReservations,
@@ -150,7 +148,6 @@ const ReservationList: React.FC = () => {
                     <TableCell>Time</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Payment Status</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -162,7 +159,6 @@ const ReservationList: React.FC = () => {
                       <TableCell>{reservation?.time || "null"}</TableCell>
                       <TableCell>{reservation?.type || "null"}</TableCell>
                       <TableCell>{reservation?.status || "null"}</TableCell>
-                      <TableCell>{reservation?.paymentStatus || "null"}</TableCell>
                       <TableCell align="right">
                         <Button variant="outlined" onClick={() => handleDetail(reservation)}>
                           View Details
@@ -200,8 +196,6 @@ const ReservationList: React.FC = () => {
                 <br />
                 <strong>Status:</strong> {selectedReservation?.status || "null"}
                 <br />
-                <strong>Payment Status:</strong> {selectedReservation?.paymentStatus || "null"}
-                <br />
                 <strong>Special Requests:</strong> {selectedReservation?.specialRequests || "null"}
                 <br />
               </DialogContentText>
@@ -216,11 +210,6 @@ const ReservationList: React.FC = () => {
                     Confirm Reservation
                   </Button>
                 </>
-              )}
-              {selectedReservation?.paymentStatus === "Pending" && (
-                <Button onClick={handleConfirmPayment} color="primary">
-                  Confirm Payment
-                </Button>
               )}
               <Button onClick={handleCloseConfirmDialog}>Close Details</Button>
             </DialogActions>

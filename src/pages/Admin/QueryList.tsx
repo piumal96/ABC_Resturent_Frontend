@@ -40,7 +40,7 @@ const QueryList: React.FC = () => {
     expandedQueryId,
     anchorEl,
     queryToDelete,
-    setQueryToDelete, // Ensure this is used from the controller
+    setQueryToDelete, 
     handleFilterChange,
     handleSearch,
     handleRowClick,
@@ -127,36 +127,37 @@ const QueryList: React.FC = () => {
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                        <Collapse in={expandedQueryId === query._id} timeout="auto" unmountOnExit>
-                          <div style={{ margin: 16 }}>
-                            <Typography variant="subtitle1">Message:</Typography>
-                            <Typography variant="body2" color="textSecondary" paragraph>
-                              {query.message ?? 'No message available.'}
-                            </Typography>
-                            <div style={{ marginTop: 16 }}>
-                              <TextareaAutosize
-                                minRows={3}
-                                placeholder="Write your reply here..."
-                                style={{ width: '100%' }}
-                                value={replyMessage}
-                                onChange={(e) => handleReplyChange(e.target.value)}
-                              />
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                startIcon={<SendIcon />}
-                                onClick={handleSendReply}
-                                style={{ marginTop: 8 }}
-                                disabled={!replyMessage.trim()} // Disable if reply is empty
-                              >
-                                Send Reply
-                              </Button>
-                            </div>
-                          </div>
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
+  <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+    <Collapse in={expandedQueryId === query._id} timeout="auto" unmountOnExit>
+      <div style={{ margin: 16 }}>
+        <Typography variant="subtitle1">Message:</Typography>
+        <Typography variant="body2" color="textSecondary" paragraph>
+          {query.message ?? 'No message available.'}
+        </Typography>
+        <div style={{ marginTop: 16 }}>
+          <TextareaAutosize
+            minRows={3}
+            placeholder="Write your reply here..."
+            style={{ width: '100%' }}
+            value={replyMessage}
+            onChange={(e) => handleReplyChange(e.target.value)}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SendIcon />}
+            onClick={handleSendReply} // This triggers the reply
+            style={{ marginTop: 8 }}
+            disabled={!replyMessage.trim()} // Disable if reply is empty
+          >
+            Send Reply
+          </Button>
+        </div>
+      </div>
+    </Collapse>
+  </TableCell>
+</TableRow>
+
                   </React.Fragment>
                 ))
               ) : (

@@ -11,6 +11,7 @@ import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 import { PaymentModel } from '@/models/Payments';
 import { OrderModel } from '@/models/OrderModel';
 import { PaymentReportResponse } from '@/models/PaymentReport';
+import UserModelRole from '@/models/UserModelRole';
 
 
 const API_URL = 'http://localhost:5001/api/';
@@ -129,7 +130,7 @@ interface RegisterResponse {
 interface FetchUsersResponse {
     success: boolean;
     message: string;
-    users: UserModel[];
+    users: UserModelRole[];
 }
 
 export interface CustomizationModel {
@@ -559,7 +560,7 @@ export const deleteUser = async (id: string): Promise<void> => {
     }
 };
 
-export const fetchUsers = async (): Promise<UserModel[]> => {
+export const fetchUsers = async (): Promise<UserModelRole[]> => {
     try {
         const response: AxiosResponse<FetchUsersResponse> = await axios.get(`${API_URL}users`);
         if (!response.data.success) {
@@ -573,13 +574,12 @@ export const fetchUsers = async (): Promise<UserModel[]> => {
 };
 
 // Fetch all dishes
-// Fetch all dishes with their image URLs formatted
 export const fetchDishes = async (): Promise<DishModel[]> => {
   try {
       const response: AxiosResponse<FetchDishesResponse> = await axios.get(`${API_URL}dishes`);
       return response.data.dishes.map(dish => ({
           ...dish,
-          imageUrl: dish.imageUrl ? `${API_URL}${dish.imageUrl}` : '' 
+          imageUrl: dish.imageUrl ? `http://localhost:5001/api${dish.imageUrl}` : '' 
           
       }));
       
@@ -801,8 +801,27 @@ export const fetchOrders = async (searchTerm: string, status: string): Promise<{
     }
   };
 
+  export const sendQueryReply = async (queryId: string, responseMessage: string): Promise<void> => {
+    try {
+        // Changed from PUT to POST, and updated the URL to match the new backend route
+        const response: AxiosResponse<{ success: boolean; message: string }> = await axios.post(`${API_URL}queries/respond/${queryId}`, {
+            response: responseMessage
+        });
+
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to send reply');
+        }
+    } catch (error) {
+        console.error('Error sending query reply:', error);
+        throw error;
+    }
+};
+
+
+
 // Export all functions as a single default object
 export default {
+  sendQueryReply,
   fetchPaymentReport,
     fetchOrders,
     updateOrderStatus,
