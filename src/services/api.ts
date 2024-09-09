@@ -743,18 +743,33 @@ export const removeCartItem = async (dishId: string): Promise<string> => {
 
   export const createOrder = async (
     restaurantId: string,
-    deliveryAddress: string
+    deliveryAddress: string,
+    items: any[],  // Cart items to be sent
+    paymentInfo: {
+      cardNumber: string;
+      cardExpiry: string;
+      cardCvc: string;
+    },
+    totalCost: number  // Total order cost to be sent
   ): Promise<OrderModel> => {
-    const response: AxiosResponse<{ success: boolean; order: OrderModel }> = await axios.post(`${API_URL}payment`, {
-      restaurantId,
-      deliveryAddress,
-    });
+    try {
+      const response: AxiosResponse<{ success: boolean; order: OrderModel }> = await axios.post(`${API_URL}/payment`, {
+        restaurantId,
+        deliveryAddress,
+        items, // Send the items in the cart
+        totalCost, // Send the total cost of the order
+        paymentInfo, // Send payment details
+      });
   
-    if (!response.data.success) {
-      throw new Error('Failed to create order');
+      if (!response.data.success) {
+        throw new Error('Failed to create order');
+      }
+  
+      return response.data.order;
+    } catch (error) {
+      console.error('Error in createOrder:', error);
+      throw error;  // Re-throw the error so it can be handled in the calling function
     }
-  
-    return response.data.order;
   };
 
   // Fetch all orders with search term and status filter

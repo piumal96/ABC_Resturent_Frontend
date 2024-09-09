@@ -19,7 +19,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
-import { Add, Remove, Delete, ArrowBack, Home, ShoppingCart } from '@mui/icons-material';
+import { Add, Remove, Delete, ArrowBack, Home, ShoppingCart } from '@mui/icons-material'; // Added ShoppingCart icon
 import { fetchCart, updateCartItem, removeCartItem, createOrder, fetchRestaurants } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,8 +49,8 @@ const CartPage: React.FC = () => {
     try {
       const fetchedCart = await fetchCart();
       const fetchedRestaurants = await fetchRestaurants();
-      setCart(fetchedCart || null);
-      setRestaurants(fetchedRestaurants || []);
+      setCart(fetchedCart);
+      setRestaurants(fetchedRestaurants);
       calculateTotalOrderCost(fetchedCart);
     } catch (error) {
       console.error('Error loading cart or restaurants:', error);
@@ -63,7 +63,7 @@ const CartPage: React.FC = () => {
 
   // Calculate total order cost
   const calculateTotalOrderCost = (cart: any) => {
-    if (cart?.items) {
+    if (cart && cart.items) {
       const totalCost = cart.items.reduce((total: number, item: any) => total + item.totalPrice, 0);
       setTotalOrderCost(totalCost);
     }
@@ -79,7 +79,7 @@ const CartPage: React.FC = () => {
 
     try {
       await updateCartItem(dishId, newQuantity);
-      await loadCartAndRestaurants();
+      await loadCartAndRestaurants(); // Reload cart after updating quantity
       setSnackbarMessage('Quantity updated');
       setSnackbarOpen(true);
     } catch (error) {
@@ -93,7 +93,7 @@ const CartPage: React.FC = () => {
   const handleRemoveFromCart = async (dishId: string) => {
     try {
       await removeCartItem(dishId);
-      await loadCartAndRestaurants();
+      await loadCartAndRestaurants(); // Reload cart after removing an item
       setSnackbarMessage('Item removed');
       setSnackbarOpen(true);
     } catch (error) {
@@ -111,6 +111,7 @@ const CartPage: React.FC = () => {
       return;
     }
 
+    // Open the payment dialog when placing order
     setPaymentDialogOpen(true);
   };
 
@@ -121,19 +122,53 @@ const CartPage: React.FC = () => {
       setSnackbarOpen(true);
       return;
     }
-
+  
+    // Ensure all items have valid dish information
+    const validItems = cart?.items?.filter((item: any) => {
+      // Check if dish has valid fields according to the schema
+      return (
+        item?.dish &&
+        item?.dish?.name &&
+        item?.dish?.price &&
+        item?.dish?.category &&
+        item?.dish?._id
+      );
+    });
+  
+    // Check if all items are valid and the lengths match
+    if (!validItems || validItems.length !== cart.items.length) {
+      setSnackbarMessage('Some items in your cart are missing dish information.');
+      setSnackbarOpen(true);
+      return;
+    }
+  
     try {
-      await createOrder(restaurantId, deliveryAddress);
+      // Create the order with valid items and payment information
+      await createOrder(
+        restaurantId,
+        deliveryAddress,
+        validItems, // Pass valid items from the cart
+        {
+          cardNumber,
+          cardExpiry,
+          cardCvc,
+        },
+        totalOrderCost // Total cost of the order
+      );
+  
       setSnackbarMessage('Order placed successfully!');
       setSnackbarOpen(true);
       setPaymentDialogOpen(false);
-      await loadCartAndRestaurants();
+      await loadCartAndRestaurants(); // Reload cart after placing the order
     } catch (error) {
       console.error('Error placing order:', error);
       setSnackbarMessage('Failed to place order.');
       setSnackbarOpen(true);
     }
   };
+  
+  
+  
 
   // Handle snackbar close
   const handleCloseSnackbar = () => {
@@ -148,23 +183,24 @@ const CartPage: React.FC = () => {
     );
   }
 
-  // UI for when the cart is empty or null
-  if (!cart || !cart.items || cart.items.length === 0) {
+  // UI for when the cart is empty
+  if (!cart || cart.items.length === 0) {
     return (
       <Container maxWidth="sm" sx={{ textAlign: 'center', padding: '20px' }}>
         <ShoppingCart fontSize="large" color="primary" sx={{ fontSize: '80px', mb: 2 }} />
         <Typography variant="h5" gutterBottom>
-          {cart === null ? 'Cart is null' : 'Your cart is empty.'}
+          Your cart is empty.
         </Typography>
         <Typography variant="body1" sx={{ mb: 3 }}>
-          {cart === null ? 'Failed to load cart data.' : "Looks like you haven't added anything to your cart yet."}
+          Looks like you haven't added anything to your cart yet.
         </Typography>
 
+        {/* Back and Home Buttons */}
         <Box display="flex" justifyContent="center" gap={2}>
           <Button
             variant="outlined"
             startIcon={<ArrowBack />}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(-1)} // Navigate back to the previous page
             sx={{
               borderColor: '#ff5722',
               color: '#ff5722',
@@ -176,7 +212,7 @@ const CartPage: React.FC = () => {
           <Button
             variant="outlined"
             startIcon={<Home />}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/')} // Navigate to the home page
             sx={{
               borderColor: '#ff5722',
               color: '#ff5722',
@@ -192,11 +228,12 @@ const CartPage: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ padding: '20px' }}>
+      {/* Back and Home Buttons */}
       <Box display="flex" justifyContent="space-between" mb={3}>
         <Button
           variant="outlined"
           startIcon={<ArrowBack />}
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(-1)} // Navigate back to the previous page
           sx={{
             borderColor: '#ff5722',
             color: '#ff5722',
@@ -208,7 +245,7 @@ const CartPage: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<Home />}
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/')} // Navigate to the home page
           sx={{
             borderColor: '#ff5722',
             color: '#ff5722',
@@ -221,49 +258,53 @@ const CartPage: React.FC = () => {
 
       <Typography variant="h4" gutterBottom>Your Cart</Typography>
       <Grid container spacing={2}>
-        {cart?.items?.map((item: any, index: number) => (
-          item?.dish ? (  // Check if the dish is not null
-            <Grid item xs={12} sm={6} key={`${item.dish._id}-${index}`}>
-              <Paper
-                sx={{
-                  padding: '16px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
-                  boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
-                }}
-              >
-                <Box>
-                  <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
-                  <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
-                  <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography>
-                </Box>
-                <Box>
-                  <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
-                    <Remove />
-                  </IconButton>
-                  <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}>
-                    <Add />
-                  </IconButton>
-                  <IconButton onClick={() => handleRemoveFromCart(item.dish._id)}>
-                    <Delete />
-                  </IconButton>
-                </Box>
-              </Paper>
-            </Grid>
-          ) : null // If item or item.dish is null, render nothing
-        ))}
+  {cart?.items?.map((item: any, index: number) => (
+    item?.dish ? (  // Ensure the dish object is valid
+      <Grid item xs={12} sm={6} key={`${item.dish._id}-${index}`}>
+        <Paper
+          sx={{
+            padding: '16px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+            boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
+          }}
+        >
+          <Box>
+            <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
+            <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
+            <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography>
+          </Box>
+          <Box>
+            <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
+              <Remove />
+            </IconButton>
+            <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}>
+              <Add />
+            </IconButton>
+            <IconButton onClick={() => handleRemoveFromCart(item.dish._id)}>
+              <Delete />
+            </IconButton>
+          </Box>
+        </Paper>
       </Grid>
+    ) : null  // Skip items with missing or invalid dish information
+  ))}
+</Grid>
+
+
 
       <Divider sx={{ my: 3 }} />
 
+      {/* Total Price */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
         <Typography variant="h5" color="primary">
           Total Order Cost: LKR {totalOrderCost.toFixed(2)}
         </Typography>
       </Box>
 
+      {/* Restaurant Selection */}
       <Box mb={3}>
         <TextField
           label="Select Restaurant"
@@ -281,6 +322,7 @@ const CartPage: React.FC = () => {
         </TextField>
       </Box>
 
+      {/* Delivery Address */}
       <Box mb={3}>
         <TextField
           label="Delivery Address"
@@ -292,6 +334,7 @@ const CartPage: React.FC = () => {
         />
       </Box>
 
+      {/* Place Order Button */}
       <Button
         variant="contained"
         color="primary"
@@ -302,6 +345,7 @@ const CartPage: React.FC = () => {
         Place Order
       </Button>
 
+      {/* Payment Confirmation Dialog */}
       <Dialog open={paymentDialogOpen} onClose={() => setPaymentDialogOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Payment Details</DialogTitle>
         <DialogContent>
@@ -342,6 +386,7 @@ const CartPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
