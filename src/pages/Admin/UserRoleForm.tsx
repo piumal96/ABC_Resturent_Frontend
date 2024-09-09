@@ -22,7 +22,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchUsers, updateUser, deleteUser, registerUserAdmin } from '@/services/api'; // Import API functions
-import UserModel from '@/models/UserModel';
+import UserModel from '@/models/UserModelRole';
 
 interface User {
   id: string;
@@ -51,8 +51,8 @@ const UserManagementDashboard: React.FC = () => {
 
         // Map UserModel to User interface
         const usersData: User[] = fetchedUsers.map((userModel) => ({
-          id: userModel.id,
-          name: userModel.username, // Assuming `username` is equivalent to `name`
+          id: userModel._id,
+          name: userModel.username,
           email: userModel.email,
           role: userModel.role,
         }));
