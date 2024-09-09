@@ -1,105 +1,190 @@
 import React from 'react';
-import { Grid, Box } from '@mui/material';
-import DashboardCard from '../components/DashboardCard';
+import { Grid, Box, Card, CardContent, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles'; // Correct styled import
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ReportIcon from '@mui/icons-material/Report';
 import BuildIcon from '@mui/icons-material/Build';
-import HomeWorkIcon from '@mui/icons-material/HomeWork'; // Facility icon
-import EventAvailableIcon from '@mui/icons-material/EventAvailable'; // Reservation icon
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer'; // Query management icon
-import PaymentIcon from '@mui/icons-material/Payment'; // Payment management icon
-import PeopleIcon from '@mui/icons-material/People'; // User management icon
-import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary'; // Gallery management icon
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import PaymentIcon from '@mui/icons-material/Payment';
+import PeopleIcon from '@mui/icons-material/People';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout/Layout';
+
+const DashboardCard = styled(Card)(({ theme }) => ({
+  textAlign: 'center',
+  backgroundColor: '#fff',
+  boxShadow: theme.shadows[3],
+  transition: 'transform 0.3s, box-shadow 0.3s',
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: theme.shadows[6],
+  },
+}));
+
+const IconContainer = styled(Box)(({ theme }) => ({
+  margin: 'auto',
+  backgroundColor: theme.palette.primary.light,
+  borderRadius: '50%',
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  display: 'inline-block',
+}));
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <Layout>
-      <Box sx={{ flexGrow: 1, p: 3 }}>
+      {/* Reduced Horizontal Padding (p: 2) */}
+      <Box sx={{ flexGrow: 1, px: { xs: 2, sm: 3 }, py: 4, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+        <Typography variant="h4" gutterBottom align="center" sx={{ marginBottom: 4 }}>
+          Restaurant Admin Panel
+        </Typography>
+
+        {/* Reduced Grid spacing (Spacing: 3 instead of 4) */}
         <Grid container spacing={3} justifyContent="center">
-          <Grid item>
-            <DashboardCard
-              title="Manage Services"
-              description="Add, edit, and remove restaurant services."
-              icon={RestaurantMenuIcon}
-              onClick={() => navigate('/services')}
-            />
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/services')}>
+              <CardContent>
+                <IconContainer>
+                  <RestaurantMenuIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Services</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Add, edit, and remove restaurant services.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Offers"
-              description="Create and manage promotions and offers."
-              icon={LocalOfferIcon}
-              onClick={() => navigate('/offers')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/offers')}>
+              <CardContent>
+                <IconContainer>
+                  <LocalOfferIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Offers</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Create and manage promotions and offers.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Facilities"
-              description="Manage facilities at different locations."
-              icon={HomeWorkIcon} // Facility management icon
-              onClick={() => navigate('/facilities')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/facilities')}>
+              <CardContent>
+                <IconContainer>
+                  <HomeWorkIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Facilities</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Manage facilities at different locations.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Reservations"
-              description="View and manage customer reservations."
-              icon={EventAvailableIcon} // Reservation management icon
-              onClick={() => navigate('/reservations')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/reservations')}>
+              <CardContent>
+                <IconContainer>
+                  <EventAvailableIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Reservations</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  View and manage customer reservations.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Queries"
-              description="View and manage customer queries."
-              icon={QuestionAnswerIcon} // Query management icon
-              onClick={() => navigate('/queries')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/queries')}>
+              <CardContent>
+                <IconContainer>
+                  <QuestionAnswerIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Queries</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  View and manage customer queries.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Payments"
-              description="View and process customer payments."
-              icon={PaymentIcon} // Payment management icon
-              onClick={() => navigate('/payments')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/users')}>
+              <CardContent>
+                <IconContainer>
+                  <PeopleIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Users</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  View and manage user roles and access levels.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Users"
-              description="View and manage user roles and access levels."
-              icon={PeopleIcon} // User management icon
-              onClick={() => navigate('/users')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/reports')}>
+              <CardContent>
+                <IconContainer>
+                  <ReportIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">View Reports</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Generate and view business reports.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="View Reports"
-              description="Generate and view business reports."
-              icon={ReportIcon}
-              onClick={() => navigate('/reports')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/gallery')}>
+              <CardContent>
+                <IconContainer>
+                  <PhotoLibraryIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Manage Gallery</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  View and manage gallery images.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="Manage Gallery"
-              description="View and manage gallery images."
-              icon={PhotoLibraryIcon} // Gallery management icon
-              onClick={() => navigate('/gallery')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/dish')}>
+              <CardContent>
+                <IconContainer>
+                  <BuildIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Menu Items</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Manage system settings and configurations.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
-          <Grid item>
-            <DashboardCard
-              title="System Settings"
-              description="Manage system settings and configurations."
-              icon={BuildIcon}
-              onClick={() => navigate('/settings')}
-            />
+
+          <Grid item xs={12} sm={6} md={4}>
+            <DashboardCard onClick={() => navigate('/ordermanage')}>
+              <CardContent>
+                <IconContainer>
+                  <PaymentIcon fontSize="large" />
+                </IconContainer>
+                <Typography variant="h6">Order Management</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  View and process customer orders.
+                </Typography>
+              </CardContent>
+            </DashboardCard>
           </Grid>
         </Grid>
       </Box>

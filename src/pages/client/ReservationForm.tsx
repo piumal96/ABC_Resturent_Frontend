@@ -1,180 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { fetchRestaurants, fetchServices, updatePayment, createReservation } from '@/services/api';
-import RestaurantModel from '@/models/RestaurantModel';
-import { ServiceModel } from '@/models/ServiceModel';
-import ReservationModel from '@/models/ReservationModel';
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  MenuItem,
-  Paper,
-  Grid,
-  CircularProgress,
-  Snackbar,
-  IconButton,
-  Box,
-} from '@mui/material';
+import React from 'react';
+import { Container, TextField, Button, Typography, MenuItem, Paper, Grid, CircularProgress, Snackbar, IconButton, Box } from '@mui/material';
 import RoomServiceIcon from '@mui/icons-material/RoomService';
 import HomeIcon from '@mui/icons-material/Home';
 import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PaymentDialog from './PaymentDialog';
+import { useNavigate } from 'react-router-dom'; 
+import { useReservationController } from '@/controllers/Customer/ReservationController'; 
+import PaymentDialog from './PaymentDialog'; 
 
 const ReservationForm: React.FC = () => {
-  const [restaurant, setRestaurant] = useState<string>('');
-  const [restaurants, setRestaurants] = useState<RestaurantModel[]>([]);
-  const [service, setService] = useState<string>('');
-  const [services, setServices] = useState<ServiceModel[]>([]);
-  const [serviceCost, setServiceCost] = useState<number>(0);
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [type, setType] = useState('Dine-in');
-  const [specialRequests, setSpecialRequests] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState('');
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [currentReservation, setCurrentReservation] = useState<ReservationModel | null>(null);
-
-  const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-
-    const loadRestaurantsAndServices = async () => {
-      try {
-        const fetchedRestaurants = await fetchRestaurants();
-        setRestaurants(fetchedRestaurants);
-
-        const fetchedServices = await fetchServices();
-        setServices(fetchedServices);
-      } catch (error) {
-        console.error('Failed to fetch data', error);
-      }
-    };
-
-    loadRestaurantsAndServices();
-  }, [isAuthenticated, navigate]);
-
-  const handleServiceChange = (serviceId: string) => {
-    setService(serviceId);
-    const selectedService = services.find((s) => s._id === serviceId);
-    if (selectedService) {
-      let cost = selectedService.price;
-      if (type === 'Delivery') {
-        const deliveryFee = 10; // Example delivery fee
-        cost += deliveryFee;
-      }
-      setServiceCost(cost);
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-
-    try {
-      if (!user) {
-        throw new Error('You must be logged in to make a reservation.');
-      }
-
-      const reservationData: ReservationModel = {
-        id: '',
-        customer: user.id,
-        restaurant,
-        service,
-        date,
-        time,
-        type,
-        deliveryAddress: type === 'Delivery' ? deliveryAddress : undefined,
-        contactNumber: type === 'Delivery' ? contactNumber : undefined,
-        specialRequests,
-        status: 'Pending',
-        createdAt: '',
-      };
-
-      const reservation = await createReservation(reservationData);
-      if (reservation && type === 'Delivery') {
-        setCurrentReservation(reservation);
-        setPaymentDialogOpen(true);
-      } else {
-        setFeedback('Reservation created successfully!');
-        setSnackbarOpen(true);
-      }
-
-      setLoading(false);
-    } catch (error) {
-      setFeedback('Failed to create reservation. Please try again.');
-      setSnackbarOpen(true);
-      setLoading(false);
-      console.error('Error creating reservation:', error);
-    }
-  };
-
-  const handlePayment = async (method: string, cardDetails?: { cardNumber: string; expiryDate: string; cvv: string }) => {
-    setPaymentDialogOpen(false);
-    try {
-      if (!currentReservation || !currentReservation.payment) {
-        throw new Error('No payment information found. Please try again.');
-      }
-
-      const paymentId = currentReservation.payment.id; // Payment ID now exists on currentReservation
-      const amount = serviceCost; // Amount to be paid
-
-      if (method === 'Card Payment' && cardDetails) {
-        console.log('Processing card payment with details:', cardDetails);
-      }
-
-      const paymentResponse = await updatePayment(paymentId, amount, "credit-card", "Paid");
-
-      console.log('Payment response:', paymentResponse);
-
-      if (paymentResponse.success) {
-        if (paymentResponse.payment && paymentResponse.payment.status) {
-          setFeedback(`Reservation confirmed and payment processed successfully! Payment Status: ${paymentResponse.payment.status}`);
-        } else {
-          setFeedback('Payment processed, but payment status is missing.');
-        }
-        setSnackbarOpen(true);
-
-        // Optionally, update the reservation status in the UI
-        setCurrentReservation((prev) => {
-          if (prev) {
-            return {
-              ...prev,
-              status: paymentResponse.payment.status,
-            };
-          }
-          return prev;
-        });
-      } else {
-        setFeedback('Payment processing failed. Please try again.');
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      setFeedback('Failed to process payment. Please try again.');
-      setSnackbarOpen(true);
-      console.error('Error processing payment:', error);
-    }
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-    navigate('/');
-  };
+  const navigate = useNavigate(); // useNavigate hook called inside the component
+  
+  // Calling the controller to manage business logic
+  const {
+    restaurant,
+    restaurants,
+    service,
+    services,
+    serviceCost,
+    date,
+    time,
+    type,
+    specialRequests,
+    deliveryAddress,
+    contactNumber,
+    loading,
+    snackbarOpen,
+    feedback,
+    paymentDialogOpen,
+    handleServiceChange,
+    handleSubmit,
+    handlePayment,
+    handleSnackbarClose,
+    setRestaurant,
+    setDate,
+    setTime,
+    setType,
+    setSpecialRequests,
+    setDeliveryAddress,
+    setContactNumber,
+    setPaymentDialogOpen,
+  } = useReservationController(); // Make sure this is a valid hook or function
 
   return (
     <Container maxWidth="sm" sx={{ padding: '40px 0', backgroundImage: 'url(/path-to-background-image.jpg)', backgroundSize: 'cover', minHeight: '100vh' }}>
-      {/* Header with Go Back Button */}
       <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <IconButton onClick={() => navigate(-1)} sx={{ marginRight: '10px' }}>
           <ArrowBackIcon />
@@ -197,12 +66,10 @@ const ReservationForm: React.FC = () => {
                 required
                 sx={{ marginBottom: '20px' }}
                 InputProps={{
-                  startAdornment: (
-                    type === 'Dine-in' ? (
-                      <LocalDiningIcon sx={{ marginRight: '8px', color: '#888' }} />
-                    ) : (
-                      <RoomServiceIcon sx={{ marginRight: '8px', color: '#888' }} />
-                    )
+                  startAdornment: type === 'Dine-in' ? (
+                    <LocalDiningIcon sx={{ marginRight: '8px', color: '#888' }} />
+                  ) : (
+                    <RoomServiceIcon sx={{ marginRight: '8px', color: '#888' }} />
                   ),
                 }}
               >
@@ -276,11 +143,7 @@ const ReservationForm: React.FC = () => {
                     fullWidth
                     required
                     placeholder="Enter your delivery address"
-                    InputProps={{
-                      startAdornment: (
-                        <HomeIcon sx={{ marginRight: '8px', color: '#888' }} />
-                      ),
-                    }}
+                    InputProps={{ startAdornment: <HomeIcon sx={{ marginRight: '8px', color: '#888' }} /> }}
                   />
                 </Grid>
                 <Grid item xs={12}>

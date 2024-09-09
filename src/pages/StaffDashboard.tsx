@@ -32,10 +32,10 @@ const StaffDashboard: React.FC = () => {
           </Grid>
           <Grid item>
             <DashboardCard
-              title="Manage Payments"
+              title=" Order Manage"
               description="View and process customer payments."
               icon={PaymentIcon}
-              onClick={() => navigate('/staff/payments')}
+              onClick={() => navigate('/staff/ordermanage')}
             />
           </Grid>
         </Grid>

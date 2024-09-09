@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { fetchReservationReport, fetchQueryReport, fetchUserActivityReport } from '@/services/api';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -17,10 +16,12 @@ import {
   IconButton,
   Tooltip,
   Button,
+  Pagination,
 } from '@mui/material';
 import { Bar, Pie } from 'react-chartjs-2';
-import { saveAs } from 'file-saver';
-import * as XLSX from 'xlsx';
+import InfoIcon from '@mui/icons-material/Info';
+import { useReportController } from '@/controllers/Admin/ReportController';
+import Layout from '@/components/Layout/Layout';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,73 +32,13 @@ import {
   Tooltip as ChartTooltip,
   Legend,
 } from 'chart.js';
-import { Pagination } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import Layout from '@/components/Layout/Layout';
+import { OrderModel } from '@/models/OrderModel';
 
 // Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  ChartTooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, ChartTooltip, Legend);
 
 const ReportDashboard: React.FC = () => {
-  const [reservationData, setReservationData] = useState<any[]>([]);
-  const [queryData, setQueryData] = useState<any[]>([]);
-  const [userData, setUserData] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const reservationResponse = await fetchReservationReport();
-        const queryResponse = await fetchQueryReport();
-        const userResponse = await fetchUserActivityReport();
-
-        setReservationData(reservationResponse.reservations);
-        setQueryData(queryResponse.queries);
-        setUserData(userResponse.users);
-      } catch (error) {
-        console.error('Failed to load data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
-
-    const reservationsSheet = XLSX.utils.json_to_sheet(reservationData);
-    XLSX.utils.book_append_sheet(wb, reservationsSheet, 'Reservations');
-
-    const queriesSheet = XLSX.utils.json_to_sheet(queryData);
-    XLSX.utils.book_append_sheet(wb, queriesSheet, 'Queries');
-
-    const usersSheet = XLSX.utils.json_to_sheet(userData);
-    XLSX.utils.book_append_sheet(wb, usersSheet, 'Users');
-
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
-
-    const s2ab = (s: string) => {
-      const buf = new ArrayBuffer(s.length);
-      const view = new Uint8Array(buf);
-      for (let i = 0; i < s.length; i++) {
-        view[i] = s.charCodeAt(i) & 0xFF;
-      }
-      return buf;
-    };
-
-    saveAs(new Blob([s2ab(wbout)], { type: 'application/octet-stream' }), 'report.xlsx');
-  };
+  const { reservationData, queryData, userData, paymentData, loading, exportToExcel } = useReportController(); // Added paymentData
 
   if (loading) {
     return (
@@ -144,27 +85,37 @@ const ReportDashboard: React.FC = () => {
         </Typography>
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3, backgroundColor: '#f0f4f8' }}>
+              <CardContent>
+                <Typography variant="h6" color="textSecondary">Total Sales</Typography>
+                <Typography variant="h4" color="primary">Rs {paymentData.reduce((acc: number, order: OrderModel) => acc + order.totalPrice, 0)}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3, backgroundColor: '#f0f4f8' }}>
+              <CardContent>
+                <Typography variant="h6" color="textSecondary">Total Orders</Typography>
+                <Typography variant="h4" color="primary">{paymentData.length}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3 }}>
               <CardContent>
                 <Typography variant="h6">Total Reservations</Typography>
                 <Typography variant="h4">{reservationData.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ textAlign: 'center', p: 3 }}>
               <CardContent>
                 <Typography variant="h6">Total Queries</Typography>
                 <Typography variant="h4">{queryData.length}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ '&:hover': { boxShadow: 6 }, textAlign: 'center', p: 2 }}>
-              <CardContent>
-                <Typography variant="h6">Active Users</Typography>
-                <Typography variant="h4">{userData.length}</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -204,8 +155,8 @@ const ReportDashboard: React.FC = () => {
         {/* Detailed Tables */}
         <Box sx={{ my: 4 }}>
           <Typography variant="h5" gutterBottom>
-            Reservations
-            <Tooltip title="Detailed list of all reservations">
+            Payment Report
+            <Tooltip title="Detailed list of payments">
               <IconButton>
                 <InfoIcon />
               </IconButton>
@@ -215,23 +166,21 @@ const ReportDashboard: React.FC = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Restaurant</TableCell>
-                  <TableCell>Service</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>Order ID</TableCell>
+                  <TableCell>Total Price</TableCell>
                   <TableCell>Payment Status</TableCell>
+                  <TableCell>Order Status</TableCell>
+                  <TableCell>Created At</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {reservationData.map((reservation) => (
-                  <TableRow key={reservation._id}>
-                    <TableCell>{reservation.customer.email}</TableCell>
-                    <TableCell>{reservation.restaurant.name}</TableCell>
-                    <TableCell>{reservation.service.name}</TableCell>
-                    <TableCell>{new Date(reservation.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{reservation.status}</TableCell>
-                    <TableCell>{reservation.paymentStatus}</TableCell>
+                {paymentData.map((order: OrderModel) => (
+                  <TableRow key={order._id}>
+                    <TableCell>{order._id || 'null'}</TableCell>
+                    <TableCell>Rs {order.totalPrice || 'null'}</TableCell>
+                    <TableCell>{order.paymentStatus || 'null'}</TableCell>
+                    <TableCell>{order.orderStatus || 'null'}</TableCell>
+                    <TableCell>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -260,11 +209,11 @@ const ReportDashboard: React.FC = () => {
               </TableHead>
               <TableBody>
                 {queryData.map((query) => (
-                  <TableRow key={query._id}>
-                    <TableCell>{query.customer.email}</TableCell>
-                    <TableCell>{query.subject}</TableCell>
-                    <TableCell>{query.message}</TableCell>
-                    <TableCell>{query.status}</TableCell>
+                  <TableRow key={query?._id}>
+                    <TableCell>{query?.customer?.email || 'null'}</TableCell>
+                    <TableCell>{query?.subject || 'null'}</TableCell>
+                    <TableCell>{query?.message || 'null'}</TableCell>
+                    <TableCell>{query?.status || 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -292,10 +241,10 @@ const ReportDashboard: React.FC = () => {
               </TableHead>
               <TableBody>
                 {userData.map((user) => (
-                  <TableRow key={user._id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableRow key={user?._id}>
+                    <TableCell>{user?.email || 'null'}</TableCell>
+                    <TableCell>{user?.role || 'null'}</TableCell>
+                    <TableCell>{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'null'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

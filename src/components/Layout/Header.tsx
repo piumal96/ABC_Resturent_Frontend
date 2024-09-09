@@ -15,7 +15,7 @@ const Header: React.FC<{ onSidebarToggle: () => void }> = ({ onSidebarToggle }) 
   };
 
   const handleHomeClick = () => {
-    navigate('/');
+    navigate('/admin');
   };
 
   return (

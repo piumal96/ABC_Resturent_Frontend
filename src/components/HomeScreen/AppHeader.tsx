@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -15,6 +15,7 @@ import {
   ListItemText,
   useMediaQuery,
   Tooltip,
+  Badge,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +23,7 @@ import { useAuth } from '@/context/AuthContext';
 import MenuIcon from '@mui/icons-material/Menu';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ReservationTrackingDialog from '@/components/ReservationTrackingDialog';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; // Cart Icon
 
 const AppHeader: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -29,9 +31,20 @@ const AppHeader: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0); // State for cart items
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  useEffect(() => {
+    // Mock: Replace with API call to get the number of items in the user's cart
+    const fetchCartItems = async () => {
+      const cartItems = 3; // Replace with actual logic
+      setCartItemCount(cartItems);
+    };
+
+    fetchCartItems();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -138,6 +151,24 @@ const AppHeader: React.FC = () => {
                     Services
                   </Button>
                 </Tooltip>
+                <Tooltip title="View our Services">
+                  <Button
+                    color="inherit"
+                    onClick={() => navigate('/menu')} 
+                    sx={{ '&:hover': { backgroundColor: '#357a38' } }}
+                  >
+                    Menu
+                  </Button>
+                </Tooltip>
+                <Tooltip title="View our Services">
+                  <Button
+                    color="inherit"
+                    onClick={() => navigate('/track')} 
+                    sx={{ '&:hover': { backgroundColor: '#357a38' } }}
+                  >
+                    Order
+                  </Button>
+                </Tooltip>
                 <Tooltip title="Check our Offers">
                   <Button
                     color="inherit"
@@ -167,6 +198,18 @@ const AppHeader: React.FC = () => {
                 </Tooltip>
               </>
             )}
+
+            {/* Cart Button */}
+            <IconButton
+              color="inherit"
+              onClick={() => navigate('/cart')} 
+              sx={{ '&:hover': { backgroundColor: '#357a38' } }}
+            >
+              <Badge badgeContent={cartItemCount} color="error">
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
+
             {!isAuthenticated ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button color="inherit" onClick={() => navigate('/login')}>Login</Button>
@@ -234,6 +277,7 @@ const AppHeader: React.FC = () => {
 
       {/* Reservation Tracking Dialog */}
       {user && <ReservationTrackingDialog open={dialogOpen} onClose={() => setDialogOpen(false)} userId={user.id} />}
+
     </>
   );
 };
