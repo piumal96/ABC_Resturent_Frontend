@@ -12,8 +12,9 @@ import QueryList from './pages/Admin/QueryList';
 import QueryDetail from './pages/Admin/QueryDetail';
 import PaymentList from './pages/Admin/PaymentList';
 import PaymentDetail from './pages/Admin/PaymentDetail';
-import UserList from './pages/Admin/UserList';
-import UserRoleForm from './pages/Admin/UserRoleForm';
+
+import ReportView from './pages/Admin/ReportView';
+
 
 import SignIn from './pages/Auth/SignIn';
 // import Register from './pages/Auth/Register';
