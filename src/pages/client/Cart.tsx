@@ -122,53 +122,19 @@ const CartPage: React.FC = () => {
       setSnackbarOpen(true);
       return;
     }
-  
-    // Ensure all items have valid dish information
-    const validItems = cart?.items?.filter((item: any) => {
-      // Check if dish has valid fields according to the schema
-      return (
-        item?.dish &&
-        item?.dish?.name &&
-        item?.dish?.price &&
-        item?.dish?.category &&
-        item?.dish?._id
-      );
-    });
-  
-    // Check if all items are valid and the lengths match
-    if (!validItems || validItems.length !== cart.items.length) {
-      setSnackbarMessage('Some items in your cart are missing dish information.');
-      setSnackbarOpen(true);
-      return;
-    }
-  
+
     try {
-      // Create the order with valid items and payment information
-      await createOrder(
-        restaurantId,
-        deliveryAddress,
-        validItems, // Pass valid items from the cart
-        {
-          cardNumber,
-          cardExpiry,
-          cardCvc,
-        },
-        totalOrderCost // Total cost of the order
-      );
-  
+      await createOrder(restaurantId, deliveryAddress);
       setSnackbarMessage('Order placed successfully!');
       setSnackbarOpen(true);
-      setPaymentDialogOpen(false);
-      await loadCartAndRestaurants(); // Reload cart after placing the order
+      setPaymentDialogOpen(false); // Close payment dialog
+      await loadCartAndRestaurants(); // Reload cart after order completion
     } catch (error) {
       console.error('Error placing order:', error);
       setSnackbarMessage('Failed to place order.');
       setSnackbarOpen(true);
     }
   };
-  
-  
-  
 
   // Handle snackbar close
   const handleCloseSnackbar = () => {
@@ -258,42 +224,38 @@ const CartPage: React.FC = () => {
 
       <Typography variant="h4" gutterBottom>Your Cart</Typography>
       <Grid container spacing={2}>
-  {cart?.items?.map((item: any, index: number) => (
-    item?.dish ? (  // Ensure the dish object is valid
-      <Grid item xs={12} sm={6} key={`${item.dish._id}-${index}`}>
-        <Paper
-          sx={{
-            padding: '16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 2,
-            boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
-          }}
-        >
-          <Box>
-            <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
-            <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
-            <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography>
-          </Box>
-          <Box>
-            <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
-              <Remove />
-            </IconButton>
-            <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}>
-              <Add />
-            </IconButton>
-            <IconButton onClick={() => handleRemoveFromCart(item.dish._id)}>
-              <Delete />
-            </IconButton>
-          </Box>
-        </Paper>
+        {cart.items.map((item: any, index: number) => (
+          <Grid item xs={12} sm={6} key={`${item.dish._id}-${index}`}>
+            <Paper
+              sx={{
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+                boxShadow: '0px 3px 6px rgba(0,0,0,0.1)',
+              }}
+            >
+              <Box>
+                <Typography variant="h6" gutterBottom>{item.dish.name}</Typography>
+                <Typography variant="body2" color="textSecondary">Quantity: {item.quantity}</Typography>
+                <Typography variant="body2" color="primary">Total: LKR {item.totalPrice.toFixed(2)}</Typography>
+              </Box>
+              <Box>
+                <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity - 1)}>
+                  <Remove />
+                </IconButton>
+                <IconButton onClick={() => handleUpdateQuantity(item.dish._id, item.quantity + 1)}>
+                  <Add />
+                </IconButton>
+                <IconButton onClick={() => handleRemoveFromCart(item.dish._id)}>
+                  <Delete />
+                </IconButton>
+              </Box>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
-    ) : null  // Skip items with missing or invalid dish information
-  ))}
-</Grid>
-
-
 
       <Divider sx={{ my: 3 }} />
 
