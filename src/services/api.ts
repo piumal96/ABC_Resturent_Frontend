@@ -580,7 +580,7 @@ export const fetchDishes = async (): Promise<DishModel[]> => {
       const response: AxiosResponse<FetchDishesResponse> = await axios.get(`${API_URL}dishes`);
       return response.data.dishes.map(dish => ({
           ...dish,
-          imageUrl: dish.imageUrl ? `${API_URL}${dish.imageUrl}` : '' 
+          imageUrl: dish.imageUrl ? `http://localhost:5001/api${dish.imageUrl}` : '' 
           
       }));
       

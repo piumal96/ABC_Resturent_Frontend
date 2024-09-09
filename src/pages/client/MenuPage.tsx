@@ -17,20 +17,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HomeIcon from '@mui/icons-material/Home';
 import { useNavigate } from 'react-router-dom';
 
-// Sample dish images (You can replace these URLs with actual images)
-const sampleDishImages: { [key: string]: string } = {
-  "Chicken Kottu": "https://via.placeholder.com/600x300?text=Chicken+Kottu",
-  "Egg Hoppers": "https://via.placeholder.com/600x300?text=Egg+Hoppers",
-  "Fish Ambul Thiyal": "https://via.placeholder.com/600x300?text=Fish+Ambul+Thiyal",
-  "Watalappam": "https://via.placeholder.com/600x300?text=Watalappam",
-  "Parippu (Lentil Curry)": "https://via.placeholder.com/600x300?text=Parippu",
-  "String Hoppers": "https://via.placeholder.com/600x300?text=String+Hoppers",
-  "Coconut Roti": "https://via.placeholder.com/600x300?text=Coconut+Roti",
-  "Pittu": "https://via.placeholder.com/600x300?text=Pittu",
-  "Pol Sambol": "https://via.placeholder.com/600x300?text=Pol+Sambol",
-  "Kiribath": "https://via.placeholder.com/600x300?text=Kiribath",
-};
-
+// Menu Page Component
 const MenuPage: React.FC = () => {
   const [dishes, setDishes] = useState<DishModel[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -91,7 +78,7 @@ const MenuPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: '20px' }}>
+    <Box sx={{ padding: '20px', maxWidth: '1200px', margin: 'auto' }}>
       {/* Header Section with Back and Home Buttons */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <IconButton onClick={goBack}>
@@ -123,22 +110,24 @@ const MenuPage: React.FC = () => {
                   flexDirection: 'column',
                   boxShadow: 3,
                   transition: 'transform 0.2s ease-in-out',
-                  '&:hover': { transform: 'scale(1.05)' },
+                  '&:hover': { transform: 'scale(1.02)' }, // Subtle hover effect
+                  maxWidth: '320px', // Limit the maximum width of the card
+                  margin: 'auto', // Center the card horizontally
                 }}
               >
                 <Box
                   component="img"
-                  src={sampleDishImages[dish.name] || 'https://via.placeholder.com/600x300?text=Dish+Image'}
+                  src={dish.imageUrl || 'https://via.placeholder.com/300x200?text=Dish+Image'} // Use dish image from API
                   alt={dish.name}
                   sx={{
-                    height: 'auto',
+                    height: '200px', // Set a consistent height for all images
                     width: '100%',
                     objectFit: 'cover',
                     borderTopLeftRadius: '4px',
                     borderTopRightRadius: '4px',
                   }}
                 />
-                <CardContent sx={{ flexGrow: 1, padding: '24px', textAlign: 'center' }}>
+                <CardContent sx={{ flexGrow: 1, padding: '16px', textAlign: 'center' }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {dish.name}
                   </Typography>
@@ -149,14 +138,14 @@ const MenuPage: React.FC = () => {
                     Rs {dish.price.toFixed(2)}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'center', padding: '16px' }}>
+                <CardActions sx={{ justifyContent: 'center', padding: '12px' }}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleAddToCart(dish)}
                     fullWidth
                     sx={{
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '16px',
                       transition: 'background-color 0.2s ease-in-out',
                       '&:hover': {
