@@ -16,16 +16,15 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   useTheme,
   useMediaQuery,
   Alert,
 } from "@mui/material";
-import Layout from "@/components/Layout/Layout";
 import { useOrderController } from "@/controllers/OrderController";
+import StaffLayout from "@/components/Layout/StaffLayout";
 
-const OrderList: React.FC = () => {
+const OrderManage: React.FC = () => {
   const {
     orders,
     loading,
@@ -48,7 +47,7 @@ const OrderList: React.FC = () => {
   } = useOrderController();
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+ useMediaQuery(theme.breakpoints.down("sm"));
 
   if (loading) {
     return (
@@ -75,7 +74,7 @@ const OrderList: React.FC = () => {
   }
 
   return (
-    <Layout>
+    <StaffLayout>
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" mb={3}>
           Manage Orders
@@ -225,8 +224,8 @@ const OrderList: React.FC = () => {
           message={snackbarMessage || "Operation completed"}
         />
       </Box>
-    </Layout>
+    </StaffLayout>
   );
 };
 
-export default OrderList;
+export default OrderManage;

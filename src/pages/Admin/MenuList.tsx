@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchDishes, deleteDish, createDish, updateDish } from '@/services/api'; // Import your API functions
-import { DishModel, CustomizationModel } from '@/models/Dish Model'; // Import the DishModel interface
+import { DishModel } from '@/models/Dish Model'; // No need for CustomizationModel anymore
 import {
   Grid,
   Card,
@@ -15,14 +15,16 @@ import {
   DialogActions,
   TextField,
   CircularProgress,
-  IconButton,
   InputAdornment,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import Layout from '@/components/Layout/Layout';
 
 const DishList: React.FC = () => {
+  const categories = ['Starter', 'Main Course', 'Dessert', 'Drinks'] as const; // List of allowed categories
+
   const [dishes, setDishes] = useState<DishModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -32,10 +34,9 @@ const DishList: React.FC = () => {
     name: '',
     description: '',
     price: '',
-    category: '',
-    imageUrl: '',
+    category: '' as DishModel['category'], // Ensure correct type for category
   });
-  const [customizations, setCustomizations] = useState<CustomizationModel[]>([]);
+  const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 
   useEffect(() => {
     const loadDishes = async () => {
@@ -69,15 +70,13 @@ const DishList: React.FC = () => {
         description: dish.description,
         price: String(dish.price),
         category: dish.category,
-        imageUrl: dish.imageUrl,
       });
-      setCustomizations(dish.customizations || []);
       setSelectedDish(dish);
     } else {
-      setFormValues({ name: '', description: '', price: '', category: '', imageUrl: '' });
-      setCustomizations([]);
+      setFormValues({ name: '', description: '', price: '', category: 'Starter' });
       setSelectedDish(null);
     }
+    setImageFile(undefined); // Reset the image file state to undefined
     setOpenModal(true);
   };
 
@@ -88,25 +87,26 @@ const DishList: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setFormValues((prevValues) => ({
       ...prevValues,
       [name]: value,
     }));
   };
 
-  // Handle adding or removing customizations
-  const handleCustomizationChange = (index: number, field: keyof CustomizationModel, value: any) => {
-    const updatedCustomizations = [...customizations];
-    updatedCustomizations[index] = { ...updatedCustomizations[index], [field]: value };
-    setCustomizations(updatedCustomizations);
+  const handleCategoryChange = (e: SelectChangeEvent<DishModel['category']>) => {
+    setFormValues((prevValues) => ({
+      ...prevValues,
+      category: e.target.value as DishModel['category'], // Ensure type safety
+    }));
   };
 
-  const addCustomization = () => {
-    setCustomizations([...customizations, { name: '', options: [], price: 0 }]);
-  };
-
-  const removeCustomization = (index: number) => {
-    setCustomizations(customizations.filter((_, i) => i !== index));
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]); // Store the selected image file
+    } else {
+      setImageFile(undefined); // If no file is selected, set it to undefined
+    }
   };
 
   const handleSaveDish = async () => {
@@ -114,18 +114,16 @@ const DishList: React.FC = () => {
       name: formValues.name,
       description: formValues.description,
       price: parseFloat(formValues.price),
-      customizations,
-      imageUrl: formValues.imageUrl,
+      category: formValues.category,
     };
 
     try {
       if (editMode && selectedDish?._id) {
-        await updateDish(selectedDish._id, dishData); // Update existing dish
+        await updateDish(selectedDish._id, dishData, imageFile); // Update existing dish
       } else {
-        await createDish(dishData); // Create new dish
+        await createDish(dishData, imageFile); // Create new dish
       }
 
-      // Reload the dishes after saving
       const updatedDishes = await fetchDishes();
       setDishes(updatedDishes);
       handleCloseModal();
@@ -154,6 +152,22 @@ const DishList: React.FC = () => {
               <Grid item xs={12} sm={6} md={4} key={dish._id}>
                 <Card sx={{ borderRadius: '10px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)' }}>
                   <CardContent>
+                    {/* Display the image */}
+                    {dish.imageUrl && (
+                      <Box
+                        component="img"
+                        sx={{
+                          height: 100, // Adjust the height as per your design
+                          width: '100%',
+                          objectFit: 'cover',
+                          borderRadius: '10px 10px 0 0',
+                        }}
+                        alt={dish.name}
+                        
+                        src={dish.imageUrl} // Display the image
+                      />
+                    )}
+                    
                     <Typography variant="h6">{dish.name}</Typography>
                     <Typography variant="body2">{dish.description}</Typography>
                     <Typography variant="body1" color="primary">
@@ -209,52 +223,19 @@ const DishList: React.FC = () => {
                 startAdornment: <InputAdornment position="start">LKR</InputAdornment>,
               }}
             />
-            <TextField
+            <Select
               label="Category"
-              name="category"
               value={formValues.category}
-              onChange={handleInputChange}
+              onChange={handleCategoryChange}
               fullWidth
-              margin="normal"
-            />
-            <TextField
-              label="Image URL"
-              name="imageUrl"
-              value={formValues.imageUrl}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-            />
-
-            {/* Customizations */}
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                Customizations
-              </Typography>
-              {customizations.map((customization, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <TextField
-                    label="Customization Name"
-                    value={customization.name}
-                    onChange={(e) => handleCustomizationChange(index, 'name', e.target.value)}
-                    fullWidth
-                  />
-                  <TextField
-                    label="Price"
-                    value={customization.price}
-                    onChange={(e) => handleCustomizationChange(index, 'price', parseFloat(e.target.value))}
-                    type="number"
-                    sx={{ width: '100px', marginLeft: '10px' }}
-                  />
-                  <IconButton onClick={() => removeCustomization(index)} color="error">
-                    <RemoveCircleOutlineIcon />
-                  </IconButton>
-                </Box>
+            >
+              {categories.map((cat) => (
+                <MenuItem key={cat} value={cat}>
+                  {cat}
+                </MenuItem>
               ))}
-              <Button startIcon={<AddCircleOutlineIcon />} onClick={addCustomization}>
-                Add Customization
-              </Button>
-            </Box>
+            </Select>
+            <input type="file" accept="image/*" onChange={handleImageChange} />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseModal} color="primary">

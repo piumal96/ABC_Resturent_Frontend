@@ -47,6 +47,7 @@ import MenuPage from './pages/client/MenuPage';
 import DishList from './pages/Admin/MenuList';
 import OrderList from './pages/Admin/OrderManage';
 import UserOrderTracking from './pages/client/OrderTracking';
+import OrderManage from './pages/staff/OrderManage';
 
 function App() {
   const navigate = useNavigate();
@@ -101,6 +102,7 @@ function App() {
           <Route path="/staff/queries/:id" element={<ProtectedRoute><StaffQueryDetail /></ProtectedRoute>} />
           <Route path="/staff/payments" element={<ProtectedRoute><StaffPaymentList /></ProtectedRoute>} />
           <Route path="/staff/payments/:id" element={<ProtectedRoute><StaffPaymentDetail /></ProtectedRoute>} />
+          <Route path="/staff/ordermanage" element={<ProtectedRoute><OrderManage /></ProtectedRoute>} />
 
           {/* Customer reservation form */}
           <Route path="/customer/reservation" element={<ProtectedRoute><ReservationForm /></ProtectedRoute>} />

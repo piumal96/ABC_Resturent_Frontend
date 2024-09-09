@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchDishes, addToCart,DishModel } from '@/services/api';
-//import { DishModel } from '@/models/DishModel'; // Ensure this path is correct
+import { fetchDishes, addToCart, DishModel } from '@/services/api';
 import {
   Grid,
   Card,
@@ -20,16 +19,16 @@ import { useNavigate } from 'react-router-dom';
 
 // Sample dish images (You can replace these URLs with actual images)
 const sampleDishImages: { [key: string]: string } = {
-  "Chicken Kottu": "https://via.placeholder.com/400x200?text=Chicken+Kottu",
-  "Egg Hoppers": "https://via.placeholder.com/400x200?text=Egg+Hoppers",
-  "Fish Ambul Thiyal": "https://via.placeholder.com/400x200?text=Fish+Ambul+Thiyal",
-  "Watalappam": "https://via.placeholder.com/400x200?text=Watalappam",
-  "Parippu (Lentil Curry)": "https://via.placeholder.com/400x200?text=Parippu",
-  "String Hoppers": "https://via.placeholder.com/400x200?text=String+Hoppers",
-  "Coconut Roti": "https://via.placeholder.com/400x200?text=Coconut+Roti",
-  "Pittu": "https://via.placeholder.com/400x200?text=Pittu",
-  "Pol Sambol": "https://via.placeholder.com/400x200?text=Pol+Sambol",
-  "Kiribath": "https://via.placeholder.com/400x200?text=Kiribath",
+  "Chicken Kottu": "https://via.placeholder.com/600x300?text=Chicken+Kottu",
+  "Egg Hoppers": "https://via.placeholder.com/600x300?text=Egg+Hoppers",
+  "Fish Ambul Thiyal": "https://via.placeholder.com/600x300?text=Fish+Ambul+Thiyal",
+  "Watalappam": "https://via.placeholder.com/600x300?text=Watalappam",
+  "Parippu (Lentil Curry)": "https://via.placeholder.com/600x300?text=Parippu",
+  "String Hoppers": "https://via.placeholder.com/600x300?text=String+Hoppers",
+  "Coconut Roti": "https://via.placeholder.com/600x300?text=Coconut+Roti",
+  "Pittu": "https://via.placeholder.com/600x300?text=Pittu",
+  "Pol Sambol": "https://via.placeholder.com/600x300?text=Pol+Sambol",
+  "Kiribath": "https://via.placeholder.com/600x300?text=Kiribath",
 };
 
 const MenuPage: React.FC = () => {
@@ -129,17 +128,17 @@ const MenuPage: React.FC = () => {
               >
                 <Box
                   component="img"
-                  src={sampleDishImages[dish.name] || 'https://via.placeholder.com/400x200?text=Dish+Image'}
+                  src={sampleDishImages[dish.name] || 'https://via.placeholder.com/600x300?text=Dish+Image'}
                   alt={dish.name}
                   sx={{
-                    height: '200px',
+                    height: 'auto',
                     width: '100%',
                     objectFit: 'cover',
                     borderTopLeftRadius: '4px',
                     borderTopRightRadius: '4px',
                   }}
                 />
-                <CardContent sx={{ flexGrow: 1, padding: '16px' }}>
+                <CardContent sx={{ flexGrow: 1, padding: '24px', textAlign: 'center' }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
                     {dish.name}
                   </Typography>
@@ -147,17 +146,18 @@ const MenuPage: React.FC = () => {
                     {dish.description}
                   </Typography>
                   <Typography variant="subtitle1" color="primary">
-                    ${dish.price.toFixed(2)}
+                    Rs {dish.price.toFixed(2)}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'center', padding: '10px' }}>
+                <CardActions sx={{ justifyContent: 'center', padding: '16px' }}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={() => handleAddToCart(dish)}
                     fullWidth
                     sx={{
-                      padding: '10px',
+                      padding: '12px',
+                      fontSize: '16px',
                       transition: 'background-color 0.2s ease-in-out',
                       '&:hover': {
                         backgroundColor: '#3a8dff',
