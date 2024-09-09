@@ -21,7 +21,6 @@ import {
   useMediaQuery,
   Alert,
 } from "@mui/material";
-import Layout from "@/components/Layout/Layout";
 import { useOrderController } from "@/controllers/OrderController";
 import StaffLayout from "@/components/Layout/StaffLayout";
 
@@ -48,7 +47,7 @@ const OrderManage: React.FC = () => {
   } = useOrderController();
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  useMediaQuery(theme.breakpoints.down("sm"));
 
   if (loading) {
     return (

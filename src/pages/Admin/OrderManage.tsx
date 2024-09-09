@@ -47,7 +47,7 @@ const OrderList: React.FC = () => {
   } = useOrderController();
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  useMediaQuery(theme.breakpoints.down("sm"));
 
   if (loading) {
     return (
