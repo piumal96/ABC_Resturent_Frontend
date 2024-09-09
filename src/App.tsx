@@ -12,12 +12,11 @@ import QueryList from './pages/Admin/QueryList';
 import QueryDetail from './pages/Admin/QueryDetail';
 import PaymentList from './pages/Admin/PaymentList';
 import PaymentDetail from './pages/Admin/PaymentDetail';
-
-import ReportView from './pages/Admin/ReportView';
-
+import UserList from './pages/Admin/UserList'; // Make sure this import exists
+import UserRoleForm from './pages/Admin/UserRoleForm'; // Make sure this import exists
 
 import SignIn from './pages/Auth/SignIn';
-// import Register from './pages/Auth/Register';
+import Register from './pages/Auth/Register'; // Fix: Moved to import above and use it
 
 // Import the gallery components
 import GalleryList from './pages/Admin/GalleryList'; 
@@ -41,8 +40,7 @@ import { ReservationProvider } from './context/ReservationContext';
 
 // Import ProtectedRoute
 import ProtectedRoute from './components/ProtectedRoute';
-import Register from './pages/Auth/Register';
-import ReportDashboard from './pages/Admin/ReportGenerator';
+import ReportDashboard from './pages/Admin/ReportGenerator'; // Make sure this component exists
 import CartManagement from './pages/client/Cart';
 import MenuPage from './pages/client/MenuPage';
 import DishList from './pages/Admin/MenuList';
