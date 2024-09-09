@@ -573,37 +573,95 @@ export const fetchUsers = async (): Promise<UserModel[]> => {
 };
 
 // Fetch all dishes
+// Fetch all dishes with their image URLs formatted
 export const fetchDishes = async (): Promise<DishModel[]> => {
-    try {
-        const response: AxiosResponse<FetchDishesResponse> = await axios.get(`${API_URL}dishes`);
-        return response.data.dishes;
-    } catch (error) {
-        console.error('Error fetching dishes:', error);
-        throw error;
-    }
+  try {
+      const response: AxiosResponse<FetchDishesResponse> = await axios.get(`${API_URL}dishes`);
+      return response.data.dishes.map(dish => ({
+          ...dish,
+          imageUrl: dish.imageUrl ? `${API_URL}${dish.imageUrl}` : '' 
+          
+      }));
+      
+  } catch (error) {
+      console.error('Error fetching dishes:', error);
+      throw error;
+  }
 };
+
 
 // Create a new dish
-export const createDish = async (dishData: Partial<DishModel>): Promise<DishModel> => {
-    try {
-        const response: AxiosResponse<CreateDishResponse> = await axios.post(`${API_URL}dishes`, dishData);
-        return response.data.dish;
-    } catch (error) {
-        console.error('Error creating dish:', error);
-        throw error;
-    }
+export const createDish = async (dishData: Partial<DishModel>, imageFile?: File): Promise<DishModel> => {
+  try {
+      const formData = new FormData();
+      
+      // Append all fields to formData
+      formData.append('name', dishData.name || '');
+      formData.append('description', dishData.description || '');
+      formData.append('price', dishData.price?.toString() || '');
+      formData.append('category', dishData.category || '');
+      
+      // Handle customizations if they exist
+      if (dishData.customizations) {
+          formData.append('customizations', JSON.stringify(dishData.customizations));
+      }
+      
+      // If there is an image file, append it to the formData
+      if (imageFile) {
+          formData.append('image', imageFile);
+      }
+      
+      const response: AxiosResponse<CreateDishResponse> = await axios.post(`${API_URL}dishes`, formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data',
+          },
+      });
+      return response.data.dish;
+  } catch (error) {
+      console.error('Error creating dish:', error);
+      throw error;
+  }
 };
 
+
 // Update an existing dish
-export const updateDish = async (id: string, dishData: Partial<DishModel>): Promise<DishModel> => {
-    try {
-        const response: AxiosResponse<UpdateDishResponse> = await axios.put(`${API_URL}dishes/${id}`, dishData);
-        return response.data.dish;
-    } catch (error) {
-        console.error('Error updating dish:', error);
-        throw error;
-    }
+export const updateDish = async (id: string, dishData: Partial<DishModel>, imageFile?: File): Promise<DishModel> => {
+  try {
+      // Check if imageFile is provided, if yes, use FormData to send the image and other fields.
+      if (imageFile) {
+          const formData = new FormData();
+          
+          // Append the fields to FormData
+          if (dishData.name) formData.append('name', dishData.name);
+          if (dishData.description) formData.append('description', dishData.description);
+          if (dishData.price) formData.append('price', dishData.price.toString());
+          if (dishData.category) formData.append('category', dishData.category);
+          
+          // Handle customizations if they exist
+          if (dishData.customizations) {
+              formData.append('customizations', JSON.stringify(dishData.customizations));
+          }
+          
+          // Append the image file
+          formData.append('image', imageFile);
+
+          const response: AxiosResponse<UpdateDishResponse> = await axios.put(`${API_URL}dishes/${id}`, formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data',
+              },
+          });
+          return response.data.dish;
+      } else {
+          // If no image file is provided, send a regular JSON request to update the dish
+          const response: AxiosResponse<UpdateDishResponse> = await axios.put(`${API_URL}dishes/${id}`, dishData);
+          return response.data.dish;
+      }
+  } catch (error) {
+      console.error('Error updating dish:', error);
+      throw error;
+  }
 };
+
 
 // Delete a dish
 export const deleteDish = async (id: string): Promise<string> => {
