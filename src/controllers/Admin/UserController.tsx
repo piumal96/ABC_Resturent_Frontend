@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchUsers, updateUser, deleteUser, registerUserAdmin } from "@/services/api";
-import UserModel from "@/models/UserModel";
+// import UserModel from "@/models/UserModel";
+import UserModelRole from "@/models/UserModelRole"
 
 interface User {
   id: string;
@@ -20,16 +21,16 @@ export const useUserController = () => {
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
 
-  // Fetch users from the API when the component mounts
+ 
   useEffect(() => {
     const loadUsers = async () => {
       try {
         setLoading(true);
-        const fetchedUsers: UserModel[] = await fetchUsers();
+        const fetchedUsers: UserModelRole[] = await fetchUsers();
 
-        // Map UserModel to User interface
+        
         const usersData: User[] = fetchedUsers.map((userModel) => ({
-          id: userModel.id,
+          id: userModel._id, 
           name: userModel.username,
           email: userModel.email,
           role: userModel.role,
@@ -53,7 +54,7 @@ export const useUserController = () => {
 
       // Update the user list in state with the updated user data
       const updatedUser: User = {
-        id: updatedUserModel.id,
+        id: updatedUserModel.id, // <-- Use _id if your API uses this field
         name: updatedUserModel.username,
         email: updatedUserModel.email,
         role: updatedUserModel.role,
@@ -80,7 +81,7 @@ export const useUserController = () => {
       setUsers([
         ...users,
         {
-          id: createdUser.id,
+          id: createdUser.id, 
           name: createdUser.username,
           email: createdUser.email,
           role: createdUser.role,
@@ -88,7 +89,7 @@ export const useUserController = () => {
       ]);
 
       setNotification(`New user "${createdUser.username}" created.`);
-      setNewUser({ name: "", email: "", password: "", role: roles[0] }); // Reset the form
+      setNewUser({ name: "", email: "", password: "", role: roles[0] }); 
       setShowUserModal(false);
     } catch (error) {
       setNotification("Failed to create user");

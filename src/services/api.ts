@@ -11,6 +11,7 @@ import { UserActivityReportResponse } from '@/models/UserActivityReportModel';
 import { PaymentModel } from '@/models/Payments';
 import { OrderModel } from '@/models/OrderModel';
 import { PaymentReportResponse } from '@/models/PaymentReport';
+import UserModelRole from '@/models/UserModelRole';
 
 
 const API_URL = 'http://localhost:5001/api/';
@@ -129,7 +130,7 @@ interface RegisterResponse {
 interface FetchUsersResponse {
     success: boolean;
     message: string;
-    users: UserModel[];
+    users: UserModelRole[];
 }
 
 export interface CustomizationModel {
@@ -559,7 +560,7 @@ export const deleteUser = async (id: string): Promise<void> => {
     }
 };
 
-export const fetchUsers = async (): Promise<UserModel[]> => {
+export const fetchUsers = async (): Promise<UserModelRole[]> => {
     try {
         const response: AxiosResponse<FetchUsersResponse> = await axios.get(`${API_URL}users`);
         if (!response.data.success) {
